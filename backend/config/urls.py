@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from apps.core.views import HealthCheckView
@@ -14,6 +15,7 @@ from apps.weather.views import LegacyWeatherAdviceView, V1WeatherAdviceView
 
 
 urlpatterns = [
+    path("", RedirectView.as_view(pattern_name="admin:index", permanent=False), name="root"),
     path("admin/", admin.site.urls),
     path(
         "api/greenhouse/dashboard",
