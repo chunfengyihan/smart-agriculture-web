@@ -400,6 +400,12 @@ Open Django Admin:
 http://127.0.0.1:8000/admin/
 ```
 
+The admin "View site" link points to the frontend. Override it with:
+
+```powershell
+$env:DJANGO_ADMIN_SITE_URL = "http://127.0.0.1:5173/"
+```
+
 Create a local admin user when needed:
 
 ```powershell

@@ -86,6 +86,7 @@ CORS_ALLOWED_ORIGINS = env_list(
     "DJANGO_CORS_ALLOWED_ORIGINS",
     ["http://localhost:5173", "http://127.0.0.1:5173"],
 )
+ADMIN_SITE_URL = os.environ.get("DJANGO_ADMIN_SITE_URL", "http://127.0.0.1:5173/")
 
 
 def sqlite_database():
