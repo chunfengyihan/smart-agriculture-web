@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.urls import path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
@@ -13,6 +14,7 @@ from apps.weather.views import LegacyWeatherAdviceView, V1WeatherAdviceView
 
 
 urlpatterns = [
+    path("admin/", admin.site.urls),
     path(
         "api/greenhouse/dashboard",
         LegacyGreenhouseDashboardView.as_view(),

@@ -394,6 +394,18 @@ Start Django:
 .venv\Scripts\python.exe backend\manage.py runserver 127.0.0.1:8000
 ```
 
+Open Django Admin:
+
+```text
+http://127.0.0.1:8000/admin/
+```
+
+Create a local admin user when needed:
+
+```powershell
+.venv\Scripts\python.exe backend\manage.py createsuperuser
+```
+
 Start the frontend:
 
 ```powershell
