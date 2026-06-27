@@ -113,7 +113,13 @@ async function callChatModel({ requestBody, context }) {
     throw error
   }
 
-  const apiBase = (process.env.AI_API_BASE || 'https://api.openai.com/v1').replace(/\/$/, '')
+  if (!process.env.AI_API_BASE) {
+    const error = new Error('AI_API_BASE 未配置，外部集成未启用')
+    error.statusCode = 503
+    throw error
+  }
+
+  const apiBase = process.env.AI_API_BASE.replace(/\/$/, '')
   const model = process.env.AI_MODEL || 'gpt-4o-mini'
 
   const response = await fetch(`${apiBase}/chat/completions`, {

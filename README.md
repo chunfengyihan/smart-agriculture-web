@@ -275,7 +275,7 @@ Content-Type: multipart/form-data
 ```env
 AI_API_KEY=your_ai_api_key
 AI_MODEL=gpt-4o-mini
-AI_API_BASE=https://api.openai.com/v1
+AI_API_BASE=
 ```
 
 前端会在选择非法格式或超大图片时清空旧图片实例，避免误提交上一张图片。AI 返回结果会被服务端标准化为 `CropDiagnosisResult` 后再返回给页面。
@@ -301,7 +301,7 @@ YOUREN_APP_SECRET=your_app_secret
 
 - 二次开发 API 需要通过 `appKey` 和 `appSecret` 获取 `X-Access-Token`。
 - `X-Access-Token` 有效期约 2 小时。
-- 网关列表接口示例为 `https://openapi.mp.usr.cn/usrCloud/V6/device/getDevices`，请求头需要携带 `X-Access-Token`。
+- 网关列表接口地址以有人云官方文档和服务器环境变量配置为准，请求头需要携带 `X-Access-Token`。
 
 ## 后端接口建议
 

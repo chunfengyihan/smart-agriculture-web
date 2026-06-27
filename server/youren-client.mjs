@@ -1,4 +1,4 @@
-const API_BASE = process.env.YOUREN_API_BASE || 'https://openapi.mp.usr.cn'
+const API_BASE = process.env.YOUREN_API_BASE?.trim() || ''
 const AUTH_PATH = process.env.YOUREN_AUTH_PATH || '/usrCloud/user/getAuthToken'
 
 let tokenCache = {
@@ -7,6 +7,10 @@ let tokenCache = {
 }
 
 async function postJson(path, body, headers = {}) {
+  if (!API_BASE) {
+    throw new Error('YOUREN_API_BASE 未配置，外部集成未启用')
+  }
+
   const response = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: {
