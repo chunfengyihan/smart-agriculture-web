@@ -1,0 +1,510 @@
+openapi: 3.0.3
+info:
+  title: Smart Agriculture Django API Contract Draft
+  version: 0.1.0
+  description: >
+    Stage 1 draft contract for the Django migration. Legacy paths keep their
+    current response shape. /api/v1/ paths use code/message/data/request_id.
+servers:
+  - url: http://127.0.0.1:8000
+    description: Local Django development server
+paths:
+  /api/v1/health/:
+    get:
+      summary: Health check
+      operationId: getV1Health
+      responses:
+        "200":
+          description: Service health
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1HealthResponse"
+  /api/greenhouse/dashboard:
+    get:
+      summary: Legacy greenhouse dashboard
+      description: Legacy compatibility path. Response body is the raw DashboardData object.
+      operationId: getLegacyGreenhouseDashboard
+      responses:
+        "200":
+          description: Legacy dashboard payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardData"
+        "503":
+          description: External integration disabled or data source unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacyError"
+  /api/v1/greenhouse/dashboard:
+    get:
+      summary: V1 greenhouse dashboard
+      operationId: getV1GreenhouseDashboard
+      responses:
+        "200":
+          description: V1 dashboard payload
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/V1Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/DashboardData"
+        "503":
+          $ref: "#/components/responses/ExternalIntegrationDisabled"
+  /api/v1/weather/greenhouse-advice:
+    post:
+      summary: V1 greenhouse weather and operation advice
+      operationId: postV1WeatherGreenhouseAdvice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WeatherAdviceRequest"
+      responses:
+        "200":
+          description: Weather payload and optional advice
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/V1Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/WeatherAdviceResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "503":
+          $ref: "#/components/responses/ExternalIntegrationDisabled"
+  /api/v1/ai/crop-diagnosis:
+    post:
+      summary: V1 crop image diagnosis
+      operationId: postV1CropDiagnosis
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CropDiagnosisRequest"
+      responses:
+        "200":
+          description: Diagnosis result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/V1Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/CropDiagnosisResult"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "413":
+          description: Payload too large
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1Error"
+        "503":
+          $ref: "#/components/responses/ExternalIntegrationDisabled"
+  /api/v1/ai/agri-chat:
+    post:
+      summary: V1 agricultural chat
+      operationId: postV1AgriChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgriChatRequest"
+      responses:
+        "200":
+          description: Agricultural chat answer
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/V1Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AgriChatResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "503":
+          $ref: "#/components/responses/ExternalIntegrationDisabled"
+components:
+  responses:
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/V1ValidationError"
+    ExternalIntegrationDisabled:
+      description: External integration disabled
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/V1Error"
+              - type: object
+                properties:
+                  code:
+                    example: 50020
+                  message:
+                    example: 外部集成未启用
+  schemas:
+    V1Success:
+      type: object
+      required: [code, message, data, request_id]
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: success
+        data:
+          type: object
+        request_id:
+          type: string
+          format: uuid
+    V1Error:
+      type: object
+      required: [code, message, data, request_id]
+      properties:
+        code:
+          type: integer
+          example: 50000
+        message:
+          type: string
+        data:
+          type: object
+          nullable: true
+        request_id:
+          type: string
+          format: uuid
+    V1ValidationError:
+      type: object
+      required: [code, message, data, request_id]
+      properties:
+        code:
+          type: integer
+          example: 40001
+        message:
+          type: string
+          example: 参数校验失败
+        data:
+          type: object
+          required: [field_errors]
+          properties:
+            field_errors:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+        request_id:
+          type: string
+          format: uuid
+    LegacyError:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        requiredEnv:
+          type: array
+          items:
+            type: string
+    V1HealthResponse:
+      allOf:
+        - $ref: "#/components/schemas/V1Success"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [ok]
+              properties:
+                ok:
+                  type: boolean
+                service:
+                  type: string
+                  example: django-api
+    DashboardData:
+      type: object
+      required: [generatedAt, source, crops]
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        source:
+          type: string
+          enum: [mock, local, youren]
+        crops:
+          type: array
+          items:
+            $ref: "#/components/schemas/Crop"
+    Crop:
+      type: object
+      required: [id, name, greenhouses]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        latinName:
+          type: string
+        description:
+          type: string
+        heroImage:
+          type: string
+        accent:
+          type: string
+        greenhouses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Greenhouse"
+    Greenhouse:
+      type: object
+      required: [id, name, status, metrics, trend, alerts]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        area:
+          type: string
+        status:
+          type: string
+          enum: [online, warning, offline]
+        onlineDevices:
+          type: integer
+        totalDevices:
+          type: integer
+        metrics:
+          type: array
+          items:
+            $ref: "#/components/schemas/MetricReading"
+        trend:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrendPoint"
+        alerts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AlertItem"
+    MetricReading:
+      type: object
+      required: [key, label, value, unit, status, target]
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        value:
+          type: number
+          nullable: true
+        unit:
+          type: string
+        status:
+          type: string
+          enum: [normal, warning, critical]
+        target:
+          type: string
+    TrendPoint:
+      type: object
+      required: [time]
+      properties:
+        time:
+          type: string
+        airTemp:
+          type: number
+          nullable: true
+        airHumidity:
+          type: number
+          nullable: true
+        soilHumidity:
+          type: number
+          nullable: true
+        light:
+          type: number
+          nullable: true
+    AlertItem:
+      type: object
+      required: [id, level, message, time]
+      properties:
+        id:
+          type: string
+        level:
+          type: string
+          enum: [warning, critical]
+        message:
+          type: string
+        time:
+          type: string
+    MetricInput:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        value:
+          type: number
+          nullable: true
+        unit:
+          type: string
+        status:
+          type: string
+        target:
+          type: string
+    WeatherAdviceRequest:
+      type: object
+      required: [cropId, cropName, greenhouseId, greenhouseName, latitude, longitude]
+      properties:
+        cropId:
+          type: string
+        cropName:
+          type: string
+        greenhouseId:
+          type: string
+        greenhouseName:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        address:
+          type: string
+        metrics:
+          type: array
+          items:
+            $ref: "#/components/schemas/MetricInput"
+        includeAdvice:
+          type: boolean
+          default: true
+    WeatherAdviceResponse:
+      type: object
+      properties:
+        cacheKey:
+          type: string
+        cachedAt:
+          type: string
+          format: date-time
+        weather:
+          type: object
+        advice:
+          type: object
+          nullable: true
+        adviceError:
+          type: string
+          nullable: true
+    CropDiagnosisRequest:
+      type: object
+      required: [image, cropId, cropName, greenhouseId]
+      properties:
+        image:
+          type: string
+          format: binary
+        cropId:
+          type: string
+        cropName:
+          type: string
+        greenhouseId:
+          type: string
+        greenhouseName:
+          type: string
+        useEnvironmentContext:
+          type: boolean
+        metrics:
+          type: string
+          description: JSON encoded MetricInput array for legacy compatibility.
+    CropDiagnosisResult:
+      type: object
+      required: [riskLevel, hasPestOrDisease, suspectedIssues, environmentAssessment, recommendations, disclaimer]
+      properties:
+        riskLevel:
+          type: string
+          enum: [low, medium, high, unknown]
+        hasPestOrDisease:
+          type: boolean
+        suspectedIssues:
+          type: array
+          items:
+            type: object
+        environmentAssessment:
+          type: string
+        recommendations:
+          type: array
+          items:
+            type: string
+        disclaimer:
+          type: string
+        evidence:
+          type: array
+          items:
+            type: string
+        matchedRules:
+          type: array
+          items:
+            type: string
+        confidenceReason:
+          type: string
+        followUpQuestions:
+          type: array
+          items:
+            type: string
+    AgriChatRequest:
+      type: object
+      required: [cropId, cropName, greenhouseId, greenhouseName, question]
+      properties:
+        cropId:
+          type: string
+        cropName:
+          type: string
+        greenhouseId:
+          type: string
+        greenhouseName:
+          type: string
+        question:
+          type: string
+        metrics:
+          type: array
+          items:
+            $ref: "#/components/schemas/MetricInput"
+    AgriChatResponse:
+      type: object
+      required: [riskLevel, summary, likelyCauses, actions, watchItems, matchedRules, disclaimer]
+      properties:
+        riskLevel:
+          type: string
+          enum: [low, medium, high, unknown]
+        summary:
+          type: string
+        likelyCauses:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            type: string
+        watchItems:
+          type: array
+          items:
+            type: string
+        matchedRules:
+          type: array
+          items:
+            type: string
+        disclaimer:
+          type: string
