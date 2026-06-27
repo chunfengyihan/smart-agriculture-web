@@ -400,6 +400,8 @@ Open Django Admin:
 http://127.0.0.1:8000/admin/
 ```
 
+The admin UI uses `django-simpleui` and defaults to Simplified Chinese through `LANGUAGE_CODE=zh-hans`.
+
 The admin "View site" link points to the frontend. Override it with:
 
 ```powershell

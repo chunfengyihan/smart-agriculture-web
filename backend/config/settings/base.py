@@ -28,6 +28,7 @@ DEBUG = env_bool("DJANGO_DEBUG", False)
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
 
 INSTALLED_APPS = [
+    "simpleui",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -79,6 +80,11 @@ TIME_ZONE = "Asia/Shanghai"
 USE_I18N = True
 USE_TZ = True
 
+SIMPLEUI_HOME_TITLE = "智慧农业管理后台"
+SIMPLEUI_HOME_ICON = "fa fa-leaf"
+SIMPLEUI_INDEX = os.environ.get("DJANGO_ADMIN_SITE_URL", "http://127.0.0.1:5173/")
+SIMPLEUI_ANALYSIS = False
+
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -87,6 +93,9 @@ CORS_ALLOWED_ORIGINS = env_list(
     ["http://localhost:5173", "http://127.0.0.1:5173"],
 )
 ADMIN_SITE_URL = os.environ.get("DJANGO_ADMIN_SITE_URL", "http://127.0.0.1:5173/")
+ADMIN_SITE_HEADER = os.environ.get("DJANGO_ADMIN_SITE_HEADER", "智慧农业管理后台")
+ADMIN_SITE_TITLE = os.environ.get("DJANGO_ADMIN_SITE_TITLE", "智慧农业管理后台")
+ADMIN_INDEX_TITLE = os.environ.get("DJANGO_ADMIN_INDEX_TITLE", "后台首页")
 
 
 def sqlite_database():
