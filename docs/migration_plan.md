@@ -43,6 +43,8 @@
 
 ## 阶段 2：Django 基础工程
 
+状态：已完成基础工程骨架，尚未创建业务 Model 或 Migration。
+
 进入条件：
 
 - 阶段 1 文档确认通过。
@@ -58,6 +60,16 @@
 - 当前开发数据库使用 SQLite。
 - 通过环境变量准备 MySQL 切换。
 - 增加统一响应、统一异常、request_id、结构化日志、分页、健康检查。
+
+已完成：
+
+- 创建 `backend/` 基础工程。
+- 添加 `GET /api/v1/health/`、`GET /api/v1/schema/`、`GET /api/v1/docs/`。
+- 添加分层 settings：`base`、`development`、`test`、`production`。
+- 添加环境变量驱动的 SQLite/MySQL 配置。
+- 添加 request_id 中间件、统一响应、统一异常、分页类。
+- 添加基础健康检查测试。
+- 完成 Django `check`、单元测试、OpenAPI schema 校验、`makemigrations --check --dry-run` 和 SQLite 空库 `migrate` 验证。
 
 禁止事项：
 

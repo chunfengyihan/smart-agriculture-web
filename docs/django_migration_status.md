@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-阶段 0 与阶段 1 已完成当前轮审计和契约草案输出。当前禁止进入阶段 2、阶段 3、阶段 4、阶段 5。
+阶段 2：Django 基础工程。当前禁止进入阶段 3、阶段 4、阶段 5。
 
 ## 迁移分支名
 
@@ -14,7 +14,7 @@
 
 ## 当前 Git 提交哈希
 
-`d09debd2c38826b8d08979889bcb1e33f5184fa5`
+以 `git rev-parse HEAD` 为准；阶段 2 基础工程提交完成后由最终阶段报告记录实际 HEAD。
 
 ## 已完成事项
 
@@ -26,23 +26,53 @@
 - 创建迁移起点标签。
 - 完成阶段 1 静态审计：前端架构、旧 Node 网关、静态数据、部署/测试/数据库资产、接口契约与 P0 数据模型建议。
 - 创建接口清单、OpenAPI 草案、项目审计和迁移计划文档。
+- 创建 Django 基础工程骨架：`backend/manage.py`、分层 settings、根 URL、ASGI/WSGI。
+- 添加 Django REST Framework、drf-spectacular、django-cors-headers 基础依赖文件。
+- 添加 SQLite/MySQL 环境变量驱动的数据库配置，其中 MySQL 驱动单独放在 `requirements/mysql.txt`。
+- 添加 request_id 中间件、统一成功响应、统一异常响应、分页类、健康检查接口。
+- 添加基础测试，覆盖 `/api/v1/health/` 标准响应和 `X-Request-ID` 透传。
+- 生成并验证 Django OpenAPI schema。
+- 在 SQLite 开发库上执行 Django 内置迁移，确认 `.runtime/local/db.sqlite3` 运行时数据库可生成且被 Git 忽略。
+
+## 验证命令
+
+- `node --check server/youren-client.mjs`
+- `node --check server/agri-chat.mjs`
+- `node --check server/ai-diagnosis.mjs`
+- `node --check server/weather-advice.mjs`
+- `npm run lint`
+- `.venv\Scripts\python.exe backend\manage.py check`
+- `.venv\Scripts\python.exe backend\manage.py test apps.core`
+- `.venv\Scripts\python.exe backend\manage.py spectacular --validate --file .runtime\schema-stage2.yaml`
+- `.venv\Scripts\python.exe backend\manage.py makemigrations --check --dry-run`
+- `.venv\Scripts\python.exe backend\manage.py migrate --noinput`
+
+## 验证结果
+
+- Node 语法检查通过。
+- 前端 ESLint 通过。
+- Django system check 通过。
+- `apps.core` 2 个测试通过。
+- OpenAPI schema 生成和校验通过。
+- `makemigrations --check --dry-run` 显示 `No changes detected`。
+- SQLite 开发库迁移通过，仅执行 Django 内置 `auth`、`contenttypes` 迁移。
+- `.venv/`、`.runtime/`、`.runtime/schema-stage2.yaml`、`.runtime/local/db.sqlite3` 均被 Git 忽略。
 
 ## 风险项
 
 - 常见密钥扫描工具未安装，Git 历史内容级密钥扫描覆盖有限；当前仅完成文件名级历史检查和路径级关键词审计。
 - `.env.local` 中的外部 API 已由项目方确认废弃，但仍应避免提交和展示其内容。
-- 当前没有数据库、ORM、迁移、CI 或自动化测试基线。
+- 当前没有业务数据库模型、业务迁移、CI 或完整自动化测试基线。
 - 旧 Node 网关仍保留外部集成能力；真实外呼必须依赖显式环境变量配置，且后续需统一由 `EXTERNAL_INTEGRATIONS_ENABLED=false` 默认关闭。
 - README 与示例配置已移除默认真实基地址，但历史提交中曾出现外部服务示例地址；如需发布或开源，应使用 gitleaks/trufflehog 做完整历史扫描。
 
 ## 阻塞项
 
-- 阶段 2 前需确认阶段 1 契约是否按 `docs/api_contract_v1.yaml` 作为实施依据。
-- 阶段 2 前需确认 Python 版本、Django/DRF/drf-spectacular/mysqlclient 兼容版本范围。
 - 阶段 3 前需确认 P0 看板 legacy 响应字段与 `public/data/local-dashboard.json` 及旧 Node 响应保持一致。
+- 阶段 3 前需确认 `Greenhouse`、`EnvironmentReading`、`DashboardSnapshot` 的最终字段和种子策略。
 
 ## 下一步
 
-1. 审阅阶段 1 文档并确认契约。
-2. 安装并运行专用密钥扫描工具，补充历史内容级扫描证据。
-3. 阶段 1 验收通过后，再进入阶段 2：Django 基础工程。
+1. 安装并运行专用密钥扫描工具，补充历史内容级扫描证据。
+2. 阶段 2 验收通过后，进入阶段 3：P0 温室看板接口迁移。
+3. 阶段 3 前先做 P0 字段对比，确认 legacy 路径响应结构。
