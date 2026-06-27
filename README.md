@@ -408,3 +408,14 @@ http://127.0.0.1:5173/
 
 By default `EXTERNAL_INTEGRATIONS_ENABLED=false`. Weather advice, crop diagnosis, and agricultural chat return HTTP 503 with an external-integration-disabled message; they do not call real external services.
 
+Run the full local verification suite:
+
+```powershell
+npm run verify
+```
+
+Stage 5 references:
+
+- `docs/stage5_acceptance_report.md`
+- `docs/mysql_switch_runbook.md`
+

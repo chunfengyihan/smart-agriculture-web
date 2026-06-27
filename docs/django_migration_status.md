@@ -102,6 +102,27 @@
 - 阶段 5 前需创建统一 `scripts/verify.py` 和 CI。
 - MySQL 8.0+ 非生产数据库尚未验收。
 
+## Stage 5 Update
+
+Status: partially completed.
+
+Completed in this round:
+
+- Added `scripts/verify.py` as the unified local and CI verification entry.
+- Added `npm run verify`.
+- Added `.github/workflows/verify.yml`.
+- Added `docs/mysql_switch_runbook.md`.
+- Added `docs/stage5_acceptance_report.md`.
+- Ran `.venv\Scripts\python.exe scripts\verify.py` successfully.
+- Ran browser QA for `http://127.0.0.1:5173/`; the page shows `Django API / 本地 Excel 数据`.
+- Confirmed Vite proxy request `GET /api/greenhouse/dashboard` returns 200 through Django.
+- Confirmed P1 safe-disabled request `POST /api/weather/greenhouse-advice` returns expected HTTP 503.
+
+Pending:
+
+- Live MySQL 8.0+ validation requires a disposable non-production MySQL database.
+- Dedicated secret-history scanning with gitleaks or trufflehog is still recommended before public release.
+
 ## 下一步
 
 1. 安装并运行专用密钥扫描工具，补充历史内容级扫描证据。

@@ -8,6 +8,7 @@
     "dev:api": "node server/youren-api.mjs",
     "dev:full": "node server/dev.mjs",
     "local:data": "python scripts/build-local-dashboard.py",
+    "verify": "python scripts/verify.py",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
