@@ -1,0 +1,1033 @@
+{
+  "generatedAt": "2026-06-27T08:47:16.330455",
+  "source": "local",
+  "crops": [
+    {
+      "id": "jujube",
+      "name": "冰糖枣",
+      "latinName": "Crystal Jujube",
+      "description": "本地 Excel 采集数据汇总，重点关注昼夜温差、土壤墒情与光照积累。",
+      "heroImage": "/images/jujube-hero.jpg",
+      "accent": "#16a34a",
+      "greenhouses": [
+        {
+          "id": "jujube-1",
+          "name": "冰糖枣 1 号棚",
+          "area": "冰糖枣1号数据",
+          "status": "warning",
+          "onlineDevices": 1,
+          "totalDevices": 1,
+          "metrics": [
+            {
+              "key": "airTemp",
+              "label": "空气温度",
+              "value": 18.9,
+              "unit": "°C",
+              "status": "normal",
+              "target": "18-28°C"
+            },
+            {
+              "key": "airHumidity",
+              "label": "空气湿度",
+              "value": 80.9,
+              "unit": "%",
+              "status": "normal",
+              "target": "55-80%"
+            },
+            {
+              "key": "light",
+              "label": "光照强度",
+              "value": 0.0,
+              "unit": "lux",
+              "status": "normal",
+              "target": "12k-38k"
+            },
+            {
+              "key": "co2",
+              "label": "CO2",
+              "value": 512.0,
+              "unit": "ppm",
+              "status": "normal",
+              "target": "420-900"
+            },
+            {
+              "key": "soilHumidity",
+              "label": "土壤湿度",
+              "value": 12.5,
+              "unit": "%",
+              "status": "warning",
+              "target": "45-70%"
+            },
+            {
+              "key": "soilTemp",
+              "label": "土壤温度",
+              "value": 22.8,
+              "unit": "°C",
+              "status": "normal",
+              "target": "16-25°C"
+            },
+            {
+              "key": "ec",
+              "label": "土壤 EC",
+              "value": 0.14,
+              "unit": "mS/cm",
+              "status": "normal",
+              "target": "0.8-1.8"
+            },
+            {
+              "key": "ph",
+              "label": "土壤 PH",
+              "value": 9.02,
+              "unit": "",
+              "status": "warning",
+              "target": "5.8-7.2"
+            }
+          ],
+          "trend": [
+            {
+              "time": "00:00",
+              "airTemp": 20.4,
+              "airHumidity": 81,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "01:00",
+              "airTemp": 20.8,
+              "airHumidity": 81,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "02:00",
+              "airTemp": 20.8,
+              "airHumidity": 81,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "03:00",
+              "airTemp": 20.6,
+              "airHumidity": 81,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "04:00",
+              "airTemp": 20.7,
+              "airHumidity": 82,
+              "soilHumidity": 13,
+              "light": 120
+            },
+            {
+              "time": "05:00",
+              "airTemp": 20.6,
+              "airHumidity": 81,
+              "soilHumidity": 12,
+              "light": 676
+            },
+            {
+              "time": "06:00",
+              "airTemp": 20.9,
+              "airHumidity": 82,
+              "soilHumidity": 12,
+              "light": 2339
+            },
+            {
+              "time": "07:00",
+              "airTemp": 22.5,
+              "airHumidity": 82,
+              "soilHumidity": 12,
+              "light": 6718
+            },
+            {
+              "time": "08:00",
+              "airTemp": 26.9,
+              "airHumidity": 74,
+              "soilHumidity": 12,
+              "light": 28760
+            },
+            {
+              "time": "09:00",
+              "airTemp": 30.7,
+              "airHumidity": 59,
+              "soilHumidity": 13,
+              "light": 45757
+            },
+            {
+              "time": "10:00",
+              "airTemp": 34.2,
+              "airHumidity": 50,
+              "soilHumidity": 13,
+              "light": 65382
+            },
+            {
+              "time": "11:00",
+              "airTemp": 34.7,
+              "airHumidity": 48,
+              "soilHumidity": 13,
+              "light": 56512
+            },
+            {
+              "time": "12:00",
+              "airTemp": 29.8,
+              "airHumidity": 52,
+              "soilHumidity": 13,
+              "light": 23287
+            },
+            {
+              "time": "13:00",
+              "airTemp": 29.9,
+              "airHumidity": 52,
+              "soilHumidity": 13,
+              "light": 24732
+            },
+            {
+              "time": "14:00",
+              "airTemp": 25.6,
+              "airHumidity": 69,
+              "soilHumidity": 13,
+              "light": 6265
+            },
+            {
+              "time": "15:00",
+              "airTemp": 26.2,
+              "airHumidity": 74,
+              "soilHumidity": 13,
+              "light": 1246
+            },
+            {
+              "time": "16:00",
+              "airTemp": 24.2,
+              "airHumidity": 75,
+              "soilHumidity": 13,
+              "light": 436
+            },
+            {
+              "time": "17:00",
+              "airTemp": 23.3,
+              "airHumidity": 78,
+              "soilHumidity": 13,
+              "light": 2199
+            },
+            {
+              "time": "18:00",
+              "airTemp": 23.2,
+              "airHumidity": 78,
+              "soilHumidity": 13,
+              "light": 2056
+            },
+            {
+              "time": "19:00",
+              "airTemp": 22.7,
+              "airHumidity": 78,
+              "soilHumidity": 13,
+              "light": 179
+            },
+            {
+              "time": "20:00",
+              "airTemp": 21.5,
+              "airHumidity": 79,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "21:00",
+              "airTemp": 20.6,
+              "airHumidity": 80,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "22:00",
+              "airTemp": 19.8,
+              "airHumidity": 80,
+              "soilHumidity": 12,
+              "light": 0
+            },
+            {
+              "time": "23:00",
+              "airTemp": 19.2,
+              "airHumidity": 81,
+              "soilHumidity": 12,
+              "light": 0
+            }
+          ],
+          "alerts": [
+            {
+              "id": "local-soilHumidity",
+              "level": "warning",
+              "message": "土壤湿度 当前值 12.5%，建议复核目标范围 45-70%。",
+              "time": "08:47"
+            },
+            {
+              "id": "local-ph",
+              "level": "warning",
+              "message": "土壤 PH 当前值 9.02，建议复核目标范围 5.8-7.2。",
+              "time": "08:47"
+            }
+          ]
+        },
+        {
+          "id": "jujube-2",
+          "name": "冰糖枣 2 号棚",
+          "area": "冰糖枣2号数据",
+          "status": "warning",
+          "onlineDevices": 1,
+          "totalDevices": 1,
+          "metrics": [
+            {
+              "key": "airTemp",
+              "label": "空气温度",
+              "value": 18.2,
+              "unit": "°C",
+              "status": "normal",
+              "target": "18-28°C"
+            },
+            {
+              "key": "airHumidity",
+              "label": "空气湿度",
+              "value": 81.2,
+              "unit": "%",
+              "status": "normal",
+              "target": "55-80%"
+            },
+            {
+              "key": "light",
+              "label": "光照强度",
+              "value": 0.0,
+              "unit": "lux",
+              "status": "normal",
+              "target": "12k-38k"
+            },
+            {
+              "key": "co2",
+              "label": "CO2",
+              "value": 561.0,
+              "unit": "ppm",
+              "status": "normal",
+              "target": "420-900"
+            },
+            {
+              "key": "soilHumidity",
+              "label": "土壤湿度",
+              "value": 0.0,
+              "unit": "%",
+              "status": "warning",
+              "target": "45-70%"
+            },
+            {
+              "key": "soilTemp",
+              "label": "土壤温度",
+              "value": 18.4,
+              "unit": "°C",
+              "status": "normal",
+              "target": "16-25°C"
+            },
+            {
+              "key": "ec",
+              "label": "土壤 EC",
+              "value": 0.0,
+              "unit": "mS/cm",
+              "status": "normal",
+              "target": "0.8-1.8"
+            },
+            {
+              "key": "ph",
+              "label": "土壤 PH",
+              "value": 7.74,
+              "unit": "",
+              "status": "normal",
+              "target": "5.8-7.2"
+            }
+          ],
+          "trend": [
+            {
+              "time": "00:00",
+              "airTemp": 19.7,
+              "airHumidity": 81,
+              "soilHumidity": 0,
+              "light": 0
+            },
+            {
+              "time": "01:00",
+              "airTemp": 20.1,
+              "airHumidity": 82,
+              "soilHumidity": 0,
+              "light": 0
+            },
+            {
+              "time": "02:00",
+              "airTemp": 20.1,
+              "airHumidity": 82,
+              "soilHumidity": 0,
+              "light": 0
+            },
+            {
+              "time": "03:00",
+              "airTemp": 20.0,
+              "airHumidity": 82,
+              "soilHumidity": 0,
+              "light": 0
+            },
+            {
+              "time": "04:00",
+              "airTemp": 20.0,
+              "airHumidity": 82,
+              "soilHumidity": 0,
+              "light": 122
+            },
+            {
+              "time": "05:00",
+              "airTemp": 20.0,
+              "airHumidity": 82,
+              "soilHumidity": 0,
+              "light": 706
+            },
+            {
+              "time": "06:00",
+              "airTemp": 20.4,
+              "airHumidity": 83,
+              "soilHumidity": 0,
+              "light": 2342
+            },
+            {
+              "time": "07:00",
+              "airTemp": 22.2,
+              "airHumidity": 83,
+              "soilHumidity": 0,
+              "light": 6711
+            },
+            {
+              "time": "08:00",
+              "airTemp": 26.5,
+              "airHumidity": 71,
+              "soilHumidity": 0,
+              "light": 26736
+            },
+            {
+              "time": "09:00",
+              "airTemp": 29.4,
+              "airHumidity": 59,
+              "soilHumidity": 1,
+              "light": 43488
+            },
+            {
+              "time": "10:00",
+              "airTemp": 33.6,
+              "airHumidity": 49,
+              "soilHumidity": 1,
+              "light": 55655
+            },
+            {
+              "time": "11:00",
+              "airTemp": 34.8,
+              "airHumidity": 46,
+              "soilHumidity": 2,
+              "light": 45247
+            },
+            {
+              "time": "12:00",
+              "airTemp": 30.0,
+              "airHumidity": 52,
+              "soilHumidity": 1,
+              "light": 22250
+            },
+            {
+              "time": "13:00",
+              "airTemp": 30.2,
+              "airHumidity": 51,
+              "soilHumidity": 0,
+              "light": 25333
+            },
+            {
+              "time": "14:00",
+              "airTemp": 26.6,
+              "airHumidity": 64,
+              "soilHumidity": 0,
+              "light": 7194
+            },
+            {
+              "time": "15:00",
+              "airTemp": 26.1,
+              "airHumidity": 73,
+              "soilHumidity": 0,
+              "light": 1326
+            },
+            {
+              "time": "16:00",
+              "airTemp": 23.7,
+              "airHumidity": 75,
+              "soilHumidity": 0,
+              "light": 436
+            },
+            {
+              "time": "17:00",
+              "airTemp": 22.9,
+              "airHumidity": 78,
+              "soilHumidity": 0,
+              "light": 2447
+            },
+            {
+              "time": "18:00",
+              "airTemp": 23.0,
+              "airHumidity": 78,
+              "soilHumidity": 0,
+              "light": 2142
+            },
+            {
+              "time": "19:00",
+              "airTemp": 22.4,
+              "airHumidity": 77,
+              "soilHumidity": 0,
+              "light": 182
+            },
+            {
+              "time": "20:00",
+              "airTemp": 20.9,
+              "airHumidity": 79,
+              "soilHumidity": 0,
+              "light": 0
+            },
+            {
+              "time": "21:00",
+              "airTemp": 19.9,
+              "airHumidity": 80,
+              "soilHumidity": 0,
+              "light": 0
+            },
+            {
+              "time": "22:00",
+              "airTemp": 19.1,
+              "airHumidity": 80,
+              "soilHumidity": 0,
+              "light": 0
+            },
+            {
+              "time": "23:00",
+              "airTemp": 18.4,
+              "airHumidity": 81,
+              "soilHumidity": 0,
+              "light": 0
+            }
+          ],
+          "alerts": [
+            {
+              "id": "local-soilHumidity",
+              "level": "warning",
+              "message": "土壤湿度 当前值 0.0%，建议复核目标范围 45-70%。",
+              "time": "08:47"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blueberry",
+      "name": "蓝莓",
+      "latinName": "Blueberry",
+      "description": "本地 Excel 采集数据汇总，重点关注基质湿度、温度、EC 与空气环境。",
+      "heroImage": "/images/blueberry-hero.jpg",
+      "accent": "#2563eb",
+      "greenhouses": [
+        {
+          "id": "blueberry-c1",
+          "name": "蓝莓 C1 棚",
+          "area": "蓝莓c1",
+          "status": "warning",
+          "onlineDevices": 1,
+          "totalDevices": 1,
+          "metrics": [
+            {
+              "key": "airTemp",
+              "label": "空气温度",
+              "value": 25.3,
+              "unit": "°C",
+              "status": "normal",
+              "target": "18-28°C"
+            },
+            {
+              "key": "airHumidity",
+              "label": "空气湿度",
+              "value": 63.0,
+              "unit": "%",
+              "status": "normal",
+              "target": "55-80%"
+            },
+            {
+              "key": "light",
+              "label": "光照强度",
+              "value": 4460.0,
+              "unit": "lux",
+              "status": "normal",
+              "target": "12k-38k"
+            },
+            {
+              "key": "co2",
+              "label": "CO2",
+              "value": 338.0,
+              "unit": "ppm",
+              "status": "normal",
+              "target": "420-900"
+            },
+            {
+              "key": "soilHumidity",
+              "label": "土壤湿度",
+              "value": 25.0,
+              "unit": "%",
+              "status": "warning",
+              "target": "45-70%"
+            },
+            {
+              "key": "soilTemp",
+              "label": "土壤温度",
+              "value": 24.3,
+              "unit": "°C",
+              "status": "normal",
+              "target": "16-25°C"
+            },
+            {
+              "key": "ec",
+              "label": "土壤 EC",
+              "value": 12.0,
+              "unit": "mS/cm",
+              "status": "normal",
+              "target": "0.8-1.8"
+            }
+          ],
+          "trend": [
+            {
+              "time": "00:00",
+              "airTemp": 16.3,
+              "airHumidity": 84,
+              "soilHumidity": 24,
+              "light": 0
+            },
+            {
+              "time": "01:00",
+              "airTemp": 16.4,
+              "airHumidity": 84,
+              "soilHumidity": 24,
+              "light": 0
+            },
+            {
+              "time": "02:00",
+              "airTemp": 16.4,
+              "airHumidity": 85,
+              "soilHumidity": 24,
+              "light": 0
+            },
+            {
+              "time": "03:00",
+              "airTemp": 16.7,
+              "airHumidity": 86,
+              "soilHumidity": 24,
+              "light": 0
+            },
+            {
+              "time": "04:00",
+              "airTemp": 16.7,
+              "airHumidity": 86,
+              "soilHumidity": 24,
+              "light": 148
+            },
+            {
+              "time": "05:00",
+              "airTemp": 17.0,
+              "airHumidity": 86,
+              "soilHumidity": 24,
+              "light": 1406
+            },
+            {
+              "time": "06:00",
+              "airTemp": 17.0,
+              "airHumidity": 85,
+              "soilHumidity": 24,
+              "light": 2762
+            },
+            {
+              "time": "07:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "08:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "09:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "10:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "11:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "12:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "13:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "14:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "15:00",
+              "airTemp": 25.1,
+              "airHumidity": 64,
+              "soilHumidity": 25,
+              "light": 4990
+            },
+            {
+              "time": "16:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "17:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "18:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "19:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "20:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "21:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "22:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            },
+            {
+              "time": "23:00",
+              "airTemp": 23.1,
+              "airHumidity": 60,
+              "soilHumidity": 18,
+              "light": 8480
+            }
+          ],
+          "alerts": [
+            {
+              "id": "local-soilHumidity",
+              "level": "warning",
+              "message": "土壤湿度 当前值 25.0%，建议复核目标范围 45-70%。",
+              "time": "08:47"
+            }
+          ]
+        },
+        {
+          "id": "blueberry-c2",
+          "name": "蓝莓 C2 棚",
+          "area": "蓝莓c2",
+          "status": "warning",
+          "onlineDevices": 1,
+          "totalDevices": 1,
+          "metrics": [
+            {
+              "key": "airTemp",
+              "label": "空气温度",
+              "value": 26.5,
+              "unit": "°C",
+              "status": "normal",
+              "target": "18-28°C"
+            },
+            {
+              "key": "airHumidity",
+              "label": "空气湿度",
+              "value": 59.0,
+              "unit": "%",
+              "status": "normal",
+              "target": "55-80%"
+            },
+            {
+              "key": "light",
+              "label": "光照强度",
+              "value": 29740.0,
+              "unit": "lux",
+              "status": "normal",
+              "target": "12k-38k"
+            },
+            {
+              "key": "co2",
+              "label": "CO2",
+              "value": 352.0,
+              "unit": "ppm",
+              "status": "normal",
+              "target": "420-900"
+            },
+            {
+              "key": "soilHumidity",
+              "label": "土壤湿度",
+              "value": 18.0,
+              "unit": "%",
+              "status": "warning",
+              "target": "45-70%"
+            },
+            {
+              "key": "soilTemp",
+              "label": "土壤温度",
+              "value": 16.1,
+              "unit": "°C",
+              "status": "normal",
+              "target": "16-25°C"
+            },
+            {
+              "key": "ec",
+              "label": "土壤 EC",
+              "value": 8.0,
+              "unit": "mS/cm",
+              "status": "normal",
+              "target": "0.8-1.8"
+            }
+          ],
+          "trend": [
+            {
+              "time": "00:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "01:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "02:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "03:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "04:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "05:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "06:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "07:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 13,
+              "light": 0
+            },
+            {
+              "time": "08:00",
+              "airTemp": 25.7,
+              "airHumidity": 63,
+              "soilHumidity": 13,
+              "light": 29059
+            },
+            {
+              "time": "09:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 14,
+              "light": 0
+            },
+            {
+              "time": "10:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 14,
+              "light": 0
+            },
+            {
+              "time": "11:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 14,
+              "light": 0
+            },
+            {
+              "time": "12:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 15,
+              "light": 0
+            },
+            {
+              "time": "13:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 15,
+              "light": 0
+            },
+            {
+              "time": "14:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 14,
+              "light": 0
+            },
+            {
+              "time": "15:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 22,
+              "light": 0
+            },
+            {
+              "time": "16:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 20,
+              "light": 0
+            },
+            {
+              "time": "17:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 19,
+              "light": 0
+            },
+            {
+              "time": "18:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 19,
+              "light": 0
+            },
+            {
+              "time": "19:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 19,
+              "light": 0
+            },
+            {
+              "time": "20:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 18,
+              "light": 0
+            },
+            {
+              "time": "21:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 18,
+              "light": 0
+            },
+            {
+              "time": "22:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 18,
+              "light": 0
+            },
+            {
+              "time": "23:00",
+              "airTemp": 15.5,
+              "airHumidity": 88,
+              "soilHumidity": 18,
+              "light": 0
+            }
+          ],
+          "alerts": [
+            {
+              "id": "local-soilHumidity",
+              "level": "warning",
+              "message": "土壤湿度 当前值 18.0%，建议复核目标范围 45-70%。",
+              "time": "08:47"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cherry",
+      "name": "樱桃",
+      "latinName": "Cherry",
+      "description": "当前本地文件夹尚未识别到樱桃采集数据，页面已预留接入位置。",
+      "heroImage": "/images/cherry-hero.jpg",
+      "accent": "#dc2626",
+      "greenhouses": []
+    }
+  ]
+}

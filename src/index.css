@@ -1,0 +1,87 @@
+:root {
+  --page: #f5f5f7;
+  --surface-solid: #ffffff;
+  --chrome: rgba(255, 255, 255, 0.76);
+  --chrome-line: rgba(0, 0, 0, 0.08);
+  --segment: #ffffff;
+  --segment-active: #f5f5f7;
+  --soft: rgba(0, 0, 0, 0.045);
+  --soft-strong: rgba(0, 0, 0, 0.075);
+  --line: rgba(0, 0, 0, 0.08);
+  --text: #1d1d1f;
+  --text-muted: #6e6e73;
+  --text-strong: #000000;
+  --accent: #007a3d;
+  --accent-contrast: #ffffff;
+  --chart-grid: rgba(0, 0, 0, 0.08);
+  --map-bg: #eef2f1;
+  --map-land: #ffffff;
+  --nav-shadow: 0 14px 40px rgba(0, 0, 0, 0.08);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.14);
+  --soft-shadow: 0 18px 50px rgba(0, 0, 0, 0.06);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Display',
+    'Segoe UI', sans-serif;
+  color: var(--text);
+  background: var(--page);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-theme='dark'] {
+  --page: #000000;
+  --surface-solid: #111113;
+  --chrome: rgba(22, 22, 23, 0.76);
+  --chrome-line: rgba(255, 255, 255, 0.12);
+  --segment: #111113;
+  --segment-active: #1d1d1f;
+  --soft: rgba(255, 255, 255, 0.08);
+  --soft-strong: rgba(255, 255, 255, 0.12);
+  --line: rgba(255, 255, 255, 0.12);
+  --text: #f5f5f7;
+  --text-muted: #a1a1a6;
+  --text-strong: #ffffff;
+  --accent: #30d158;
+  --accent-contrast: #031008;
+  --chart-grid: rgba(255, 255, 255, 0.11);
+  --map-bg: #0f1412;
+  --map-land: #161b19;
+  --nav-shadow: 0 14px 40px rgba(0, 0, 0, 0.36);
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+  --soft-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  letter-spacing: 0;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100svh;
+  margin: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  min-height: 100svh;
+}

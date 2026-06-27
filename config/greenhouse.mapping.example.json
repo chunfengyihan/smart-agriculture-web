@@ -1,0 +1,36 @@
+{
+  "crops": [
+    {
+      "id": "jujube",
+      "name": "冰糖枣",
+      "greenhouses": [
+        {
+          "id": "jujube-a01",
+          "name": "冰糖枣 A01 棚",
+          "area": "北区 01",
+          "deviceNo": "替换为有人云网关编号",
+          "metrics": {
+            "airTemp": 10001,
+            "airHumidity": 10002,
+            "light": 10003,
+            "co2": 10004,
+            "soilHumidity": 10005,
+            "soilTemp": 10006,
+            "ec": 10007,
+            "ph": 10008
+          }
+        }
+      ]
+    },
+    {
+      "id": "blueberry",
+      "name": "蓝莓",
+      "greenhouses": []
+    },
+    {
+      "id": "cherry",
+      "name": "樱桃",
+      "greenhouses": []
+    }
+  ]
+}
