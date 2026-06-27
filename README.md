@@ -395,6 +395,7 @@ npm run build
 Start Django:
 
 ```powershell
+$env:WEATHER_INTEGRATION_ENABLED = "true"
 .venv\Scripts\python.exe backend\manage.py migrate --noinput
 .venv\Scripts\python.exe backend\manage.py seed_dev
 .venv\Scripts\python.exe backend\manage.py runserver 127.0.0.1:8000
@@ -439,7 +440,7 @@ When using Vite directly, open:
 http://127.0.0.1:5173/
 ```
 
-By default `EXTERNAL_INTEGRATIONS_ENABLED=false`. Weather advice, crop diagnosis, and agricultural chat return HTTP 503 with an external-integration-disabled message; they do not call real external services.
+By default `EXTERNAL_INTEGRATIONS_ENABLED=false`. Set `WEATHER_INTEGRATION_ENABLED=true` to enable Open-Meteo weather forecasts. AI operation advice, crop diagnosis, and agricultural chat remain disabled until their AI adapters and credentials are configured.
 
 Run the full local verification suite:
 

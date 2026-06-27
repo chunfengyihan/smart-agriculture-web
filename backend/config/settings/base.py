@@ -165,6 +165,8 @@ else:
     raise ImproperlyConfigured("DB_ENGINE must be either 'sqlite' or 'mysql'")
 
 EXTERNAL_INTEGRATIONS_ENABLED = env_bool("EXTERNAL_INTEGRATIONS_ENABLED", False)
+WEATHER_INTEGRATION_ENABLED = env_bool("WEATHER_INTEGRATION_ENABLED", EXTERNAL_INTEGRATIONS_ENABLED)
+WEATHER_FETCH_TIMEOUT_SECONDS = float(os.environ.get("WEATHER_FETCH_TIMEOUT_SECONDS", "8"))
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",

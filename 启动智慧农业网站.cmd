@@ -4,6 +4,7 @@ setlocal
 set "PROJECT_DIR=%~dp0"
 set "APP_URL=http://127.0.0.1:8000/"
 set "PYTHON_EXE=%PROJECT_DIR%.venv\Scripts\python.exe"
+set "WEATHER_INTEGRATION_ENABLED=true"
 if not exist "%PYTHON_EXE%" set "PYTHON_EXE=python"
 
 start "Smart Agriculture Django" cmd /k "cd /d ""%PROJECT_DIR%"" && npm run build && ""%PYTHON_EXE%"" backend\manage.py migrate --noinput && ""%PYTHON_EXE%"" backend\manage.py seed_dev && ""%PYTHON_EXE%"" backend\manage.py runserver 127.0.0.1:8000 --noreload"
