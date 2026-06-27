@@ -30,8 +30,9 @@ import type {
 import './App.css'
 
 const refreshIntervalMs = 30_000
+const configuredDataSource = import.meta.env.VITE_DATA_SOURCE || 'remote'
 const usesDjangoApi =
-  import.meta.env.VITE_DATA_SOURCE === 'remote' ||
+  configuredDataSource === 'remote' ||
   (!import.meta.env.VITE_DATA_SOURCE && import.meta.env.VITE_USE_REMOTE_DATA === 'true')
 const WeatherAdvicePanel = lazy(() => import('./components/WeatherAdvicePanel'))
 const CropDiagnosisPanel = lazy(() => import('./components/CropDiagnosisPanel'))

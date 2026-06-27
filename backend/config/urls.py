@@ -1,9 +1,8 @@
 from django.contrib import admin
-from django.urls import path
-from django.views.generic import RedirectView
+from django.urls import path, re_path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from apps.core.views import HealthCheckView
+from apps.core.views import FrontendIndexView, HealthCheckView, frontend_asset_view
 from apps.ai_advisory.views import (
     LegacyAgriChatView,
     LegacyCropDiagnosisView,
@@ -15,7 +14,7 @@ from apps.weather.views import LegacyWeatherAdviceView, V1WeatherAdviceView
 
 
 urlpatterns = [
-    path("", RedirectView.as_view(pattern_name="admin:index", permanent=False), name="root"),
+    path("", FrontendIndexView.as_view(), name="frontend-index"),
     path("admin/", admin.site.urls),
     path(
         "api/greenhouse/dashboard",
@@ -63,5 +62,10 @@ urlpatterns = [
         "api/v1/docs/",
         SpectacularSwaggerView.as_view(url_name="api-v1-schema"),
         name="api-v1-docs",
+    ),
+    re_path(
+        r"^(?P<path>(assets|data|images)/.*|favicon\.(ico|png|svg)|icons\.svg|logo-(lockup|mark)\.(png|svg)|smart-agriculture-logo\.ico)$",
+        frontend_asset_view,
+        name="frontend-asset",
     ),
 ]

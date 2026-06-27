@@ -80,11 +80,6 @@ TIME_ZONE = "Asia/Shanghai"
 USE_I18N = True
 USE_TZ = True
 
-SIMPLEUI_HOME_TITLE = "智慧农业管理后台"
-SIMPLEUI_HOME_ICON = "fa fa-leaf"
-SIMPLEUI_INDEX = os.environ.get("DJANGO_ADMIN_SITE_URL", "http://127.0.0.1:5173/")
-SIMPLEUI_ANALYSIS = False
-
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -92,10 +87,19 @@ CORS_ALLOWED_ORIGINS = env_list(
     "DJANGO_CORS_ALLOWED_ORIGINS",
     ["http://localhost:5173", "http://127.0.0.1:5173"],
 )
-ADMIN_SITE_URL = os.environ.get("DJANGO_ADMIN_SITE_URL", "http://127.0.0.1:5173/")
+
+FRONTEND_DIST_DIR = Path(os.environ.get("DJANGO_FRONTEND_DIST_DIR", REPO_DIR / "dist"))
+FRONTEND_SITE_URL = os.environ.get("DJANGO_FRONTEND_SITE_URL", "/")
+
+ADMIN_SITE_URL = os.environ.get("DJANGO_ADMIN_SITE_URL", FRONTEND_SITE_URL)
 ADMIN_SITE_HEADER = os.environ.get("DJANGO_ADMIN_SITE_HEADER", "智慧农业管理后台")
 ADMIN_SITE_TITLE = os.environ.get("DJANGO_ADMIN_SITE_TITLE", "智慧农业管理后台")
 ADMIN_INDEX_TITLE = os.environ.get("DJANGO_ADMIN_INDEX_TITLE", "后台首页")
+
+SIMPLEUI_HOME_TITLE = "智慧农业管理后台"
+SIMPLEUI_HOME_ICON = "fa fa-leaf"
+SIMPLEUI_INDEX = ADMIN_SITE_URL
+SIMPLEUI_ANALYSIS = False
 
 
 def sqlite_database():

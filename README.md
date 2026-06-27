@@ -384,7 +384,13 @@ npm run youren:test
 
 ## Django Local Integration
 
-On this migration branch, the Vite `/api` development proxy points to `http://127.0.0.1:8000`.
+On this migration branch, Django can serve the built React frontend, admin, and API from one port.
+
+Build the frontend:
+
+```powershell
+npm run build
+```
 
 Start Django:
 
@@ -392,6 +398,12 @@ Start Django:
 .venv\Scripts\python.exe backend\manage.py migrate --noinput
 .venv\Scripts\python.exe backend\manage.py seed_dev
 .venv\Scripts\python.exe backend\manage.py runserver 127.0.0.1:8000
+```
+
+Open the integrated site:
+
+```text
+http://127.0.0.1:8000/
 ```
 
 Open Django Admin:
@@ -402,10 +414,11 @@ http://127.0.0.1:8000/admin/
 
 The admin UI uses `django-simpleui` and defaults to Simplified Chinese through `LANGUAGE_CODE=zh-hans`.
 
-The admin "View site" link points to the frontend. Override it with:
+The admin "View site" and simple-ui home button point to the integrated frontend by default. Override them when using a separate frontend dev server:
 
 ```powershell
 $env:DJANGO_ADMIN_SITE_URL = "http://127.0.0.1:5173/"
+$env:DJANGO_FRONTEND_SITE_URL = "http://127.0.0.1:5173/"
 ```
 
 Create a local admin user when needed:
@@ -414,13 +427,13 @@ Create a local admin user when needed:
 .venv\Scripts\python.exe backend\manage.py createsuperuser
 ```
 
-Start the frontend:
+Optional Vite hot-reload frontend:
 
 ```powershell
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
-Open:
+When using Vite directly, open:
 
 ```text
 http://127.0.0.1:5173/

@@ -1,15 +1,39 @@
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 
 
 class AdminSiteTests(TestCase):
-    def test_root_redirects_to_admin(self):
-        response = Client().get("/")
+    def test_root_serves_frontend_index(self):
+        with TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "index.html").write_text("<html>frontend</html>", encoding="utf-8")
 
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], "/admin/")
+            with override_settings(FRONTEND_DIST_DIR=Path(temp_dir)):
+                response = Client().get("/")
+                content = b"".join(response.streaming_content)
+                response.close()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "text/html; charset=utf-8")
+        self.assertEqual(content.decode("utf-8"), "<html>frontend</html>")
+
+    def test_frontend_asset_serves_dist_file(self):
+        with TemporaryDirectory() as temp_dir:
+            assets_dir = Path(temp_dir, "assets")
+            assets_dir.mkdir()
+            Path(assets_dir, "app.js").write_text("console.log('frontend')", encoding="utf-8")
+
+            with override_settings(FRONTEND_DIST_DIR=Path(temp_dir)):
+                response = Client().get("/assets/app.js")
+                content = b"".join(response.streaming_content)
+                response.close()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(b"console.log('frontend')", content)
 
     def test_admin_requires_login(self):
         response = Client().get("/admin/")
@@ -18,8 +42,8 @@ class AdminSiteTests(TestCase):
         self.assertIn("/admin/login/", response["Location"])
 
     def test_admin_view_site_points_to_frontend(self):
-        self.assertEqual(admin.site.site_url, "http://127.0.0.1:5173/")
-        self.assertEqual(settings.SIMPLEUI_INDEX, "http://127.0.0.1:5173/")
+        self.assertEqual(admin.site.site_url, "/")
+        self.assertEqual(settings.SIMPLEUI_INDEX, "/")
 
     def test_admin_home_renders_frontend_view_site_link(self):
         user = get_user_model().objects.create_superuser(
@@ -36,7 +60,7 @@ class AdminSiteTests(TestCase):
         self.assertContains(response, "django-simpleui")
         self.assertContains(response, '<html lang="zh-hans"', html=False)
         self.assertContains(response, "智慧农业管理后台")
-        self.assertContains(response, "goIndex('http://127.0.0.1:5173/')")
+        self.assertContains(response, "goIndex('/')")
 
     def test_simpleui_loads_before_django_admin(self):
         self.assertLess(

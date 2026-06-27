@@ -2,7 +2,7 @@ import { createMockDashboard } from './mockDashboard'
 import type { DashboardData } from '../types'
 import { fetchWithTimeout } from '../lib/http'
 
-const DATA_SOURCE = import.meta.env.VITE_DATA_SOURCE || 'mock'
+const DATA_SOURCE = import.meta.env.VITE_DATA_SOURCE || 'remote'
 const USE_REMOTE_DATA = import.meta.env.VITE_USE_REMOTE_DATA === 'true'
 const DASHBOARD_ENDPOINT =
   import.meta.env.VITE_DASHBOARD_ENDPOINT || '/api/greenhouse/dashboard'
