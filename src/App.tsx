@@ -30,6 +30,9 @@ import type {
 import './App.css'
 
 const refreshIntervalMs = 30_000
+const usesDjangoApi =
+  import.meta.env.VITE_DATA_SOURCE === 'remote' ||
+  (!import.meta.env.VITE_DATA_SOURCE && import.meta.env.VITE_USE_REMOTE_DATA === 'true')
 const WeatherAdvicePanel = lazy(() => import('./components/WeatherAdvicePanel'))
 const CropDiagnosisPanel = lazy(() => import('./components/CropDiagnosisPanel'))
 const JujubeAdvisorPanel = lazy(() => import('./components/JujubeAdvisorPanel'))
@@ -68,6 +71,11 @@ type DalianFeature = {
 const mapWidth = 760
 const mapHeight = 520
 const mapPadding = 26
+
+function dashboardSourceText(source: DashboardData['source']) {
+  const label = sourceText(source)
+  return usesDjangoApi ? `Django API / ${label}` : label
+}
 
 function getInitialTheme(): ThemeMode {
   const stored = localStorage.getItem('theme') as ThemeMode | null
@@ -484,7 +492,7 @@ function App() {
           <span className="hero-label">智慧农业中控台</span>
           <p className="eyebrow">
             <Sprout size={16} />
-            {sourceText(dashboard.source)} · 更新于 {formatTime(dashboard.generatedAt)}
+            {dashboardSourceText(dashboard.source)} · 更新于 {formatTime(dashboard.generatedAt)}
           </p>
           <h1>{selectedCrop.name}</h1>
           <p className="hero-description">{selectedCrop.description}</p>
