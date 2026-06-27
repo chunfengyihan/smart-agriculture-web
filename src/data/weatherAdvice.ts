@@ -38,7 +38,11 @@ export async function getGreenhouseWeatherAdvice(
 
   if (!response.ok) {
     if ([502, 503, 504].includes(response.status)) {
-      throw new Error('天气服务暂不可用，请确认本地 API 已启动：npm run dev:full 或 npm run dev:api')
+      throw new Error(
+        payload && 'message' in payload && payload.message
+          ? payload.message
+          : '天气服务暂不可用：外部天气集成当前未启用',
+      )
     }
 
     throw new Error(
