@@ -1,5 +1,7 @@
 import json
+from collections import OrderedDict
 from datetime import datetime
+from time import monotonic
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
@@ -8,7 +10,7 @@ from django.utils import timezone
 
 
 SHANGHAI_TIME_ZONE = "Asia/Shanghai"
-WEATHER_CACHE = {}
+WEATHER_CACHE = OrderedDict()
 
 
 class WeatherIntegrationError(Exception):
@@ -73,6 +75,29 @@ def make_cache_key(validated):
             f"{validated['longitude']:.4f}",
         ]
     )
+
+
+def get_cached_weather(cache_key):
+    cached = WEATHER_CACHE.get(cache_key)
+    if not cached:
+        return None
+
+    expires_at, value = cached
+    if expires_at <= monotonic():
+        WEATHER_CACHE.pop(cache_key, None)
+        return None
+
+    WEATHER_CACHE.move_to_end(cache_key)
+    return value
+
+
+def set_cached_weather(cache_key, value):
+    WEATHER_CACHE[cache_key] = (monotonic() + settings.WEATHER_CACHE_TTL_SECONDS, value)
+    WEATHER_CACHE.move_to_end(cache_key)
+
+    max_items = max(1, settings.WEATHER_CACHE_MAX_ITEMS)
+    while len(WEATHER_CACHE) > max_items:
+        WEATHER_CACHE.popitem(last=False)
 
 
 def fetch_open_meteo_payload(latitude, longitude):
@@ -146,7 +171,7 @@ def normalize_weather(payload, validated):
 
 def get_greenhouse_weather_advice(validated):
     cache_key = make_cache_key(validated)
-    cached = WEATHER_CACHE.get(cache_key)
+    cached = get_cached_weather(cache_key)
     if cached:
         return cached
 
@@ -163,5 +188,5 @@ def get_greenhouse_weather_advice(validated):
             else None
         ),
     }
-    WEATHER_CACHE[cache_key] = result
+    set_cached_weather(cache_key, result)
     return result

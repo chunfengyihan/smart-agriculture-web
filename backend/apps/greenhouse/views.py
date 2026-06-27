@@ -3,6 +3,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.permissions import ApiKeyRequired
 from apps.core.responses import success_response
 
 from .models import DashboardSnapshot
@@ -26,7 +27,7 @@ def latest_dashboard_payload():
 
 class LegacyGreenhouseDashboardView(APIView):
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [ApiKeyRequired]
 
     @extend_schema(responses={200: DashboardPayloadSerializer})
     def get(self, request):
@@ -35,7 +36,7 @@ class LegacyGreenhouseDashboardView(APIView):
 
 class V1GreenhouseDashboardView(APIView):
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [ApiKeyRequired]
 
     @extend_schema(responses={200: V1DashboardResponseSerializer})
     def get(self, request):

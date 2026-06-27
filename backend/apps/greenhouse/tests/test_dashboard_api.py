@@ -1,5 +1,5 @@
 from django.core.management import call_command
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 
 from apps.greenhouse.models import DashboardSnapshot, EnvironmentReading, Greenhouse
 
@@ -60,3 +60,15 @@ class GreenhouseDashboardApiTests(TestCase):
         self.assertEqual(payload["data"]["source"], "local")
         self.assertEqual(len(payload["data"]["crops"]), 3)
         self.assertTrue(payload["request_id"])
+
+    @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="test-token")
+    def test_dashboard_requires_api_key_when_enabled(self):
+        response = Client().get("/api/greenhouse/dashboard")
+
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="test-token")
+    def test_dashboard_accepts_api_key_when_enabled(self):
+        response = Client().get("/api/greenhouse/dashboard", HTTP_X_API_KEY="test-token")
+
+        self.assertEqual(response.status_code, 200)

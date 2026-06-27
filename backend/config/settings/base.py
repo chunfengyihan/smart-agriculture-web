@@ -26,6 +26,8 @@ def env_list(name, default=None):
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-local-development-only")
 DEBUG = env_bool("DJANGO_DEBUG", False)
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
+API_AUTH_REQUIRED = env_bool("DJANGO_API_AUTH_REQUIRED", False)
+API_AUTH_TOKEN = os.environ.get("DJANGO_API_AUTH_TOKEN", "")
 
 INSTALLED_APPS = [
     "simpleui",
@@ -167,6 +169,8 @@ else:
 EXTERNAL_INTEGRATIONS_ENABLED = env_bool("EXTERNAL_INTEGRATIONS_ENABLED", False)
 WEATHER_INTEGRATION_ENABLED = env_bool("WEATHER_INTEGRATION_ENABLED", EXTERNAL_INTEGRATIONS_ENABLED)
 WEATHER_FETCH_TIMEOUT_SECONDS = float(os.environ.get("WEATHER_FETCH_TIMEOUT_SECONDS", "8"))
+WEATHER_CACHE_MAX_ITEMS = int(os.environ.get("WEATHER_CACHE_MAX_ITEMS", "512"))
+WEATHER_CACHE_TTL_SECONDS = int(os.environ.get("WEATHER_CACHE_TTL_SECONDS", str(6 * 60 * 60)))
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",

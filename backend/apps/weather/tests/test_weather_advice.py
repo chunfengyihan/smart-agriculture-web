@@ -65,6 +65,27 @@ class WeatherAdviceDisabledTests(TestCase):
         self.assertEqual(payload["message"], "外部集成未启用")
         self.assertTrue(payload["request_id"])
 
+    @override_settings(WEATHER_INTEGRATION_ENABLED=True)
+    def test_v1_weather_advice_rejects_invalid_coordinates(self):
+        response = Client().post(
+            "/api/v1/weather/greenhouse-advice",
+            data={
+                "cropId": "jujube",
+                "cropName": "冰糖枣",
+                "greenhouseId": "jujube-1",
+                "greenhouseName": "1 号棚",
+                "latitude": 999,
+                "longitude": 121.0,
+                "metrics": [],
+            },
+            content_type="application/json",
+        )
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(payload["code"], 40000)
+        self.assertIn("latitude", payload["data"])
+
 
 class WeatherAdviceEnabledTests(TestCase):
     def setUp(self):

@@ -4,6 +4,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.permissions import ApiKeyRequired
 from apps.core.responses import error_response
 from apps.core.serializers import LegacyExternalDisabledSerializer, V1ExternalDisabledSerializer
 
@@ -13,26 +14,26 @@ EXTERNAL_INTEGRATION_DISABLED_MESSAGE = "外部集成未启用"
 
 class CropDiagnosisRequestSerializer(serializers.Serializer):
     image = serializers.FileField()
-    cropId = serializers.CharField()
-    cropName = serializers.CharField()
-    greenhouseId = serializers.CharField()
-    greenhouseName = serializers.CharField(required=False, allow_blank=True)
+    cropId = serializers.CharField(max_length=64)
+    cropName = serializers.CharField(max_length=128)
+    greenhouseId = serializers.CharField(max_length=64)
+    greenhouseName = serializers.CharField(required=False, allow_blank=True, max_length=128)
     useEnvironmentContext = serializers.BooleanField(required=False, default=False)
-    metrics = serializers.CharField(required=False, allow_blank=True)
+    metrics = serializers.CharField(required=False, allow_blank=True, max_length=32768)
 
 
 class AgriChatRequestSerializer(serializers.Serializer):
-    cropId = serializers.CharField()
-    cropName = serializers.CharField()
-    greenhouseId = serializers.CharField()
-    greenhouseName = serializers.CharField()
-    metrics = serializers.ListField(child=serializers.DictField(), required=False)
-    question = serializers.CharField()
+    cropId = serializers.CharField(max_length=64)
+    cropName = serializers.CharField(max_length=128)
+    greenhouseId = serializers.CharField(max_length=64)
+    greenhouseName = serializers.CharField(max_length=128)
+    metrics = serializers.ListField(child=serializers.DictField(), required=False, max_length=64)
+    question = serializers.CharField(max_length=2000, trim_whitespace=True)
 
 
 class LegacyCropDiagnosisView(APIView):
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [ApiKeyRequired]
 
     @extend_schema(request=CropDiagnosisRequestSerializer, responses={503: LegacyExternalDisabledSerializer})
     def post(self, request):
@@ -44,7 +45,7 @@ class LegacyCropDiagnosisView(APIView):
 
 class V1CropDiagnosisView(APIView):
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [ApiKeyRequired]
 
     @extend_schema(request=CropDiagnosisRequestSerializer, responses={503: V1ExternalDisabledSerializer})
     def post(self, request):
@@ -55,6 +56,8 @@ class V1CropDiagnosisView(APIView):
                 message=EXTERNAL_INTEGRATION_DISABLED_MESSAGE,
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
+        serializer = CropDiagnosisRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         return error_response(
             request,
             code=50020,
@@ -65,7 +68,7 @@ class V1CropDiagnosisView(APIView):
 
 class LegacyAgriChatView(APIView):
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [ApiKeyRequired]
 
     @extend_schema(request=AgriChatRequestSerializer, responses={503: LegacyExternalDisabledSerializer})
     def post(self, request):
@@ -77,7 +80,7 @@ class LegacyAgriChatView(APIView):
 
 class V1AgriChatView(APIView):
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [ApiKeyRequired]
 
     @extend_schema(request=AgriChatRequestSerializer, responses={503: V1ExternalDisabledSerializer})
     def post(self, request):
@@ -88,6 +91,8 @@ class V1AgriChatView(APIView):
                 message=EXTERNAL_INTEGRATION_DISABLED_MESSAGE,
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
+        serializer = AgriChatRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         return error_response(
             request,
             code=50020,

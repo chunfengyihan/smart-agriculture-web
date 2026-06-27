@@ -3,6 +3,8 @@ const weatherCache = new Map()
 const shanghaiTimeZone = 'Asia/Shanghai'
 const weatherFetchAttempts = 3
 const weatherFetchTimeoutMs = 8_000
+const weatherCacheMaxItems = Math.max(1, Number(process.env.WEATHER_CACHE_MAX_ITEMS || 512))
+const weatherCacheTtlMs = Math.max(1_000, Number(process.env.WEATHER_CACHE_TTL_SECONDS || 6 * 60 * 60) * 1_000)
 const cacheDateFormatter = new Intl.DateTimeFormat('en-CA', {
   timeZone: shanghaiTimeZone,
   year: 'numeric',
@@ -345,13 +347,39 @@ function makeCacheKey(requestBody) {
   ].join('|')
 }
 
+function getCachedWeather(cacheKey) {
+  const cached = weatherCache.get(cacheKey)
+  if (!cached) return null
+
+  if (cached.expiresAt <= Date.now()) {
+    weatherCache.delete(cacheKey)
+    return null
+  }
+
+  weatherCache.delete(cacheKey)
+  weatherCache.set(cacheKey, cached)
+  return cached.value
+}
+
+function setCachedWeather(cacheKey, value) {
+  weatherCache.set(cacheKey, {
+    expiresAt: Date.now() + weatherCacheTtlMs,
+    value,
+  })
+
+  while (weatherCache.size > weatherCacheMaxItems) {
+    const oldestKey = weatherCache.keys().next().value
+    weatherCache.delete(oldestKey)
+  }
+}
+
 export async function handleGreenhouseWeatherAdvice(request) {
   const requestBody = await readJsonBody(request)
   requestBody.latitude = toFiniteNumber(requestBody.latitude, 'latitude')
   requestBody.longitude = toFiniteNumber(requestBody.longitude, 'longitude')
 
   const cacheKey = makeCacheKey(requestBody)
-  const cached = weatherCache.get(cacheKey)
+  const cached = getCachedWeather(cacheKey)
   if (cached) {
     if (requestBody.includeAdvice === true && !cached.advice) {
       try {
@@ -383,6 +411,6 @@ export async function handleGreenhouseWeatherAdvice(request) {
     }
   }
 
-  weatherCache.set(cacheKey, result)
+  setCachedWeather(cacheKey, result)
   return result
 }

@@ -1,4 +1,4 @@
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 
 
 class AiAdvisoryDisabledTests(TestCase):
@@ -39,3 +39,13 @@ class AiAdvisoryDisabledTests(TestCase):
         self.assertEqual(payload["code"], 50020)
         self.assertEqual(payload["message"], "外部集成未启用")
         self.assertTrue(payload["request_id"])
+
+    @override_settings(EXTERNAL_INTEGRATIONS_ENABLED=True)
+    def test_v1_agri_chat_validates_request_before_adapter(self):
+        response = Client().post("/api/v1/ai/agri-chat", data={}, content_type="application/json")
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(payload["code"], 40000)
+        self.assertIn("field_errors", payload["data"])
+        self.assertIn("question", payload["data"]["field_errors"])
