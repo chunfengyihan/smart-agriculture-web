@@ -2,7 +2,7 @@
 
 ## 当前边界
 
-本计划仅覆盖阶段 0 和阶段 1 输出。阶段 2 之前禁止创建 Django 业务接口、Django Model、Django Migration、前端代理或新的 API Client。
+本计划记录阶段 0 至阶段 3 当前迁移状态。阶段 4 之前不修改前端代理或新的 API Client。
 
 ## 阶段 0：GitHub 基线确认与敏感信息审查
 
@@ -43,7 +43,7 @@
 
 ## 阶段 2：Django 基础工程
 
-状态：已完成基础工程骨架，尚未创建业务 Model 或 Migration。
+状态：已完成基础工程骨架。
 
 进入条件：
 
@@ -80,6 +80,8 @@
 
 ## 阶段 3：P0 温室看板接口迁移
 
+状态：已完成 P0 Django 迁移。
+
 进入条件：
 
 - Django 基础工程通过 `check`。
@@ -92,6 +94,15 @@
 - v1 路径使用统一响应包装。
 - 使用 `public/data/local-dashboard.json` 作为初始种子来源。
 - 创建模型、迁移、种子命令、序列化器、视图、URL 和测试。
+
+已完成：
+
+- 创建 `apps.greenhouse`。
+- 创建 `Greenhouse`、`EnvironmentReading`、`DashboardSnapshot`。
+- 创建 `0001_initial` migration。
+- 创建 `seed_dev` 命令。
+- 创建 legacy `/api/greenhouse/dashboard` 和 v1 `/api/v1/greenhouse/dashboard`。
+- 创建 P0 单元测试和兼容性证据文档。
 
 P0 数据模型建议：
 

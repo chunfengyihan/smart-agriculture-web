@@ -11,6 +11,7 @@
 - 请求字段：无
 - 响应字段：`generatedAt`、`source`、`crops[]`；作物字段含 `id`、`name`、`latinName`、`description`、`heroImage`、`accent`、`greenhouses[]`；大棚字段含 `id`、`name`、`area`、`status`、`onlineDevices`、`totalDevices`、`metrics[]`、`trend[]`、`alerts[]`
 - 当前数据来源：旧 Node 网关从有人云查询后聚合；本地模式使用 `public/data/local-dashboard.json`
+- Django 迁移状态：已迁移。legacy 路径从 `DashboardSnapshot.payload` 直出；v1 路径使用统一响应包装。
 - 是否依赖第三方服务：是，有人云；本地 JSON 模式否
 - 迁移优先级：P0
 - 兼容性要求：legacy 路径保持旧响应直出；字段名、类型、嵌套层级、单位、时间格式、数组顺序和空值行为保持兼容
