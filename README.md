@@ -381,3 +381,30 @@ npm run youren:test
 - `npm run build` 可以通过。
 - `npm run lint` 可以通过。
 - `npm run local:data` 可以生成可解析的 `public/data/local-dashboard.json`。
+
+## Django Local Integration
+
+On this migration branch, the Vite `/api` development proxy points to `http://127.0.0.1:8000`.
+
+Start Django:
+
+```powershell
+.venv\Scripts\python.exe backend\manage.py migrate --noinput
+.venv\Scripts\python.exe backend\manage.py seed_dev
+.venv\Scripts\python.exe backend\manage.py runserver 127.0.0.1:8000
+```
+
+Start the frontend:
+
+```powershell
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
+Open:
+
+```text
+http://127.0.0.1:5173/
+```
+
+By default `EXTERNAL_INTEGRATIONS_ENABLED=false`. Weather advice, crop diagnosis, and agricultural chat return HTTP 503 with an external-integration-disabled message; they do not call real external services.
+

@@ -2,7 +2,7 @@
 
 ## 当前边界
 
-本计划记录阶段 0 至阶段 3 当前迁移状态。阶段 4 之前不修改前端代理或新的 API Client。
+本计划记录阶段 0 至阶段 4 当前迁移状态。阶段 5 前不执行真实 AI、有人云写接口或生产环境调用。
 
 ## 阶段 0：GitHub 基线确认与敏感信息审查
 
@@ -143,6 +143,8 @@ MySQL 预备约束：
 
 ## 阶段 4：前端联调与 P1 接口迁移
 
+状态：已完成 Django 开发代理切换和 P1 safe-disabled endpoints。
+
 进入条件：
 
 - P0 Django 接口迁移通过兼容性测试。
@@ -154,6 +156,20 @@ MySQL 预备约束：
 - 再迁移图片诊断接口。
 - 再迁移农业问答接口。
 - 最后迁移健康检查与辅助接口。
+
+已完成：
+
+- Vite `/api` 代理切换到 Django `127.0.0.1:8000`。
+- 新增 Django P1 routes:
+  - `POST /api/weather/greenhouse-advice`
+  - `POST /api/v1/weather/greenhouse-advice`
+  - `POST /api/ai/crop-diagnosis`
+  - `POST /api/v1/ai/crop-diagnosis`
+  - `POST /api/ai/agri-chat`
+  - `POST /api/v1/ai/agri-chat`
+- 默认 `EXTERNAL_INTEGRATIONS_ENABLED=false` 时返回 503，不执行真实外部调用。
+- P0 dashboard 已通过 Vite proxy 联调。
+- P1 disabled error responses 已通过 Vite proxy 联调。
 
 外部集成规则：
 

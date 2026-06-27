@@ -27,6 +27,7 @@
 - 请求字段：`cropId`、`cropName`、`greenhouseId`、`greenhouseName`、`latitude`、`longitude`、`address?`、`metrics`、`includeAdvice?`
 - 响应字段：`cacheKey`、`cachedAt`、`weather`、`advice`、`adviceError`
 - 当前数据来源：Open-Meteo 天气接口；AI 建议依赖外部 AI 服务
+- Django 迁移状态：已迁移为 safe-disabled endpoint。默认不调用外部服务，返回 HTTP 503。
 - 是否依赖第三方服务：是
 - 迁移优先级：P1
 - 兼容性要求：外部集成关闭时不得生成伪造农业建议；应返回清晰 503 错误
@@ -42,6 +43,7 @@
 - 请求字段：`image`、`cropId`、`cropName`、`greenhouseId`、`greenhouseName?`、`useEnvironmentContext`、`metrics`
 - 响应字段：`riskLevel`、`hasPestOrDisease`、`suspectedIssues[]`、`environmentAssessment`、`recommendations[]`、`disclaimer`、`evidence?`、`matchedRules?`、`confidenceReason?`、`followUpQuestions?`
 - 当前数据来源：外部 AI 服务
+- Django 迁移状态：已迁移为 safe-disabled endpoint。默认不调用外部服务，返回 HTTP 503。
 - 是否依赖第三方服务：是
 - 迁移优先级：P1
 - 兼容性要求：外部集成关闭时不得生成伪造诊断结论；图片不得上传到真实外部服务，除非显式启用
@@ -57,6 +59,7 @@
 - 请求字段：`cropId`、`cropName`、`greenhouseId`、`greenhouseName`、`metrics`、`question`
 - 响应字段：`riskLevel`、`summary`、`likelyCauses[]`、`actions[]`、`watchItems[]`、`matchedRules[]`、`disclaimer`
 - 当前数据来源：外部 AI 服务
+- Django 迁移状态：已迁移为 safe-disabled endpoint。默认不调用外部服务，返回 HTTP 503。
 - 是否依赖第三方服务：是
 - 迁移优先级：P1
 - 兼容性要求：外部集成关闭时不得生成伪造农业建议

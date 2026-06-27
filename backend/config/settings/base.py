@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "apps.core",
     "apps.greenhouse",
+    "apps.weather",
+    "apps.ai_advisory",
 ]
 
 MIDDLEWARE = [

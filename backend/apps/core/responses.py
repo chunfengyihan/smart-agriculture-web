@@ -11,3 +11,15 @@ def success_response(request, data=None, message="success", status_code=200):
         },
         status=status_code,
     )
+
+
+def error_response(request, code, message, data=None, status_code=400):
+    return Response(
+        {
+            "code": code,
+            "message": message,
+            "data": data if data is not None else {},
+            "request_id": getattr(request, "request_id", ""),
+        },
+        status=status_code,
+    )
