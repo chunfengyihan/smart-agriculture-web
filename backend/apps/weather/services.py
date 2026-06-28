@@ -1,3 +1,4 @@
+import hashlib
 import json
 from collections import OrderedDict
 from datetime import datetime
@@ -66,6 +67,16 @@ def cache_date_key():
 
 
 def make_cache_key(validated):
+    context_hash = hashlib.sha256(
+        json.dumps(
+            {
+                "includeAdvice": bool(validated.get("includeAdvice", True)),
+                "metrics": validated.get("metrics") or [],
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        ).encode("utf-8")
+    ).hexdigest()[:12]
     return "|".join(
         [
             cache_date_key(),
@@ -73,6 +84,7 @@ def make_cache_key(validated):
             validated.get("greenhouseId") or "unknown-greenhouse",
             f"{validated['latitude']:.4f}",
             f"{validated['longitude']:.4f}",
+            context_hash,
         ]
     )
 
@@ -120,9 +132,12 @@ def fetch_open_meteo_payload(latitude, longitude):
     url = f"https://api.open-meteo.com/v1/forecast?{query}"
     try:
         with urlopen(url, timeout=settings.WEATHER_FETCH_TIMEOUT_SECONDS) as response:
-            return json.loads(response.read().decode("utf-8"))
+            payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
         raise WeatherIntegrationError("Open-Meteo 天气预报获取失败") from exc
+    if not isinstance(payload, dict):
+        raise WeatherIntegrationError("Open-Meteo response format is invalid")
+    return payload
 
 
 def normalize_weather(payload, validated):

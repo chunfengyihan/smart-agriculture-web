@@ -9,6 +9,10 @@ class CoreConfig(AppConfig):
         from django.conf import settings
         from django.contrib import admin
 
+        x_frame_middleware = "django.middleware.clickjacking.XFrameOptionsMiddleware"
+        if x_frame_middleware not in settings.MIDDLEWARE:
+            settings.MIDDLEWARE.append(x_frame_middleware)
+
         admin.site.site_url = settings.ADMIN_SITE_URL
         admin.site.site_header = settings.ADMIN_SITE_HEADER
         admin.site.site_title = settings.ADMIN_SITE_TITLE

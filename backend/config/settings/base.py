@@ -28,6 +28,19 @@ DEBUG = env_bool("DJANGO_DEBUG", False)
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
 API_AUTH_REQUIRED = env_bool("DJANGO_API_AUTH_REQUIRED", False)
 API_AUTH_TOKEN = os.environ.get("DJANGO_API_AUTH_TOKEN", "")
+API_PUBLIC_PATHS = env_list(
+    "DJANGO_API_PUBLIC_PATHS",
+    [
+        "/api/greenhouse/dashboard",
+        "/api/v1/greenhouse/dashboard",
+        "/api/weather/greenhouse-advice",
+        "/api/v1/weather/greenhouse-advice",
+        "/api/ai/crop-diagnosis",
+        "/api/v1/ai/crop-diagnosis",
+        "/api/ai/agri-chat",
+        "/api/v1/ai/agri-chat",
+    ],
+)
 
 INSTALLED_APPS = [
     "simpleui",
@@ -52,6 +65,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",

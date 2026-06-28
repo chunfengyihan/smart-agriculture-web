@@ -12,6 +12,10 @@ from apps.core.serializers import LegacyExternalDisabledSerializer, V1ExternalDi
 EXTERNAL_INTEGRATION_DISABLED_MESSAGE = "外部集成未启用"
 
 
+MAX_DIAGNOSIS_IMAGE_BYTES = 8 * 1024 * 1024
+ALLOWED_DIAGNOSIS_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
+
+
 class CropDiagnosisRequestSerializer(serializers.Serializer):
     image = serializers.FileField()
     cropId = serializers.CharField(max_length=64)
@@ -20,6 +24,13 @@ class CropDiagnosisRequestSerializer(serializers.Serializer):
     greenhouseName = serializers.CharField(required=False, allow_blank=True, max_length=128)
     useEnvironmentContext = serializers.BooleanField(required=False, default=False)
     metrics = serializers.CharField(required=False, allow_blank=True, max_length=32768)
+
+    def validate_image(self, image):
+        if image.size > MAX_DIAGNOSIS_IMAGE_BYTES:
+            raise serializers.ValidationError("Image must not exceed 8MB")
+        if getattr(image, "content_type", "") not in ALLOWED_DIAGNOSIS_IMAGE_TYPES:
+            raise serializers.ValidationError("Only JPG, PNG, and WebP images are supported")
+        return image
 
 
 class AgriChatRequestSerializer(serializers.Serializer):

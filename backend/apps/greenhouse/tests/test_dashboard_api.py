@@ -62,7 +62,13 @@ class GreenhouseDashboardApiTests(TestCase):
         self.assertTrue(payload["request_id"])
 
     @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="test-token")
-    def test_dashboard_requires_api_key_when_enabled(self):
+    def test_dashboard_public_path_works_when_api_key_auth_enabled(self):
+        response = Client().get("/api/greenhouse/dashboard")
+
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="test-token", API_PUBLIC_PATHS=[])
+    def test_dashboard_requires_api_key_when_removed_from_public_paths(self):
         response = Client().get("/api/greenhouse/dashboard")
 
         self.assertEqual(response.status_code, 403)

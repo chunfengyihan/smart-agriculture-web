@@ -11,8 +11,14 @@ API_AUTH_REQUIRED = env_bool("DJANGO_API_AUTH_REQUIRED", True)  # noqa: F405
 if not os.environ.get("DJANGO_SECRET_KEY"):
     raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set in production")
 
+if SECRET_KEY.startswith("django-insecure-") or len(SECRET_KEY) < 50 or len(set(SECRET_KEY)) < 20:  # noqa: F405
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY must be a strong random value in production")
+
 if not ALLOWED_HOSTS:  # noqa: F405
     raise ImproperlyConfigured("DJANGO_ALLOWED_HOSTS must be set in production")
+
+if "*" in ALLOWED_HOSTS:  # noqa: F405
+    raise ImproperlyConfigured("DJANGO_ALLOWED_HOSTS must not contain '*' in production")
 
 if API_AUTH_REQUIRED and not API_AUTH_TOKEN:  # noqa: F405
     raise ImproperlyConfigured("DJANGO_API_AUTH_TOKEN must be set when API auth is required")

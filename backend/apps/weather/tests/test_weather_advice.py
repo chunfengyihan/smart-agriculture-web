@@ -155,3 +155,44 @@ class WeatherAdviceEnabledTests(TestCase):
         self.assertEqual(payload["data"]["weather"]["source"], "Open-Meteo")
         self.assertTrue(payload["request_id"])
         fetch_mock.assert_called_once_with(39.0, 121.0)
+
+    @override_settings(WEATHER_INTEGRATION_ENABLED=True)
+    @patch("apps.weather.services.fetch_open_meteo_payload", return_value=OPEN_METEO_PAYLOAD)
+    def test_include_advice_changes_cache_key(self, fetch_mock):
+        client = Client()
+
+        without_advice = client.post(
+            "/api/weather/greenhouse-advice",
+            data=self.request_payload(include_advice=False),
+            content_type="application/json",
+        ).json()
+        with_advice = client.post(
+            "/api/weather/greenhouse-advice",
+            data=self.request_payload(include_advice=True),
+            content_type="application/json",
+        ).json()
+
+        self.assertNotEqual(without_advice["cacheKey"], with_advice["cacheKey"])
+        self.assertIsNone(without_advice["adviceError"])
+        self.assertIsNotNone(with_advice["adviceError"])
+        self.assertEqual(fetch_mock.call_count, 2)
+
+    @override_settings(WEATHER_INTEGRATION_ENABLED=True)
+    @patch("apps.weather.services.urlopen")
+    def test_invalid_open_meteo_payload_returns_controlled_error(self, urlopen_mock):
+        from apps.weather.services import WeatherIntegrationError, fetch_open_meteo_payload
+
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, traceback):
+                return False
+
+            def read(self):
+                return b"[]"
+
+        urlopen_mock.return_value = FakeResponse()
+
+        with self.assertRaises(WeatherIntegrationError):
+            fetch_open_meteo_payload(39.0, 121.0)
