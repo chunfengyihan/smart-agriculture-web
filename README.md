@@ -1,6 +1,6 @@
 # 智慧农业管理大屏
 
-一个面向温室大棚管理者的单页智慧农业网站。首版使用 React + Vite + TypeScript 构建，默认展示模拟数据，并预留 `/api/greenhouse/dashboard` 接口，方便后续在云服务器上对接有人云平台。
+一个面向温室大棚管理者的智慧农业系统。当前本地版本已经迁移为 Django API-first 架构：Django 在 `8000` 端口同时提供 React 前端、Django Admin 后台和 `/api` 接口；Vite `5173` 仅作为可选热更新开发入口。
 
 ## 功能概览
 
@@ -10,9 +10,10 @@
 - 详情区展示最近 24 小时趋势图和预警中心。
 - 支持浅色/深色主题切换，主题会保存到浏览器 `localStorage`。
 - 默认每 30 秒刷新一次数据，并显示最后更新时间。
-- 数据层已抽象，可从模拟数据切换到后端真实接口。
+- 数据层已抽象，生产构建默认通过 Django `/api/greenhouse/dashboard` 读取数据。
 - 支持本地 Excel 数据模式，缺失传感器值会显示为无数据，不会被误写成 0。
-- 支持 AI 作物图片诊断，后端统一接收图片和环境指标后调用视觉模型。
+- Django 后台已启用 `django-simpleui`，默认中文界面。
+- 已接入 Open-Meteo 天气预报；AI 操作建议、图片诊断和农业问答仍保持受控关闭，等待 AI 适配器和凭据配置。
 
 ## 技术栈
 
@@ -21,19 +22,41 @@
 - Vite
 - Recharts
 - lucide-react
+- Django 4.2
+- Django REST Framework
+- drf-spectacular
+- django-simpleui
 - 原生 CSS 变量和响应式布局
 
 ## 本地运行
 
-```bash
+首次安装依赖：
+
+```powershell
 npm install
-npm run dev
+.venv\Scripts\python.exe -m pip install -r requirements\development.txt
 ```
 
-启动后打开终端显示的本地地址，通常是：
+推荐使用单端口 Django 模式：
+
+```powershell
+npm run build
+$env:WEATHER_INTEGRATION_ENABLED = "true"
+.venv\Scripts\python.exe backend\manage.py migrate --noinput
+.venv\Scripts\python.exe backend\manage.py seed_dev
+.venv\Scripts\python.exe backend\manage.py runserver 127.0.0.1:8000
+```
+
+打开：
 
 ```text
-http://localhost:5173/
+http://127.0.0.1:8000/
+```
+
+后台：
+
+```text
+http://127.0.0.1:8000/admin/
 ```
 
 ## 常用命令
@@ -44,13 +67,17 @@ npm run local:data
 npm run build
 npm run preview
 npm run lint
+npm run verify
 ```
 
-- `npm run dev`：启动本地开发服务器。
+- `npm run dev`：启动 Vite 热更新开发服务器，仅用于前端开发。
 - `npm run local:data`：读取本地 Excel 文件夹并生成网页使用的 `public/data/local-dashboard.json`。
 - `npm run build`：执行 TypeScript 检查并打包生产版本。
 - `npm run preview`：本地预览生产构建结果。
 - `npm run lint`：运行 ESLint。
+- `npm run verify`：运行 Django 检查、迁移 dry-run、种子导入、后端测试、OpenAPI 校验、前端 lint/build。
+
+`package.json` 中仍保留 `dev:api`、`dev:full` 和 `youren:test` 等旧 Node 脚本，主要用于历史参考、有人云探测或临时回退；日常集成运行以 Django `8000` 单端口为准。
 
 ## 目录结构
 
@@ -70,16 +97,29 @@ src/
     http.ts               前端请求超时封装
     metrics.ts            诊断和天气建议共用的指标快照构造
 server/
-  youren-api.mjs          本地 API 网关
+  youren-api.mjs          旧 Node 本地 API 网关，当前仅作参考/回退
   dashboard-adapter.mjs   有人云数据适配到 DashboardData
-  ai-diagnosis.mjs        作物图片诊断接口
-  agri-chat.mjs           冰糖枣问答接口
-  weather-advice.mjs      Open-Meteo 天气和棚内操作建议接口
+  ai-diagnosis.mjs        旧 Node 作物图片诊断接口
+  agri-chat.mjs           旧 Node 冰糖枣问答接口
+  weather-advice.mjs      旧 Node Open-Meteo 天气和棚内操作建议接口
+backend/
+  manage.py               Django 管理入口
+  config/                 Django URL 和 settings
+  apps/
+    core/                 统一响应、异常、权限、健康检查和前端 dist 服务
+    greenhouse/           P0 看板模型、种子导入和 dashboard API
+    weather/              Open-Meteo 天气预报 API
+    ai_advisory/          AI 图片诊断/问答 safe-disabled API
 scripts/
   build-local-dashboard.py 本地 Excel 转换为 public/data/local-dashboard.json
+  verify.py               本地和 CI 统一验证入口
 public/
   data/                   前端可直接读取的地图和本地数据 JSON
   images/                 作物主视觉图片
+requirements/
+  base.txt                Django 基础依赖
+  development.txt         本地开发依赖
+  mysql.txt               MySQL 驱动依赖
 config/
   greenhouse.mapping.example.json 有人云大棚和变量映射示例
 ```
@@ -126,20 +166,19 @@ DashboardData
 
 ## 数据源配置
 
-项目通过 `.env.local` 中的 `VITE_DATA_SOURCE` 选择数据源：
+当前生产构建默认使用 Django API：
 
 ```env
-VITE_DATA_SOURCE=mock
-VITE_USE_REMOTE_DATA=false
+VITE_DATA_SOURCE=remote
 VITE_DASHBOARD_ENDPOINT=/api/greenhouse/dashboard
 VITE_LOCAL_DASHBOARD_PATH=/data/local-dashboard.json
 ```
 
 - `mock`：使用 `src/data/mockDashboard.ts`，适合前端开发和演示。
 - `local`：请求 `VITE_LOCAL_DASHBOARD_PATH`，读取 `npm run local:data` 生成的 JSON。
-- `remote`：请求 `VITE_DASHBOARD_ENDPOINT`，由本地或云端后端代理有人云数据。
+- `remote`：请求 `VITE_DASHBOARD_ENDPOINT`，当前由 Django 提供。
 
-推荐只通过 `VITE_DATA_SOURCE` 切换模式。`VITE_USE_REMOTE_DATA` 保留为兼容旧配置；默认示例中设为 `false`，避免复制 `.env.example` 后误连远程接口。
+如果没有设置 `VITE_DATA_SOURCE`，前端默认按 `remote` 处理。`VITE_USE_REMOTE_DATA` 仅为旧配置兼容项。
 
 ## 使用本地 Excel 数据
 
@@ -168,7 +207,7 @@ VITE_DATA_SOURCE=local
 VITE_LOCAL_DASHBOARD_PATH=/data/local-dashboard.json
 ```
 
-然后启动网页：
+然后启动 Vite 开发网页：
 
 ```bash
 npm run dev
@@ -183,74 +222,34 @@ npm run dev
 
 Excel 工作表会按“变量名称、从机名称”映射为空气温度、空气湿度、光照、CO2、土壤湿度、土壤温度、EC、PH。当前文件夹没有樱桃 Excel 数据，所以樱桃页面会显示“暂无本地数据”。
 
-## 切换到真实 API
+## Django API 状态
 
-当前默认使用模拟数据。要尝试接入有人云，在项目根目录复制 `.env.example` 为 `.env.local`，然后填入有人云二次开发密钥：
-
-```env
-VITE_DATA_SOURCE=remote
-VITE_USE_REMOTE_DATA=true
-VITE_DASHBOARD_ENDPOINT=/api/greenhouse/dashboard
-API_PORT=8787
-YOUREN_APP_KEY=your_app_key
-YOUREN_APP_SECRET=your_app_secret
-```
-
-前端会调用：
+当前前端默认调用：
 
 ```http
 GET /api/greenhouse/dashboard
 ```
 
-本地联调时使用：
+Django 已实现：
 
-```bash
-npm run dev:full
+- `GET /api/greenhouse/dashboard`：legacy dashboard，直接返回前端可消费的 `DashboardData`。
+- `GET /api/v1/greenhouse/dashboard`：v1 dashboard，返回 `{ code, message, data, request_id }`。
+- `POST /api/weather/greenhouse-advice`：启用 `WEATHER_INTEGRATION_ENABLED=true` 后返回 Open-Meteo 天气预报。
+- `POST /api/v1/weather/greenhouse-advice`：v1 天气接口，返回统一包装。
+- `POST /api/ai/crop-diagnosis`、`POST /api/ai/agri-chat`：当前为 safe-disabled，默认不调用真实 AI。
+
+Open-Meteo 天气预报不需要 API key：
+
+```powershell
+$env:WEATHER_INTEGRATION_ENABLED = "true"
 ```
 
-这个命令会同时启动：
+AI 相关接口目前只保留安全关闭入口。即使配置 `EXTERNAL_INTEGRATIONS_ENABLED=true`，Django 版 AI 适配器仍需后续实现后才能真实调用模型。
 
-- Vite 前端：`http://127.0.0.1:5173/`
-- 有人云代理：`http://127.0.0.1:8787/`
-
-如果只想测试有人云凭据和设备读取：
-
-```bash
-npm run youren:test
-```
-
-如果只想启动后端代理：
-
-```bash
-npm run dev:api
-```
-
-健康检查接口：
+健康检查：
 
 ```http
-GET /api/youren/health
-```
-
-远程适配器会把有人云原始设备、变量和历史值转换为统一的 `DashboardData`。如果某个 `dataPointId` 没有返回有效值，响应中的指标值应为 `null`；不要用 `0` 代表缺失，否则会影响预警和趋势判断。
-
-建议响应格式：
-
-```json
-{
-  "generatedAt": "2026-05-25T09:30:00.000Z",
-  "source": "youren",
-  "crops": [
-    {
-      "id": "jujube",
-      "name": "冰糖枣",
-      "latinName": "Crystal Jujube",
-      "description": "水肥一体化管理...",
-      "heroImage": "https://example.com/image.jpg",
-      "accent": "#16a34a",
-      "greenhouses": []
-    }
-  ]
-}
+GET /api/v1/health/
 ```
 
 ## AI 作物诊断
@@ -270,19 +269,22 @@ Content-Type: multipart/form-data
 - `greenhouseId`：大棚 ID。
 - `metrics`：环境指标 JSON 字符串。
 
-服务端环境变量：
+当前 Django 版本默认返回 503，不会上传图片到真实外部模型。后续启用 AI 适配器时才需要配置：
 
 ```env
+EXTERNAL_INTEGRATIONS_ENABLED=true
 AI_API_KEY=your_ai_api_key
 AI_MODEL=gpt-4o-mini
-AI_API_BASE=
+AI_API_BASE=your_openai_compatible_base
 ```
 
-前端会在选择非法格式或超大图片时清空旧图片实例，避免误提交上一张图片。AI 返回结果会被服务端标准化为 `CropDiagnosisResult` 后再返回给页面。
+前端会在选择非法格式或超大图片时清空旧图片实例，避免误提交上一张图片。AI 返回结果应由服务端标准化为 `CropDiagnosisResult` 后再返回给页面。
 
 ## 有人云接入设计
 
-不要在前端保存有人云账号、密码、`appKey` 或 `appSecret`。真实接入应放在云服务器后端：
+有人云真实接入当前尚未迁入 Django。旧 Node 网关仍保留在 `server/` 目录中作为参考/回退，但本地单端口运行默认不使用它。
+
+不要在前端保存有人云账号、密码、`appKey` 或 `appSecret`。真实接入应放在 Django 后端或云服务器后端：
 
 1. 在有人云平台的二次开发功能中获取 `appKey` 和 `appSecret`。
 2. 在服务器环境变量中配置：
@@ -303,32 +305,57 @@ YOUREN_APP_SECRET=your_app_secret
 - `X-Access-Token` 有效期约 2 小时。
 - 网关列表接口地址以有人云官方文档和服务器环境变量配置为准，请求头需要携带 `X-Access-Token`。
 
-## 后端接口建议
+## 后端接口与后台
 
-首个后端接口只需要实现：
+当前 Django 后端已经具备：
 
-```http
-GET /api/greenhouse/dashboard
+- 单端口前端服务：`GET /`
+- Django Admin：`GET /admin/`
+- OpenAPI：`GET /api/v1/schema/`
+- Swagger UI：`GET /api/v1/docs/`
+- 健康检查：`GET /api/v1/health/`
+- P0 看板：`GET /api/greenhouse/dashboard`
+- P1 天气：`POST /api/weather/greenhouse-advice`
+
+Django Admin 使用 `django-simpleui`，默认中文；已注册：
+
+- `Greenhouse`
+- `EnvironmentReading`
+- `DashboardSnapshot`
+
+本地超级管理员需要在本地数据库中创建，账号密码不会提交到 Git。
+
+## API 安全配置
+
+本地开发默认不强制 API key：
+
+```env
+DJANGO_API_AUTH_REQUIRED=false
 ```
 
-服务端职责：
+生产配置默认要求 API key。启用后，请设置：
 
-- 读取有人云密钥环境变量。
-- 获取并缓存 `X-Access-Token`。
-- 查询设备、变量、实时值和历史数据。
-- 根据本项目的作物和大棚映射关系组装响应。
+```env
+DJANGO_API_AUTH_REQUIRED=true
+DJANGO_API_AUTH_TOKEN=your_random_token
+```
 
-建议后续新增一个服务器侧配置文件或数据库表，用来维护：
+客户端可通过任一方式传入：
 
-- 作物 ID 和名称。
-- 作物下包含哪些大棚。
-- 每个大棚对应哪些有人云设备或网关。
-- 有人云变量名和本项目指标键的映射关系。
-- 每个指标的目标范围和预警阈值。
+```http
+X-API-Key: your_random_token
+Authorization: Bearer your_random_token
+```
+
+生产 settings 还要求：
+
+- `DJANGO_SECRET_KEY`
+- `DJANGO_ALLOWED_HOSTS`
+- 启用 API 鉴权时必须设置 `DJANGO_API_AUTH_TOKEN`
 
 ## 大棚和变量映射
 
-真实数据接入推荐创建：
+有人云真实数据接入后，推荐创建：
 
 ```text
 config/greenhouse.mapping.json
@@ -346,15 +373,15 @@ copy config\greenhouse.mapping.example.json config\greenhouse.mapping.json
 - 每个大棚对应哪个有人云 `deviceNo`。
 - 每个环境指标对应哪个有人云 `dataPointId`。
 
-如果暂时没有映射文件，后端会尝试自动读取有人云网关列表，并按设备顺序分配到三种作物下；这只能用于初次探测，不建议作为正式展示数据。
+当前 Django 单端口版本尚未启用有人云真实读取；P0 看板使用 `seed_dev` 导入的本地 dashboard snapshot。后续迁移有人云适配器时，应优先使用数据库表或该映射文件维护设备关系，不要在前端保存有人云密钥。
 
-获取 `deviceNo` 和 `dataPointId` 的方式：
+旧 Node 探测脚本仍可作为临时工具获取 `deviceNo` 和 `dataPointId`：
 
 ```bash
 npm run youren:test
 ```
 
-脚本会输出网关样本和变量样本，之后把对应值填入 `config/greenhouse.mapping.json`。
+脚本依赖服务端环境变量中的有人云密钥，输出网关样本和变量样本后，再把对应值填入 `config/greenhouse.mapping.json` 或后续 Django 配置表。
 
 ## 开发说明
 
@@ -362,7 +389,7 @@ npm run youren:test
 - 样式使用 CSS 变量实现主题，浅色和深色主题都在 `src/index.css` 中。
 - 作物主视觉当前使用 Wikimedia Commons 上对应作物图片：枣树果实、蓝莓灌木、樱桃树果实。后续建议替换为你自己的基地实拍照片。
 - 模拟数据在 `src/data/mockDashboard.ts`，可直接修改大棚数量、指标值、告警内容。
-- 模拟模式图片在 `src/data/mockDashboard.ts` 修改；真实接口默认图片在 `server/dashboard-adapter.mjs` 修改，也可以由后端 `DashboardData.crops[].heroImage` 直接返回。
+- 模拟模式图片在 `src/data/mockDashboard.ts` 修改；Django dashboard 现在从 `DashboardSnapshot.payload` 返回 `DashboardData.crops[].heroImage`。
 - 前端刷新间隔在 `src/App.tsx` 的 `refreshIntervalMs` 中，默认 30 秒。
 - 前端刷新有请求序号保护，轮询和手动刷新并发时，旧响应不会覆盖新数据。
 - 新增工具函数或类型时优先保持模块内私有；只有被其他文件实际导入时再 `export`。
@@ -382,17 +409,17 @@ npm run youren:test
 - `npm run lint` 可以通过。
 - `npm run local:data` 可以生成可解析的 `public/data/local-dashboard.json`。
 
-## Django Local Integration
+## Django 单端口集成
 
-On this migration branch, Django can serve the built React frontend, admin, and API from one port.
+Django 当前可以在一个端口同时提供打包后的 React 前端、Django Admin 和 `/api` 接口。
 
-Build the frontend:
+打包前端：
 
 ```powershell
 npm run build
 ```
 
-Start Django:
+启动 Django：
 
 ```powershell
 $env:WEATHER_INTEGRATION_ENABLED = "true"
@@ -401,55 +428,67 @@ $env:WEATHER_INTEGRATION_ENABLED = "true"
 .venv\Scripts\python.exe backend\manage.py runserver 127.0.0.1:8000
 ```
 
-Open the integrated site:
+打开集成后的前台：
 
 ```text
 http://127.0.0.1:8000/
 ```
 
-Open Django Admin:
+打开 Django 后台：
 
 ```text
 http://127.0.0.1:8000/admin/
 ```
 
-The admin UI uses `django-simpleui` and defaults to Simplified Chinese through `LANGUAGE_CODE=zh-hans`.
+Django Admin 使用 `django-simpleui`，并通过 `LANGUAGE_CODE=zh-hans` 默认显示中文。
 
-The admin "View site" and simple-ui home button point to the integrated frontend by default. Override them when using a separate frontend dev server:
+后台的 "View site" 和 simple-ui 首页按钮默认指向 `http://127.0.0.1:8000/`。只有在单独使用 Vite 热更新开发前端时，才需要覆盖为 `5173`：
 
 ```powershell
 $env:DJANGO_ADMIN_SITE_URL = "http://127.0.0.1:5173/"
 $env:DJANGO_FRONTEND_SITE_URL = "http://127.0.0.1:5173/"
 ```
 
-Create a local admin user when needed:
+需要本地后台账号时自行创建超级管理员：
 
 ```powershell
 .venv\Scripts\python.exe backend\manage.py createsuperuser
 ```
 
-Optional Vite hot-reload frontend:
+可选的 Vite 热更新前端：
 
 ```powershell
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
-When using Vite directly, open:
+直接使用 Vite 时打开：
 
 ```text
 http://127.0.0.1:5173/
 ```
 
-By default `EXTERNAL_INTEGRATIONS_ENABLED=false`. Set `WEATHER_INTEGRATION_ENABLED=true` to enable Open-Meteo weather forecasts. AI operation advice, crop diagnosis, and agricultural chat remain disabled until their AI adapters and credentials are configured.
+默认 `EXTERNAL_INTEGRATIONS_ENABLED=false`。设置 `WEATHER_INTEGRATION_ENABLED=true` 后启用 Open-Meteo 天气预报。AI 操作建议、作物图片诊断和农业问答在 Django 版中仍保持关闭，直到后续完成 AI 适配器和凭据配置。
 
-Run the full local verification suite:
+运行完整本地验证：
 
 ```powershell
 npm run verify
 ```
 
-Stage 5 references:
+阶段 5 参考文档：
 
 - `docs/stage5_acceptance_report.md`
 - `docs/mysql_switch_runbook.md`
+
+## 桌面快捷方式
+
+桌面快捷方式 `智慧农业网站.lnk` 指向项目内的 `启动智慧农业网站.cmd`。该脚本当前会：
+
+1. 打包前端：`npm run build`
+2. 执行 Django migration
+3. 执行 `seed_dev`
+4. 启动 `http://127.0.0.1:8000/`
+5. 设置 `WEATHER_INTEGRATION_ENABLED=true`
+
+因此日常使用只需要双击桌面快捷方式。
 
