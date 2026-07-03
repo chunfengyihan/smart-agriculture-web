@@ -2,9 +2,11 @@ from django.core.management import call_command
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.test import Client, TestCase, override_settings
+from unittest.mock import patch
 from rest_framework_simplejwt.tokens import AccessToken
 
 from apps.greenhouse.models import DashboardSnapshot, EnvironmentReading, Greenhouse
+from apps.integrations.youren.client import YourenUpstreamError
 
 
 class GreenhouseDashboardApiTests(TestCase):
@@ -98,3 +100,31 @@ class GreenhouseDashboardApiTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+
+    @override_settings(YOUREN_INTEGRATION_ENABLED=True)
+    @patch("apps.greenhouse.views.get_youren_dashboard")
+    def test_v1_dashboard_can_use_youren_service(self, mock_get_youren_dashboard):
+        mock_get_youren_dashboard.return_value = {
+            "generatedAt": "2026-07-03T00:00:00Z",
+            "source": "youren",
+            "crops": [],
+        }
+
+        response = Client().get("/api/v1/greenhouse/dashboard")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["data"]["source"], "youren")
+        mock_get_youren_dashboard.assert_called_once_with()
+
+    @override_settings(YOUREN_INTEGRATION_ENABLED=True)
+    @patch("apps.greenhouse.views.get_youren_dashboard")
+    def test_v1_dashboard_sanitizes_youren_errors(self, mock_get_youren_dashboard):
+        mock_get_youren_dashboard.side_effect = YourenUpstreamError("raw upstream body with secret")
+
+        response = Client().get("/api/v1/greenhouse/dashboard")
+
+        self.assertEqual(response.status_code, 503)
+        payload = response.json()
+        self.assertEqual(payload["message"], "Youren upstream service is unavailable")
+        self.assertNotIn("secret", payload["message"])

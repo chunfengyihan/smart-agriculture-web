@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "apps.accounts",
     "apps.core",
+    "apps.integrations",
     "apps.greenhouse",
     "apps.weather",
     "apps.ai_advisory",
@@ -188,6 +189,16 @@ WEATHER_INTEGRATION_ENABLED = env_bool("WEATHER_INTEGRATION_ENABLED", EXTERNAL_I
 WEATHER_FETCH_TIMEOUT_SECONDS = float(os.environ.get("WEATHER_FETCH_TIMEOUT_SECONDS", "8"))
 WEATHER_CACHE_MAX_ITEMS = int(os.environ.get("WEATHER_CACHE_MAX_ITEMS", "512"))
 WEATHER_CACHE_TTL_SECONDS = int(os.environ.get("WEATHER_CACHE_TTL_SECONDS", str(6 * 60 * 60)))
+
+YOUREN_INTEGRATION_ENABLED = env_bool("YOUREN_INTEGRATION_ENABLED", EXTERNAL_INTEGRATIONS_ENABLED)
+YOUREN_APP_KEY = os.environ.get("YOUREN_APP_KEY", "")
+YOUREN_APP_SECRET = os.environ.get("YOUREN_APP_SECRET", "")
+YOUREN_API_BASE = os.environ.get("YOUREN_API_BASE", "")
+YOUREN_AUTH_PATH = os.environ.get("YOUREN_AUTH_PATH", "/usrCloud/user/getAuthToken")
+YOUREN_FETCH_TIMEOUT_SECONDS = float(os.environ.get("YOUREN_FETCH_TIMEOUT_SECONDS", "8"))
+YOUREN_TOKEN_TTL_SECONDS = int(os.environ.get("YOUREN_TOKEN_TTL_SECONDS", str(110 * 60)))
+YOUREN_DASHBOARD_DEVICE_PAGE_SIZE = int(os.environ.get("YOUREN_DASHBOARD_DEVICE_PAGE_SIZE", "100"))
+YOUREN_MAPPING_PATH = os.environ.get("YOUREN_MAPPING_PATH", "config/greenhouse.mapping.json")
 
 WECHAT_MINIAPP_APPID = os.environ.get("WECHAT_MINIAPP_APPID", "")
 WECHAT_MINIAPP_SECRET = os.environ.get("WECHAT_MINIAPP_SECRET", "")

@@ -1,6 +1,5 @@
 import http from 'node:http'
 import { loadEnv } from './env.mjs'
-import { buildYourenDashboard } from './dashboard-adapter.mjs'
 import { handleAgriChat } from './agri-chat.mjs'
 import { handleCropDiagnosis } from './ai-diagnosis.mjs'
 import { handleGreenhouseWeatherAdvice } from './weather-advice.mjs'
@@ -10,6 +9,7 @@ loadEnv()
 
 const port = Number(process.env.API_PORT || 8787)
 const host = process.env.API_HOST || '127.0.0.1'
+const djangoApiBase = (process.env.DJANGO_API_BASE || 'http://127.0.0.1:8000').replace(/\/$/, '')
 const allowedOrigins = new Set(
   (process.env.API_ALLOWED_ORIGINS || 'http://127.0.0.1:5173,http://localhost:5173')
     .split(',')
@@ -34,6 +34,30 @@ function sendJson(request, response, statusCode, payload) {
     ...corsHeaders(request),
   })
   response.end(JSON.stringify(payload, null, 2))
+}
+
+async function forwardToDjango(request, response, pathname) {
+  try {
+    const upstream = await fetch(`${djangoApiBase}${pathname}`, {
+      method: request.method,
+      headers: {
+        ...(request.headers.authorization ? { Authorization: request.headers.authorization } : {}),
+        ...(request.headers['x-api-key'] ? { 'X-API-Key': request.headers['x-api-key'] } : {}),
+      },
+    })
+    const body = await upstream.text()
+    response.writeHead(upstream.status, {
+      'Content-Type': upstream.headers.get('content-type') || 'application/json; charset=utf-8',
+      'X-Smart-Agri-Migrated-To': 'django',
+      ...corsHeaders(request),
+    })
+    response.end(body)
+  } catch {
+    sendJson(request, response, 503, {
+      message: 'Dashboard API has migrated to Django; start the Django service and call port 8000 directly.',
+      migratedTo: `${djangoApiBase}${pathname}`,
+    })
+  }
 }
 
 async function handleRequest(request, response) {
@@ -77,15 +101,7 @@ async function handleRequest(request, response) {
     }
 
     if (url.pathname === '/api/greenhouse/dashboard') {
-      if (!hasCredentials()) {
-        sendJson(request, response, 503, {
-          message: '有人云凭据未配置，无法获取真实数据',
-          requiredEnv: ['YOUREN_APP_KEY', 'YOUREN_APP_SECRET'],
-        })
-        return
-      }
-
-      sendJson(request, response, 200, await buildYourenDashboard())
+      await forwardToDjango(request, response, url.pathname)
       return
     }
 

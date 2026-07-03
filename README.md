@@ -10,7 +10,7 @@
 - 详情区展示最近 24 小时趋势图和预警中心。
 - 支持浅色/深色主题切换，主题会保存到浏览器 `localStorage`。
 - 默认每 30 秒刷新一次数据，并显示最后更新时间。
-- 数据层已抽象，生产构建默认通过 Django `/api/greenhouse/dashboard` 读取数据。
+- 数据层已抽象，生产构建默认通过 Django `/api/v1/greenhouse/dashboard` 读取数据。
 - 支持本地 Excel 数据模式，缺失传感器值会显示为无数据，不会被误写成 0。
 - Django 后台已启用 `django-simpleui`，默认中文界面。
 - 已接入 Open-Meteo 天气预报；AI 操作建议、图片诊断和农业问答仍保持受控关闭，等待 AI 适配器和凭据配置。
@@ -77,7 +77,7 @@ npm run verify
 - `npm run lint`：运行 ESLint。
 - `npm run verify`：运行 Django 检查、迁移 dry-run、种子导入、后端测试、OpenAPI 校验、前端 lint/build。
 
-`package.json` 中仍保留 `dev:api`、`dev:full` 和 `youren:test` 等旧 Node 脚本，主要用于历史参考、有人云探测或临时回退；日常集成运行以 Django `8000` 单端口为准。
+`package.json` 中仍保留 `dev:api`、`dev:full` 和 `youren:test` 等旧 Node 脚本，主要用于历史参考、有人云探测或临时回退；Node dashboard 路径只转发到 Django，日常集成运行以 Django `8000` 单端口为准。
 
 ## 目录结构
 
@@ -97,8 +97,7 @@ src/
     http.ts               前端请求超时封装
     metrics.ts            诊断和天气建议共用的指标快照构造
 server/
-  youren-api.mjs          旧 Node 本地 API 网关，当前仅作参考/回退
-  dashboard-adapter.mjs   有人云数据适配到 DashboardData
+  youren-api.mjs          旧 Node 本地 API 网关，dashboard 路径转发到 Django，仅保留探测/回退能力
   ai-diagnosis.mjs        旧 Node 作物图片诊断接口
   agri-chat.mjs           旧 Node 冰糖枣问答接口
   weather-advice.mjs      旧 Node Open-Meteo 天气和棚内操作建议接口
@@ -233,7 +232,7 @@ GET /api/v1/greenhouse/dashboard
 Django 已实现：
 
 - `GET /api/v1/greenhouse/dashboard`：v1 dashboard，返回 `{ code, message, data, request_id }`，Web 与小程序默认使用该路径。
-- `GET /api/greenhouse/dashboard`：legacy dashboard，直接返回前端可消费的 `DashboardData`，仅作兼容 adapter 保留。
+- `GET /api/greenhouse/dashboard`：legacy dashboard，由 Django 返回前端可消费的 `DashboardData`，仅作兼容 adapter 保留。
 - `POST /api/v1/weather/greenhouse-advice`：v1 天气接口，返回统一包装。
 - `POST /api/v1/ai/crop-diagnosis`、`POST /api/v1/ai/agri-chat`：当前为 safe-disabled，默认不调用真实 AI。
 
@@ -291,12 +290,14 @@ AI_API_BASE=your_openai_compatible_base
 ```env
 YOUREN_APP_KEY=your_app_key
 YOUREN_APP_SECRET=your_app_secret
+YOUREN_API_BASE=https://example.youren-cloud-api.invalid
+YOUREN_INTEGRATION_ENABLED=true
 ```
 
 3. 后端调用有人云鉴权接口获取 `X-Access-Token`，并缓存 Token。
 4. 后端继续调用有人云设备列表、变量列表、实时数据、历史数据接口。
 5. 后端把有人云原始数据组装成前端需要的 `DashboardData`。
-6. 前端只请求自己的 `/api/greenhouse/dashboard`。
+6. 前端只请求自己的 `/api/v1/greenhouse/dashboard`；legacy `/api/greenhouse/dashboard` 仅作旧调用兼容。
 
 有人云文档中提到：
 
@@ -313,7 +314,7 @@ YOUREN_APP_SECRET=your_app_secret
 - OpenAPI：`GET /api/v1/schema/`
 - Swagger UI：`GET /api/v1/docs/`
 - 健康检查：`GET /api/v1/health/`
-- P0 看板：`GET /api/greenhouse/dashboard`
+- P0 看板：`GET /api/v1/greenhouse/dashboard`，legacy `GET /api/greenhouse/dashboard`
 - P1 天气：`POST /api/weather/greenhouse-advice`
 
 Django Admin 使用 `django-simpleui`，默认中文；已注册：
@@ -388,7 +389,7 @@ npm run youren:test
 - 样式使用 CSS 变量实现主题，浅色和深色主题都在 `src/index.css` 中。
 - 作物主视觉当前使用 Wikimedia Commons 上对应作物图片：枣树果实、蓝莓灌木、樱桃树果实。后续建议替换为你自己的基地实拍照片。
 - 模拟数据在 `src/data/mockDashboard.ts`，可直接修改大棚数量、指标值、告警内容。
-- 模拟模式图片在 `src/data/mockDashboard.ts` 修改；Django dashboard 现在从 `DashboardSnapshot.payload` 返回 `DashboardData.crops[].heroImage`。
+- 模拟模式图片在 `src/data/mockDashboard.ts` 修改；Django dashboard 默认从 `DashboardSnapshot.payload` 返回 `DashboardData.crops[].heroImage`，启用 `YOUREN_INTEGRATION_ENABLED=true` 后由 Django 有人云 service 实时映射。
 - 前端刷新间隔在 `src/App.tsx` 的 `refreshIntervalMs` 中，默认 30 秒。
 - 前端刷新有请求序号保护，轮询和手动刷新并发时，旧响应不会覆盖新数据。
 - 新增工具函数或类型时优先保持模块内私有；只有被其他文件实际导入时再 `export`。

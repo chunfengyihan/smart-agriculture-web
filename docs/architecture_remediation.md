@@ -201,3 +201,66 @@ Git Commit：feat(accounts): add WeChat JWT authentication
 - 天气 v1 接口在外部集成未启用时返回 503，属于既有配置状态。
 Git Commit：refactor(api): unify v1 API contract
 是否允许继续下一项：等待人工确认
+
+## D-04
+
+问题编号：D-04
+修复状态：completed, waiting for manual confirmation
+修改文件：
+- `backend/apps/integrations/`
+- `backend/apps/greenhouse/views.py`
+- `backend/apps/greenhouse/tests/test_dashboard_api.py`
+- `backend/config/settings/base.py`
+- `backend/config/urls.py`
+- `server/youren-api.mjs`
+- `server/dashboard-adapter.mjs`
+- `.env.example`
+- `README.md`
+- `docs/api_inventory.md`
+- `docs/api_contract_v1.yaml`
+- `docs/node_django_dedup_plan.md`
+- `docs/architecture_remediation.md`
+关键设计决策：
+- 新增 Django `apps.integrations.youren` service layer，包含 `YourenClient`、`YourenMapper`、`YourenService`。
+- 有人云鉴权、token 缓存、设备列表、变量点位、最新值读取和 DashboardData 映射迁移到 Django。
+- Django dashboard 默认继续读取 `DashboardSnapshot`；仅在 `YOUREN_INTEGRATION_ENABLED=true` 时实时调用有人云 service。
+- 新增 Django `GET /api/v1/integrations/youren/health` 和 legacy `GET /api/youren/health`。
+- Node `/api/greenhouse/dashboard` 改为转发到 Django，删除 Node dashboard adapter 主实现。
+- Node 仍保留有人云 health/probe 和旧脚本回退能力；天气和 AI Node handlers 的后续清理由单独 parity 项处理。
+- 外部有人云异常只返回安全通用消息，原始上游响应体、token、凭据和请求体不进入 API 响应。
+自动化检查结果：
+- `.venv\Scripts\python.exe backend\manage.py check` passed.
+- `.venv\Scripts\python.exe backend\manage.py spectacular --validate --file .runtime\schema-d04.yaml` passed.
+- `.venv\Scripts\python.exe backend\manage.py test apps.greenhouse apps.integrations` passed, 13 tests.
+- `.venv\Scripts\python.exe backend\manage.py test apps.core apps.accounts apps.greenhouse apps.integrations apps.weather apps.ai_advisory` passed, 48 tests.
+- `.venv\Scripts\python.exe backend\manage.py makemigrations --check --dry-run` passed, no changes detected.
+- `.venv\Scripts\python.exe backend\manage.py migrate --noinput` passed, no migrations.
+- `npm run lint` passed.
+- `npm run build` passed.
+- `node --check server\youren-api.mjs` passed.
+- `node --check server\youren-client.mjs` passed.
+- `node --check server\youren-test.mjs` passed.
+网站运行验证结果：
+- Django runserver restarted on `127.0.0.1:8000` with `YOUREN_INTEGRATION_ENABLED=false`.
+- `GET /` returned 200.
+- `GET /api/v1/greenhouse/dashboard` returned 200 with local dashboard source.
+- `GET /api/greenhouse/dashboard` returned 200 with local dashboard source.
+- `GET /api/v1/integrations/youren/health` returned 200 with `ok=false` and `configured=false`.
+- `GET /api/youren/health` returned 200 with `ok=false`, `configured=false`, and `enabled=false`.
+- `GET /api/v1/schema/` returned 200.
+接口验证结果：
+- Node temporary server on `127.0.0.1:18787` forwarded `GET /api/greenhouse/dashboard` to Django and returned header `X-Smart-Agri-Migrated-To: django`.
+- Node forwarded response returned 200 with local dashboard payload.
+- Static OpenAPI draft includes `/api/v1/integrations/youren/health`, `/api/youren/health`, and `YourenHealth` schema.
+回归测试结果：
+- Existing local dashboard, auth, weather safe-disabled, and AI safe-disabled tests still pass.
+- Frontend production build still emits `dist/` and homepage remains reachable through Django.
+兼容性影响：
+- Dashboard primary implementation is now Django.
+- Legacy Node dashboard callers should receive forwarded Django responses when `DJANGO_API_BASE` points to the Django service.
+- Enabling real-time Youren dashboard now requires `YOUREN_INTEGRATION_ENABLED=true`, `YOUREN_API_BASE`, `YOUREN_APP_KEY`, and `YOUREN_APP_SECRET`.
+外部依赖与已知限制：
+- 当前环境未配置真实有人云凭据，未执行真实外呼。
+- Node weather and AI legacy handlers仍保留，后续应在对应 Django 外部集成达到 parity 后删除或转发。
+Git Commit：refactor(integrations): move youren dashboard to Django
+是否允许继续下一项：等待人工确认

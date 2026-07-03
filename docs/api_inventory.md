@@ -11,7 +11,7 @@
 - 请求字段：无
 - 响应字段：`generatedAt`、`source`、`crops[]`；作物字段含 `id`、`name`、`latinName`、`description`、`heroImage`、`accent`、`greenhouses[]`；大棚字段含 `id`、`name`、`area`、`status`、`onlineDevices`、`totalDevices`、`metrics[]`、`trend[]`、`alerts[]`
 - 当前数据来源：旧 Node 网关从有人云查询后聚合；本地模式使用 `public/data/local-dashboard.json`
-- Django 迁移状态：已迁移。Web 与小程序默认使用 v1 统一响应包装；legacy `/api/greenhouse/dashboard` 仅作兼容 adapter 保留。
+- Django 迁移状态：已迁移。Web 与小程序默认使用 v1 统一响应包装；Django 可在 `YOUREN_INTEGRATION_ENABLED=true` 时独立拉取有人云并映射；legacy `/api/greenhouse/dashboard` 仅作兼容 adapter 保留。
 - 是否依赖第三方服务：是，有人云；本地 JSON 模式否
 - 迁移优先级：P0
 - 兼容性要求：legacy 路径保持旧响应直出；字段名、类型、嵌套层级、单位、时间格式、数组顺序和空值行为保持兼容
@@ -71,10 +71,10 @@
 - 接口路径：`/api/youren/health`
 - 请求方法：`GET`
 - 调用页面：UNKNOWN，主要为本地联调/运维检查
-- 调用文件：`server/youren-api.mjs`
+- 调用文件：`backend/apps/integrations/youren/views.py`、`server/youren-api.mjs`
 - 请求字段：无
 - 响应字段：`ok`、`configured`、`message?`、`deviceCountInSample?`、`sampleDevices?`
-- 当前数据来源：有人云凭据检查和样本设备读取
+- 当前数据来源：Django 有人云 service 进行凭据检查和样本设备读取；旧 Node 网关仅保留探测/回退
 - 是否依赖第三方服务：凭据存在时是
 - 迁移优先级：P2
 - 兼容性要求：外部集成关闭时不得外呼；运维信息不得泄露敏感字段

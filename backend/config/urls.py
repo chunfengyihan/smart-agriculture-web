@@ -16,6 +16,7 @@ from apps.ai_advisory.views import (
     V1CropDiagnosisView,
 )
 from apps.greenhouse.views import LegacyGreenhouseDashboardView, V1GreenhouseDashboardView
+from apps.integrations.youren.views import LegacyYourenHealthView, V1YourenHealthView
 from apps.weather.views import LegacyWeatherAdviceView, V1WeatherAdviceView
 
 
@@ -27,6 +28,7 @@ urlpatterns = [
         LegacyGreenhouseDashboardView.as_view(),
         name="api-legacy-greenhouse-dashboard",
     ),
+    path("api/youren/health", LegacyYourenHealthView.as_view(), name="api-legacy-youren-health"),
     path(
         "api/weather/greenhouse-advice",
         LegacyWeatherAdviceView.as_view(),
@@ -43,6 +45,11 @@ urlpatterns = [
         name="api-legacy-ai-agri-chat",
     ),
     path("api/v1/health/", HealthCheckView.as_view(), name="api-v1-health"),
+    path(
+        "api/v1/integrations/youren/health",
+        V1YourenHealthView.as_view(),
+        name="api-v1-youren-health",
+    ),
     path("api/v1/auth/wechat-login", WeChatLoginView.as_view(), name="api-v1-auth-wechat-login"),
     path("api/v1/auth/refresh", RefreshTokenView.as_view(), name="api-v1-auth-refresh"),
     path("api/v1/auth/logout", LogoutView.as_view(), name="api-v1-auth-logout"),
