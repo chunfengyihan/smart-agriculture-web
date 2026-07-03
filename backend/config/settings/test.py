@@ -9,3 +9,4 @@ DATABASES = {
     }
 }
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+API_AUTH_REQUIRED = False

@@ -492,3 +492,13 @@ npm run verify
 
 因此日常使用只需要双击桌面快捷方式。
 
+## API authentication
+
+D-01 收窄了 Django API 的默认公开面。生产环境 `DJANGO_API_AUTH_REQUIRED` 默认为 `true`，默认公开路径仅包含 `/api/v1/health/`、`/api/v1/schema/`、`/api/v1/docs/` 以及后续登录/刷新入口。业务接口默认需要认证。
+
+支持两类调用方：
+
+- Web 和小程序客户端：使用 `Authorization: Bearer <JWT>`。Web 请求层会从 `localStorage` 或 `sessionStorage` 的 `smart_agri_access_token`、`access_token`、`token` 读取 token；小程序请求层会从 `wx` storage 的 `token` 读取 token。
+- 设备或服务调用方：使用 `DJANGO_API_KEY_HEADER` 指定的请求头，默认 `X-API-Key`。允许的 key 通过 `DJANGO_API_KEY_ALLOWLIST` 以逗号分隔配置。`DJANGO_API_AUTH_TOKEN` 仅作为旧环境的单 token 兼容项保留。
+
+本地开发可在 `.env.local` 或 shell 中设置 `DJANGO_API_AUTH_REQUIRED=false` 继续无 token 调试；生产环境不得把业务接口加入 `DJANGO_API_PUBLIC_PATHS`。

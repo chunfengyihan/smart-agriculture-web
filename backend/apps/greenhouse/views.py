@@ -26,7 +26,6 @@ def latest_dashboard_payload():
 
 
 class LegacyGreenhouseDashboardView(APIView):
-    authentication_classes = []
     permission_classes = [ApiKeyRequired]
 
     @extend_schema(responses={200: DashboardPayloadSerializer})
@@ -35,7 +34,6 @@ class LegacyGreenhouseDashboardView(APIView):
 
 
 class V1GreenhouseDashboardView(APIView):
-    authentication_classes = []
     permission_classes = [ApiKeyRequired]
 
     @extend_schema(responses={200: V1DashboardResponseSerializer})

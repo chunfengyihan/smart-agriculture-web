@@ -1,5 +1,8 @@
 from django.core.management import call_command
+from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.test import Client, TestCase, override_settings
+from rest_framework_simplejwt.tokens import AccessToken
 
 from apps.greenhouse.models import DashboardSnapshot, EnvironmentReading, Greenhouse
 
@@ -62,19 +65,36 @@ class GreenhouseDashboardApiTests(TestCase):
         self.assertTrue(payload["request_id"])
 
     @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="test-token")
-    def test_dashboard_public_path_works_when_api_key_auth_enabled(self):
+    def test_dashboard_default_public_paths_do_not_include_business_api(self):
+        self.assertNotIn("/api/greenhouse/dashboard", settings.API_PUBLIC_PATHS)
+        self.assertNotIn("/api/v1/greenhouse/dashboard", settings.API_PUBLIC_PATHS)
+
+    @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="test-token", API_PUBLIC_PATHS=["/api/v1/health/"])
+    def test_dashboard_requires_auth_when_api_auth_enabled(self):
         response = Client().get("/api/greenhouse/dashboard")
+
+        self.assertIn(response.status_code, [401, 403])
+
+    @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="test-token", API_PUBLIC_PATHS=[])
+    def test_dashboard_accepts_legacy_api_key_when_enabled(self):
+        response = Client().get("/api/greenhouse/dashboard", HTTP_X_API_KEY="test-token")
 
         self.assertEqual(response.status_code, 200)
 
-    @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="test-token", API_PUBLIC_PATHS=[])
-    def test_dashboard_requires_api_key_when_removed_from_public_paths(self):
-        response = Client().get("/api/greenhouse/dashboard")
+    @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="", API_KEY_ALLOWLIST=["service-token"], API_PUBLIC_PATHS=[])
+    def test_dashboard_accepts_allowlisted_api_key(self):
+        response = Client().get("/api/v1/greenhouse/dashboard", HTTP_X_API_KEY="service-token")
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
-    @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="test-token")
-    def test_dashboard_accepts_api_key_when_enabled(self):
-        response = Client().get("/api/greenhouse/dashboard", HTTP_X_API_KEY="test-token")
+    @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="", API_KEY_ALLOWLIST=[], API_PUBLIC_PATHS=[])
+    def test_dashboard_accepts_jwt_bearer_token(self):
+        user = get_user_model().objects.create_user(username="dashboard-user")
+        token = AccessToken.for_user(user)
+
+        response = Client().get(
+            "/api/v1/greenhouse/dashboard",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
 
         self.assertEqual(response.status_code, 200)

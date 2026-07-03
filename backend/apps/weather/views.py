@@ -27,7 +27,6 @@ class WeatherAdviceRequestSerializer(serializers.Serializer):
 
 
 class LegacyWeatherAdviceView(APIView):
-    authentication_classes = []
     permission_classes = [ApiKeyRequired]
 
     @extend_schema(request=WeatherAdviceRequestSerializer, responses={503: LegacyExternalDisabledSerializer})
@@ -47,7 +46,6 @@ class LegacyWeatherAdviceView(APIView):
 
 
 class V1WeatherAdviceView(APIView):
-    authentication_classes = []
     permission_classes = [ApiKeyRequired]
 
     @extend_schema(request=WeatherAdviceRequestSerializer, responses={503: V1ExternalDisabledSerializer})

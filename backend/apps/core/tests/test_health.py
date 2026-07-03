@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 
 
 class HealthCheckTests(TestCase):
@@ -38,3 +38,16 @@ class HealthCheckTests(TestCase):
 
     def test_clickjacking_middleware_is_enabled(self):
         self.assertIn("django.middleware.clickjacking.XFrameOptionsMiddleware", settings.MIDDLEWARE)
+        self.assertEqual(settings.X_FRAME_OPTIONS, "SAMEORIGIN")
+
+    @override_settings(API_AUTH_REQUIRED=True, API_PUBLIC_PATHS=["/api/v1/health/", "/api/v1/schema/"])
+    def test_health_check_remains_public_when_api_auth_is_required(self):
+        response = Client().get("/api/v1/health/")
+
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(API_AUTH_REQUIRED=True, API_PUBLIC_PATHS=["/api/v1/health/", "/api/v1/schema/"])
+    def test_schema_remains_public_when_api_auth_is_required(self):
+        response = Client().get("/api/v1/schema/")
+
+        self.assertEqual(response.status_code, 200)

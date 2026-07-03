@@ -43,7 +43,6 @@ class AgriChatRequestSerializer(serializers.Serializer):
 
 
 class LegacyCropDiagnosisView(APIView):
-    authentication_classes = []
     permission_classes = [ApiKeyRequired]
 
     @extend_schema(request=CropDiagnosisRequestSerializer, responses={503: LegacyExternalDisabledSerializer})
@@ -55,7 +54,6 @@ class LegacyCropDiagnosisView(APIView):
 
 
 class V1CropDiagnosisView(APIView):
-    authentication_classes = []
     permission_classes = [ApiKeyRequired]
 
     @extend_schema(request=CropDiagnosisRequestSerializer, responses={503: V1ExternalDisabledSerializer})
@@ -78,7 +76,6 @@ class V1CropDiagnosisView(APIView):
 
 
 class LegacyAgriChatView(APIView):
-    authentication_classes = []
     permission_classes = [ApiKeyRequired]
 
     @extend_schema(request=AgriChatRequestSerializer, responses={503: LegacyExternalDisabledSerializer})
@@ -90,7 +87,6 @@ class LegacyAgriChatView(APIView):
 
 
 class V1AgriChatView(APIView):
-    authentication_classes = []
     permission_classes = [ApiKeyRequired]
 
     @extend_schema(request=AgriChatRequestSerializer, responses={503: V1ExternalDisabledSerializer})

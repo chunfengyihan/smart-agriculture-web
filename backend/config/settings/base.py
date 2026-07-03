@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
@@ -26,19 +27,18 @@ def env_list(name, default=None):
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-local-development-only")
 DEBUG = env_bool("DJANGO_DEBUG", False)
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
-API_AUTH_REQUIRED = env_bool("DJANGO_API_AUTH_REQUIRED", False)
+API_AUTH_REQUIRED = env_bool("DJANGO_API_AUTH_REQUIRED", True)
 API_AUTH_TOKEN = os.environ.get("DJANGO_API_AUTH_TOKEN", "")
+API_KEY_HEADER = os.environ.get("DJANGO_API_KEY_HEADER", "X-API-Key")
+API_KEY_ALLOWLIST = env_list("DJANGO_API_KEY_ALLOWLIST", [])
 API_PUBLIC_PATHS = env_list(
     "DJANGO_API_PUBLIC_PATHS",
     [
-        "/api/greenhouse/dashboard",
-        "/api/v1/greenhouse/dashboard",
-        "/api/weather/greenhouse-advice",
-        "/api/v1/weather/greenhouse-advice",
-        "/api/ai/crop-diagnosis",
-        "/api/v1/ai/crop-diagnosis",
-        "/api/ai/agri-chat",
-        "/api/v1/ai/agri-chat",
+        "/api/v1/health/",
+        "/api/v1/schema/",
+        "/api/v1/docs/",
+        "/api/v1/auth/wechat-login",
+        "/api/v1/auth/refresh",
     ],
 )
 
@@ -98,6 +98,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+X_FRAME_OPTIONS = os.environ.get("DJANGO_X_FRAME_OPTIONS", "SAMEORIGIN")
 
 CORS_ALLOWED_ORIGINS = env_list(
     "DJANGO_CORS_ALLOWED_ORIGINS",
@@ -188,9 +189,26 @@ WEATHER_CACHE_TTL_SECONDS = int(os.environ.get("WEATHER_CACHE_TTL_SECONDS", str(
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "apps.core.permissions.ApiKeyRequired",
+    ],
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
     "DEFAULT_PAGINATION_CLASS": "apps.core.pagination.StandardPageNumberPagination",
     "PAGE_SIZE": 20,
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(os.environ.get("DJANGO_JWT_ACCESS_TOKEN_MINUTES", "30"))
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=int(os.environ.get("DJANGO_JWT_REFRESH_TOKEN_DAYS", "7"))
+    ),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 SPECTACULAR_SETTINGS = {
