@@ -3,6 +3,18 @@ from rest_framework import serializers
 from .models import Alert, DashboardSnapshot, Device, EnvironmentReading, Greenhouse
 
 
+ENVIRONMENT_READING_METRIC_FIELDS = [
+    "air_temp",
+    "air_humidity",
+    "light",
+    "co2",
+    "soil_humidity",
+    "soil_temp",
+    "ec",
+    "ph",
+]
+
+
 class GreenhouseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Greenhouse
@@ -57,6 +69,16 @@ class DeviceSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        metrics = self.context.get("metrics")
+        if metrics:
+            requested_metrics = set(metrics)
+            for field in ENVIRONMENT_READING_METRIC_FIELDS:
+                if field not in requested_metrics:
+                    data.pop(field, None)
+        return data
+
 
 class AlertSerializer(serializers.ModelSerializer):
     class Meta:
@@ -103,3 +125,17 @@ class V1DashboardResponseSerializer(serializers.Serializer):
     message = serializers.CharField()
     data = DashboardPayloadSerializer()
     request_id = serializers.CharField()
+
+
+class GreenhouseDashboardSummarySerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+    crop_code = serializers.CharField(allow_blank=True)
+    location = serializers.CharField(allow_blank=True)
+    source = serializers.CharField()
+    status = serializers.CharField()
+    online_devices = serializers.IntegerField()
+    total_devices = serializers.IntegerField()
+    latest_reading = EnvironmentReadingSerializer(allow_null=True)
+    active_alert_count = serializers.IntegerField()
+    latest_alerts = AlertSerializer(many=True)

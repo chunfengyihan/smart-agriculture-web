@@ -18,7 +18,11 @@ from apps.ai_advisory.views import (
 from apps.greenhouse.views import (
     LegacyGreenhouseDashboardView,
     V1EnvironmentReadingsView,
+    V1GreenhouseAlertsView,
     V1GreenhouseDashboardView,
+    V1GreenhouseDetailDashboardView,
+    V1GreenhouseListView,
+    V1GreenhouseReadingsView,
 )
 from apps.integrations.youren.views import LegacyYourenHealthView, V1YourenHealthView
 from apps.weather.views import LegacyWeatherAdviceView, V1WeatherAdviceView
@@ -67,6 +71,26 @@ urlpatterns = [
         "api/v1/greenhouse/readings",
         V1EnvironmentReadingsView.as_view(),
         name="api-v1-greenhouse-readings",
+    ),
+    path(
+        "api/v1/greenhouses/",
+        V1GreenhouseListView.as_view(),
+        name="api-v1-greenhouses",
+    ),
+    path(
+        "api/v1/greenhouses/<str:greenhouse_id>/readings/",
+        V1GreenhouseReadingsView.as_view(),
+        name="api-v1-greenhouse-detail-readings",
+    ),
+    path(
+        "api/v1/greenhouses/<str:greenhouse_id>/alerts/",
+        V1GreenhouseAlertsView.as_view(),
+        name="api-v1-greenhouse-detail-alerts",
+    ),
+    path(
+        "api/v1/greenhouses/<str:greenhouse_id>/dashboard/",
+        V1GreenhouseDetailDashboardView.as_view(),
+        name="api-v1-greenhouse-detail-dashboard",
     ),
     path(
         "api/v1/weather/greenhouse-advice",

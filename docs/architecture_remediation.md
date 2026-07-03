@@ -604,3 +604,55 @@ Known limits:
 
 Parent Git Commit: feat(ai): secure crop diagnosis uploads
 Continue next item: waiting for manual confirmation
+
+## D-12
+
+Issue: D-12
+Status: completed, waiting for manual confirmation
+Changed files:
+- `backend/apps/greenhouse/views.py`
+- `backend/apps/greenhouse/serializers.py`
+- `backend/apps/greenhouse/tests/test_dashboard_api.py`
+- `backend/config/urls.py`
+- `backend/config/settings/base.py`
+- `docs/architecture_remediation.md`
+
+Key decisions:
+- Added the requested resource routes:
+  - `GET /api/v1/greenhouses/`
+  - `GET /api/v1/greenhouses/{id}/readings/`
+  - `GET /api/v1/greenhouses/{id}/alerts/`
+  - `GET /api/v1/greenhouses/{id}/dashboard/`
+- Kept the existing `/api/v1/greenhouse/dashboard` response shape compatible for current web and miniapp clients.
+- Added serializer-based filter validation as the local equivalent to `django-filter`, with whitelisted ordering fields.
+- Added `start_time`, `end_time`, `metrics`, `metric_type`, and `ordering` support for paginated greenhouse readings.
+- Added `status`, `level`, `start_time`, `end_time`, and `ordering` support for paginated greenhouse alerts.
+- Added `GREENHOUSE_HISTORY_MAX_RANGE_DAYS`, default `31`, to reject oversized historical range queries.
+- Added single-greenhouse dashboard summaries that return first-screen state only; trend/curve history is fetched through the readings endpoint.
+- Added a greenhouse access resolver that returns 404 for unknown or inaccessible greenhouse ids/codes while preserving `ApiKeyRequired`.
+- Added explicit OpenAPI parameter descriptions through `drf-spectacular` parameters.
+
+Automated checks:
+- `.venv\Scripts\python.exe backend\manage.py check` passed.
+- `.venv\Scripts\python.exe backend\manage.py test apps.greenhouse` passed with 20 tests.
+- `.venv\Scripts\python.exe backend\manage.py test apps` passed with 62 tests.
+- `.venv\Scripts\python.exe backend\manage.py makemigrations --check --dry-run` passed.
+- `.venv\Scripts\python.exe backend\manage.py spectacular --file .runtime\openapi-d12.yaml --validate` passed.
+
+Acceptance coverage:
+- Large greenhouse reading sets are returned through the unified paginated response.
+- Readings can be queried by time range and metric list for curve data.
+- Invalid time range and oversized range requests return HTTP 400.
+- Alerts can be filtered by active/resolved status, level, and time range.
+- Unknown greenhouse detail access returns HTTP 404.
+- Per-greenhouse dashboard summary omits trend data and leaves curve loading to the readings endpoint.
+
+Compatibility impact:
+- Existing dashboard clients continue to use the old dashboard route without a payload shape change.
+- New clients can migrate to the resource-oriented plural endpoints incrementally.
+
+Known limits:
+- There is not yet a greenhouse-to-user ACL model; the access resolver currently enforces authentication and hides unknown resources, and is the extension point for future object permissions.
+
+Parent Git Commit: feat(greenhouse): add paginated resource APIs
+Continue next item: waiting for manual confirmation
