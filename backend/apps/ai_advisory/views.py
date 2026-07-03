@@ -2,18 +2,17 @@ from django.conf import settings
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.core.permissions import ApiKeyRequired
 from apps.core.responses import error_response
 from apps.core.serializers import LegacyExternalDisabledSerializer, V1ExternalDisabledSerializer
 
+from .upload_security import save_private_upload, validate_upload_image
+
 
 EXTERNAL_INTEGRATION_DISABLED_MESSAGE = "外部集成未启用"
-
-
-MAX_DIAGNOSIS_IMAGE_BYTES = 8 * 1024 * 1024
-ALLOWED_DIAGNOSIS_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
 
 class CropDiagnosisRequestSerializer(serializers.Serializer):
@@ -26,11 +25,7 @@ class CropDiagnosisRequestSerializer(serializers.Serializer):
     metrics = serializers.CharField(required=False, allow_blank=True, max_length=32768)
 
     def validate_image(self, image):
-        if image.size > MAX_DIAGNOSIS_IMAGE_BYTES:
-            raise serializers.ValidationError("Image must not exceed 8MB")
-        if getattr(image, "content_type", "") not in ALLOWED_DIAGNOSIS_IMAGE_TYPES:
-            raise serializers.ValidationError("Only JPG, PNG, and WebP images are supported")
-        return image
+        return validate_upload_image(image)
 
 
 class AgriChatRequestSerializer(serializers.Serializer):
@@ -55,22 +50,45 @@ class LegacyCropDiagnosisView(APIView):
 
 class V1CropDiagnosisView(APIView):
     permission_classes = [ApiKeyRequired]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "ai_upload"
 
     @extend_schema(request=CropDiagnosisRequestSerializer, responses={503: V1ExternalDisabledSerializer})
     def post(self, request):
+        upload_asset = None
+        if request.FILES:
+            serializer = CropDiagnosisRequestSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            upload_asset = save_private_upload(serializer.validated_data["image"], request.user)
+
         if not settings.EXTERNAL_INTEGRATIONS_ENABLED:
+            data = {}
+            if upload_asset:
+                data = {
+                    "upload_asset_id": upload_asset.id,
+                    "scan_status": upload_asset.scan_status,
+                }
             return error_response(
                 request,
                 code=50020,
                 message=EXTERNAL_INTEGRATION_DISABLED_MESSAGE,
+                data=data,
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        serializer = CropDiagnosisRequestSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+
+        if upload_asset is None:
+            serializer = CropDiagnosisRequestSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            upload_asset = save_private_upload(serializer.validated_data["image"], request.user)
+
         return error_response(
             request,
             code=50020,
             message="外部集成适配器尚未配置",
+            data={
+                "upload_asset_id": upload_asset.id,
+                "scan_status": upload_asset.scan_status,
+            },
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
 

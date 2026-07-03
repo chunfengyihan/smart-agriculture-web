@@ -557,3 +557,50 @@ Known limits:
 Miniapp Git Commit: fix(miniapp): validate API environment config (`ea80df7`)
 Parent Git Commit: docs(remediation): record d10 miniapp api config
 Continue next item: waiting for manual confirmation
+
+## D-11
+
+Issue: D-11
+Status: completed, waiting for manual confirmation
+Changed files:
+- `backend/apps/ai_advisory/models.py`
+- `backend/apps/ai_advisory/admin.py`
+- `backend/apps/ai_advisory/upload_security.py`
+- `backend/apps/ai_advisory/views.py`
+- `backend/apps/ai_advisory/migrations/0001_initial.py`
+- `backend/apps/ai_advisory/tests/test_disabled_integrations.py`
+- `backend/config/settings/base.py`
+- `docs/architecture_remediation.md`
+
+Key decisions:
+- Added `UploadAsset` and `UploadScanTask` to trace uploader, original name, random storage key, content type, detected content type, extension, size, SHA-256, scan status, and creation time.
+- Added signature-based image detection for JPEG, PNG, and WebP as an equivalent local alternative to `python-magic`; declared MIME, detected MIME, and extension must all agree.
+- Added `ScopedRateThrottle` on the v1 crop diagnosis upload endpoint with `DRF_AI_UPLOAD_THROTTLE_RATE` defaulting to `20/min`.
+- Stored accepted uploads under `DJANGO_PRIVATE_UPLOAD_ROOT` instead of frontend/static paths and generated random file names.
+- Added ClamAV scan task records. When `CLAMAV_ENABLED=false`, assets are marked `scan_unavailable` with a task detail policy of `hold_and_block_use`.
+- Added MinIO private bucket configuration placeholders for production migration without exposing public upload URLs.
+- Registered upload assets and scan tasks in Django admin for auditability.
+
+Automated checks:
+- `.venv\Scripts\python.exe backend\manage.py check` passed.
+- `.venv\Scripts\python.exe backend\manage.py makemigrations --check --dry-run` passed.
+- `.venv\Scripts\python.exe backend\manage.py test apps.ai_advisory` passed with 10 tests.
+- `.venv\Scripts\python.exe backend\manage.py test apps` passed with 56 tests.
+
+Acceptance coverage:
+- Forged MIME upload `leaf.jpg` with `image/jpeg` but non-image bytes is rejected.
+- Oversized upload is rejected by serializer validation.
+- Upload throttling returns HTTP 429 when the configured rate is exceeded.
+- Accepted uploads are written to private storage and `GET /<storage_key>` returns 404.
+- Upload and scan records are persisted with SHA-256, size, detected MIME, scan status, and timestamps.
+
+Compatibility impact:
+- Existing disabled external integration behavior remains unchanged for empty diagnosis requests.
+- Valid diagnosis uploads are now validated and recorded before the external adapter 503 response.
+- Production deployments can later enable ClamAV and MinIO without changing the API contract.
+
+Known limits:
+- The ClamAV worker itself is not implemented in this pass; unavailable scanner state is explicit and blocks implicit trust of uploaded files.
+
+Parent Git Commit: feat(ai): secure crop diagnosis uploads
+Continue next item: waiting for manual confirmation

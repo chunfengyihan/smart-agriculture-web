@@ -24,6 +24,16 @@ def env_list(name, default=None):
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def env_int(name, default):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except ValueError as exc:
+        raise ImproperlyConfigured(f"{name} must be an integer") from exc
+
+
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-local-development-only")
 DEBUG = env_bool("DJANGO_DEBUG", False)
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
@@ -110,6 +120,27 @@ CORS_ALLOWED_ORIGINS = env_list(
 
 FRONTEND_DIST_DIR = Path(os.environ.get("DJANGO_FRONTEND_DIST_DIR", REPO_DIR / "dist"))
 FRONTEND_SITE_URL = os.environ.get("DJANGO_FRONTEND_SITE_URL", "/")
+
+PRIVATE_UPLOAD_ROOT = Path(os.environ.get("DJANGO_PRIVATE_UPLOAD_ROOT", REPO_DIR / ".runtime/private_uploads"))
+PRIVATE_UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
+AI_UPLOAD_MAX_BYTES = env_int("AI_UPLOAD_MAX_BYTES", 8 * 1024 * 1024)
+AI_UPLOAD_ALLOWED_CONTENT_TYPES = env_list(
+    "AI_UPLOAD_ALLOWED_CONTENT_TYPES",
+    ["image/jpeg", "image/png", "image/webp"],
+)
+AI_UPLOAD_SCAN_POLICY = os.environ.get("AI_UPLOAD_SCAN_POLICY", "hold_until_scanned")
+AI_UPLOAD_SCAN_UNAVAILABLE_STRATEGY = os.environ.get(
+    "AI_UPLOAD_SCAN_UNAVAILABLE_STRATEGY",
+    "hold_and_block_use",
+)
+CLAMAV_ENABLED = env_bool("CLAMAV_ENABLED", False)
+CLAMAV_HOST = os.environ.get("CLAMAV_HOST", "127.0.0.1")
+CLAMAV_PORT = env_int("CLAMAV_PORT", 3310)
+MINIO_UPLOADS_ENABLED = env_bool("MINIO_UPLOADS_ENABLED", False)
+MINIO_UPLOADS_ENDPOINT = os.environ.get("MINIO_UPLOADS_ENDPOINT", "")
+MINIO_UPLOADS_BUCKET = os.environ.get("MINIO_UPLOADS_BUCKET", "")
+MINIO_UPLOADS_ACCESS_KEY = os.environ.get("MINIO_UPLOADS_ACCESS_KEY", "")
+MINIO_UPLOADS_SECRET_KEY = os.environ.get("MINIO_UPLOADS_SECRET_KEY", "")
 
 ADMIN_SITE_URL = os.environ.get("DJANGO_ADMIN_SITE_URL", FRONTEND_SITE_URL)
 ADMIN_SITE_HEADER = os.environ.get("DJANGO_ADMIN_SITE_HEADER", "智慧农业管理后台")
@@ -249,6 +280,9 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
     "DEFAULT_PAGINATION_CLASS": "apps.core.pagination.StandardPageNumberPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_RATES": {
+        "ai_upload": os.environ.get("DRF_AI_UPLOAD_THROTTLE_RATE", "20/min"),
+    },
 }
 
 SIMPLE_JWT = {
