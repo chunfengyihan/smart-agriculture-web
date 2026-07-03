@@ -471,4 +471,45 @@ Known limits:
 
 Git Commit: refactor(frontend): split dashboard app shell
 Continue next item: waiting for manual confirmation
+
+## D-09
+
+Issue: D-09
+Status: completed, waiting for manual confirmation
+Changed files:
+- `smart-agri-miniapp/utils/demoFallback.js`
+- `smart-agri-miniapp/services/dashboard.js`
+- `smart-agri-miniapp/services/weather.js`
+- `smart-agri-miniapp/services/auth.js`
+- `smart-agri-miniapp/services/advisor.js`
+- `smart-agri-miniapp/services/diagnosis.js`
+- `smart-agri-miniapp/pages/dashboard/dashboard.js`
+- `smart-agri-miniapp/pages/dashboard/dashboard.wxml`
+- `smart-agri-miniapp/pages/weather/weather.js`
+- `smart-agri-miniapp/pages/weather/weather.wxml`
+- `docs/architecture_remediation.md`
+
+Key decisions:
+- Added a shared miniapp fallback policy in `utils/demoFallback.js`.
+- Demo fallback now requires both `ENABLE_DEMO_FALLBACK=true` and WeChat runtime `envVersion=develop`.
+- `trial` and `release` runtimes throw the real service error instead of returning demo data.
+- Fallback logs now include service name, whether fallback was enabled, configured environment, runtime environment, and original error summary.
+- Dashboard, weather, auth, advisor, and diagnosis services now use the same fallback gate so release builds cannot reach demo through another API path.
+- Dashboard and weather pages now expose explicit empty-data states with retry buttons.
+
+Automated checks:
+- `Get-ChildItem -Recurse -Filter *.js | ForEach-Object { node --check $_.FullName }` passed in `smart-agri-miniapp`.
+- `Get-ChildItem -Recurse -Filter *.json | ForEach-Object { node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" $_.FullName }` passed in `smart-agri-miniapp`.
+- `rg -n "ENABLE_DEMO_FALLBACK|using demo|demo login|throw error|if \(ENABLE" services utils config` confirmed direct fallback decisions only remain in `utils/demoFallback.js` and config.
+
+Compatibility impact:
+- Development runtime can still use demo data when explicitly configured.
+- Trial and release users now see service/network errors and can retry instead of seeing fake data.
+
+Known limits:
+- WeChat DevTools compile was not run from this environment; syntax and JSON checks passed.
+
+Miniapp Git Commit: fix(miniapp): gate demo fallback by runtime (`3864881`)
+Parent Git Commit: docs(remediation): record d09 miniapp fallback policy
+Continue next item: waiting for manual confirmation
 是否允许继续下一项：等待人工确认
