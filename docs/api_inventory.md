@@ -18,6 +18,15 @@
 - 风险：有人云字段稳定性 UNKNOWN；静态 JSON 是展示快照，不是完整时序事实表
 - 确认状态：CONFIRMED
 
+### D-07 Frontend Query Notes
+
+- Web dashboard caller now goes through `src/hooks/useDashboardQuery.ts`.
+- The full dashboard, readings, alerts, and future alert stream are represented separately in `src/api/dashboard.ts` through `DASHBOARD_RESOURCE_PATHS`.
+- Dashboard fetch supports `AbortSignal`; local JSON mode only adds cache-busting on retry/manual retry, so normal first load can reuse browser caching.
+- Client cache keeps a 20s stale window, polls every 30s only while the page is visible, reuses an in-flight promise, and exposes a visible failed-refresh state.
+- `DashboardRequestMetadata` reserves `etag`, `lastModified`, and `version` fields for later conditional request handling.
+- `DASHBOARD_RESOURCE_PATHS.alertStream` reserves the interface layer for later SSE/WebSocket alert push.
+
 ## P0 - Environment Readings
 
 - 接口路径：`/api/v1/greenhouse/readings`

@@ -30,6 +30,7 @@
 .section-heading,
 .eyebrow,
 .health-pill,
+.query-status,
 .location-heading > span,
 .diagnosis-badge {
   display: flex;
@@ -103,6 +104,27 @@
   background: var(--soft);
   font-size: 13px;
   white-space: nowrap;
+}
+
+.query-status {
+  min-height: 34px;
+  gap: 5px;
+  border: 1px solid var(--chrome-line);
+  border-radius: 12px;
+  padding: 0 10px;
+  color: var(--text-muted);
+  background: var(--surface-solid);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.query-status.warning {
+  color: #b42318;
+  background: rgba(180, 35, 24, 0.1);
+}
+
+.query-status.muted {
+  color: var(--text-muted);
 }
 
 .icon-button {
@@ -1593,7 +1615,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .health-pill {
+  .health-pill,
+  .query-status {
     display: none;
   }
 

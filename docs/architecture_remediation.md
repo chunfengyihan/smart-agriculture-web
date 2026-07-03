@@ -375,4 +375,49 @@ Git Commit：feat(greenhouse): build dashboard from normalized models
 - Redis server connectivity was not exercised because no Redis service is configured in the local environment; Django Redis backend configuration and dependency import were verified.
 - Weather integration remains guarded by `WEATHER_INTEGRATION_ENABLED`.
 Git Commit：refactor(weather): use Django cache backend
+
+## D-07
+
+Issue: D-07
+Status: completed, waiting for manual confirmation
+Changed files:
+- `src/hooks/useDashboardQuery.ts`
+- `src/App.tsx`
+- `src/api/dashboard.ts`
+- `src/data/dataProvider.ts`
+- `src/App.css`
+- `docs/api_inventory.md`
+- `docs/architecture_remediation.md`
+
+Key decisions:
+- Added a lightweight TanStack Query equivalent for the dashboard path instead of adding a new dependency to the existing package manifest.
+- Dashboard requests now have a 20s stale window, reuse an in-flight promise, retry failed requests twice, and cancel the active request through `AbortController`.
+- Polling remains 30s when the page is visible, but the hook stops scheduling polling while `document.hidden` is true and refreshes again when visible if data is stale.
+- Local JSON mode no longer appends `?t=Date.now()` on every normal request; cache-busting is reserved for retries/manual retry paths.
+- Split future interface paths for dashboard, readings, alerts, and alert stream in `DASHBOARD_RESOURCE_PATHS`.
+- Reserved `DashboardRequestMetadata` with `etag`, `lastModified`, and `version` fields for later conditional requests.
+- Reserved `alertStream` path for later SSE/WebSocket alert push without changing the current screen behavior.
+
+Automated checks:
+- `npm run lint` passed.
+- `npm run build` passed.
+- `.venv\Scripts\python.exe backend\manage.py check` passed.
+
+Browser verification:
+- `GET /` returned 200 from `127.0.0.1:8000`.
+- Playwright CLI loaded page title `智慧农业管理中枢`.
+- Initial browser request list contained one `GET /api/v1/greenhouse/dashboard` 200 request.
+- Clicking the detail navigation kept the page stable; later dashboard requests observed were scheduled polling/manual refresh, not route remounts.
+- Simulated `document.hidden=true` and waited 35 seconds; no new dashboard request was added during the hidden interval.
+
+Compatibility impact:
+- Core dashboard rendering remains unchanged.
+- Manual refresh still exists; its icon now reflects active query fetching.
+- If refresh fails after data is already visible, the page keeps the cached dashboard and shows a visible failed-refresh status.
+
+Known limits:
+- Backend conditional response headers and push transport are only reserved at the client interface layer in this item.
+
+Git Commit: refactor(frontend): cache dashboard polling
+Continue next item: waiting for manual confirmation
 是否允许继续下一项：等待人工确认

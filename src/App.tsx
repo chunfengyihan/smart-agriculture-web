@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react'
 import {
   Activity,
   AlertTriangle,
@@ -17,8 +17,8 @@ import {
   WifiOff,
   X,
 } from 'lucide-react'
-import { getDashboardData } from './data/dataProvider'
 import { greenhouseLocations } from './data/greenhouseLocations'
+import { useDashboardQuery } from './hooks/useDashboardQuery'
 import { formatTime, hasMetricValue, metricValue, sourceText, statusText } from './lib/formatters'
 import type {
   Crop,
@@ -29,7 +29,6 @@ import type {
 } from './types'
 import './App.css'
 
-const refreshIntervalMs = 30_000
 const configuredDataSource = import.meta.env.VITE_DATA_SOURCE || 'remote'
 const usesDjangoApi =
   configuredDataSource === 'remote' ||
@@ -339,49 +338,22 @@ function PanelFallback({ label }: { label: string }) {
 }
 
 function App() {
-  const [dashboard, setDashboard] = useState<DashboardData | null>(null)
+  const {
+    data: dashboard,
+    error,
+    isFetching,
+    isPaused,
+    refetch: refetchDashboard,
+  } = useDashboardQuery()
   const [selectedCropId, setSelectedCropId] = useState<Crop['id']>('jujube')
   const [selectedGreenhouseId, setSelectedGreenhouseId] = useState<string>('')
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const dashboardRequestId = useRef(0)
-
-  const loadDashboard = useCallback(async () => {
-    const requestId = dashboardRequestId.current + 1
-    dashboardRequestId.current = requestId
-
-    try {
-      setLoading(true)
-      const data = await getDashboardData()
-      if (requestId !== dashboardRequestId.current) return
-      setDashboard(data)
-      setError(null)
-      setSelectedGreenhouseId((current) => current || data.crops[0]?.greenhouses[0]?.id || '')
-    } catch (loadError) {
-      if (requestId !== dashboardRequestId.current) return
-      setError(loadError instanceof Error ? loadError.message : '数据加载失败')
-    } finally {
-      if (requestId === dashboardRequestId.current) {
-        setLoading(false)
-      }
-    }
-  }, [])
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
     localStorage.setItem('theme', theme)
   }, [theme])
-
-  useEffect(() => {
-    const initialLoad = window.setTimeout(() => void loadDashboard(), 0)
-    const timer = window.setInterval(() => void loadDashboard(), refreshIntervalMs)
-    return () => {
-      window.clearTimeout(initialLoad)
-      window.clearInterval(timer)
-    }
-  }, [loadDashboard])
 
   const selectedCrop = useMemo(
     () => dashboard?.crops.find((crop) => crop.id === selectedCropId) || dashboard?.crops[0],
@@ -416,7 +388,7 @@ function App() {
           <img className="loading-logo" src="/logo-mark.svg" alt="" />
           <h1>智慧农业管理中枢</h1>
           <p>{error || '正在准备温室数据...'}</p>
-          <button type="button" onClick={() => void loadDashboard()}>
+          <button type="button" onClick={() => void refetchDashboard({ force: true })}>
             重新加载
           </button>
         </div>
@@ -448,6 +420,14 @@ function App() {
           </a>
         </nav>
         <div className="topbar-actions">
+          {error ? (
+            <span className="query-status warning">
+              <AlertTriangle size={14} />
+              数据刷新失败
+            </span>
+          ) : null}
+          {isPaused ? <span className="query-status muted">暂停刷新</span> : null}
+          {isFetching ? <span className="query-status">正在刷新</span> : null}
           <span className="health-pill">
             <Activity size={15} />
             {totals.alerts > 0 ? `${totals.alerts} 条提醒` : '全部正常'}
@@ -464,11 +444,11 @@ function App() {
           <button
             className="icon-button"
             type="button"
-            onClick={() => void loadDashboard()}
+            onClick={() => void refetchDashboard({ force: true })}
             aria-label="刷新数据"
             title="刷新数据"
           >
-            <RefreshCw className={loading ? 'spinning' : ''} size={18} />
+            <RefreshCw className={isFetching ? 'spinning' : ''} size={18} />
           </button>
           <button
             className="icon-button mobile-menu-button"

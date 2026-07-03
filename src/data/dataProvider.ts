@@ -10,9 +10,15 @@ const DASHBOARD_ENDPOINT =
 const LOCAL_DASHBOARD_PATH =
   import.meta.env.VITE_LOCAL_DASHBOARD_PATH || '/data/local-dashboard.json'
 
-export async function getDashboardData(): Promise<DashboardData> {
+export interface DashboardDataRequestOptions {
+  cacheBust?: boolean
+  signal?: AbortSignal
+}
+
+export async function getDashboardData(options: DashboardDataRequestOptions = {}): Promise<DashboardData> {
   if (DATA_SOURCE === 'local') {
-    const response = await fetchWithTimeout(`${LOCAL_DASHBOARD_PATH}?t=${Date.now()}`, { timeoutMs: 8_000 })
+    const localUrl = options.cacheBust ? `${LOCAL_DASHBOARD_PATH}?t=${Date.now()}` : LOCAL_DASHBOARD_PATH
+    const response = await fetchWithTimeout(localUrl, { timeoutMs: 8_000, signal: options.signal })
 
     if (!response.ok) {
       throw new Error(`Local dashboard file failed: ${response.status}`)
@@ -22,7 +28,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   }
 
   if (DATA_SOURCE === 'remote' || (!import.meta.env.VITE_DATA_SOURCE && USE_REMOTE_DATA)) {
-    return getRemoteDashboardData(DASHBOARD_ENDPOINT)
+    return getRemoteDashboardData(DASHBOARD_ENDPOINT, { signal: options.signal })
   }
 
   if (DATA_SOURCE !== 'mock') {
