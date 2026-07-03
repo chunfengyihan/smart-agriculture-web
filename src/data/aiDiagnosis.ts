@@ -1,5 +1,5 @@
+import { requestForm } from '../api/client'
 import type { CropDiagnosisMetric, CropDiagnosisResult, CropId } from '../types'
-import { fetchWithTimeout } from '../lib/http'
 
 interface CropDiagnosisRequest {
   image: File
@@ -21,17 +21,7 @@ export async function diagnoseCrop(request: CropDiagnosisRequest): Promise<CropD
   formData.append('useEnvironmentContext', request.useEnvironmentContext ? 'true' : 'false')
   formData.append('metrics', JSON.stringify(request.useEnvironmentContext ? request.metrics || [] : []))
 
-  const response = await fetchWithTimeout('/api/ai/crop-diagnosis', {
-    method: 'POST',
-    body: formData,
+  return requestForm<CropDiagnosisResult>('/api/v1/ai/crop-diagnosis', formData, {
     timeoutMs: 30_000,
   })
-
-  const payload = (await response.json().catch(() => null)) as { message?: string } | CropDiagnosisResult | null
-
-  if (!response.ok) {
-    throw new Error(payload && 'message' in payload && payload.message ? payload.message : `AI 诊断失败：${response.status}`)
-  }
-
-  return payload as CropDiagnosisResult
 }

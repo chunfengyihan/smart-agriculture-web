@@ -4,14 +4,14 @@
 
 ## P0 - Greenhouse Dashboard
 
-- 接口路径：`/api/greenhouse/dashboard`
+- 接口路径：`/api/v1/greenhouse/dashboard`
 - 请求方法：`GET`
 - 调用页面：监测详情、作物总览、地图和指标区域
-- 调用文件：`src/data/dataProvider.ts`、`src/App.tsx`
+- 调用文件：`src/api/dashboard.ts`、`src/data/dataProvider.ts`、`src/App.tsx`、`smart-agri-miniapp/services/dashboard.js`
 - 请求字段：无
 - 响应字段：`generatedAt`、`source`、`crops[]`；作物字段含 `id`、`name`、`latinName`、`description`、`heroImage`、`accent`、`greenhouses[]`；大棚字段含 `id`、`name`、`area`、`status`、`onlineDevices`、`totalDevices`、`metrics[]`、`trend[]`、`alerts[]`
 - 当前数据来源：旧 Node 网关从有人云查询后聚合；本地模式使用 `public/data/local-dashboard.json`
-- Django 迁移状态：已迁移。legacy 路径从 `DashboardSnapshot.payload` 直出；v1 路径使用统一响应包装。
+- Django 迁移状态：已迁移。Web 与小程序默认使用 v1 统一响应包装；legacy `/api/greenhouse/dashboard` 仅作兼容 adapter 保留。
 - 是否依赖第三方服务：是，有人云；本地 JSON 模式否
 - 迁移优先级：P0
 - 兼容性要求：legacy 路径保持旧响应直出；字段名、类型、嵌套层级、单位、时间格式、数组顺序和空值行为保持兼容
@@ -20,10 +20,10 @@
 
 ## P1 - Weather Greenhouse Advice
 
-- 接口路径：`/api/weather/greenhouse-advice`
+- 接口路径：`/api/v1/weather/greenhouse-advice`
 - 请求方法：`POST`
 - 调用页面：天气与棚内建议面板
-- 调用文件：`src/data/weatherAdvice.ts`、`src/components/WeatherAdvicePanel.tsx`
+- 调用文件：`src/data/weatherAdvice.ts`、`src/components/WeatherAdvicePanel.tsx`、`smart-agri-miniapp/services/weather.js`
 - 请求字段：`cropId`、`cropName`、`greenhouseId`、`greenhouseName`、`latitude`、`longitude`、`address?`、`metrics`、`includeAdvice?`
 - 响应字段：`cacheKey`、`cachedAt`、`weather`、`advice`、`adviceError`
 - 当前数据来源：Open-Meteo 天气接口；AI 建议依赖外部 AI 服务
@@ -36,10 +36,10 @@
 
 ## P1 - Crop Diagnosis
 
-- 接口路径：`/api/ai/crop-diagnosis`
+- 接口路径：`/api/v1/ai/crop-diagnosis`
 - 请求方法：`POST`
 - 调用页面：AI 图片诊断面板
-- 调用文件：`src/data/aiDiagnosis.ts`、`src/components/CropDiagnosisPanel.tsx`
+- 调用文件：`src/data/aiDiagnosis.ts`、`src/components/CropDiagnosisPanel.tsx`、`smart-agri-miniapp/services/diagnosis.js`
 - 请求字段：`image`、`cropId`、`cropName`、`greenhouseId`、`greenhouseName?`、`useEnvironmentContext`、`metrics`
 - 响应字段：`riskLevel`、`hasPestOrDisease`、`suspectedIssues[]`、`environmentAssessment`、`recommendations[]`、`disclaimer`、`evidence?`、`matchedRules?`、`confidenceReason?`、`followUpQuestions?`
 - 当前数据来源：外部 AI 服务
@@ -52,10 +52,10 @@
 
 ## P1 - Agri Chat
 
-- 接口路径：`/api/ai/agri-chat`
+- 接口路径：`/api/v1/ai/agri-chat`
 - 请求方法：`POST`
 - 调用页面：冰糖枣顾问面板
-- 调用文件：`src/data/agriChat.ts`、`src/components/JujubeAdvisorPanel.tsx`
+- 调用文件：`src/data/agriChat.ts`、`src/components/JujubeAdvisorPanel.tsx`、`smart-agri-miniapp/services/advisor.js`
 - 请求字段：`cropId`、`cropName`、`greenhouseId`、`greenhouseName`、`metrics`、`question`
 - 响应字段：`riskLevel`、`summary`、`likelyCauses[]`、`actions[]`、`watchItems[]`、`matchedRules[]`、`disclaimer`
 - 当前数据来源：外部 AI 服务
@@ -118,4 +118,4 @@
 - 历史曲线分页接口：UNKNOWN
 - 告警列表分页接口：UNKNOWN
 - 作物/大棚 CRUD 接口：UNKNOWN
-- `/api/v1/*` 当前均未实现
+- `/api/v1/health/`、`/api/v1/auth/*`、`/api/v1/greenhouse/dashboard`、`/api/v1/weather/greenhouse-advice`、`/api/v1/ai/crop-diagnosis`、`/api/v1/ai/agri-chat` 已实现；分页历史和 CRUD 类 v1 接口仍待 D-12 等后续项处理。

@@ -20,6 +20,102 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/V1HealthResponse"
+  /api/v1/auth/wechat-login:
+    post:
+      summary: WeChat miniapp login
+      operationId: postV1AuthWechatLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WeChatLoginRequest"
+      responses:
+        "200":
+          description: JWT token pair and user profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/V1Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuthTokenPair"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "503":
+          $ref: "#/components/responses/ExternalIntegrationDisabled"
+  /api/v1/auth/refresh:
+    post:
+      summary: Refresh access token
+      operationId: postV1AuthRefresh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: New access token
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/V1Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/RefreshTokenResponse"
+        "401":
+          $ref: "#/components/responses/AuthError"
+  /api/v1/auth/logout:
+    post:
+      summary: Logout and blacklist refresh token
+      operationId: postV1AuthLogout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Logout result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/V1Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        required: [logged_out]
+                        properties:
+                          logged_out:
+                            type: boolean
+        "401":
+          $ref: "#/components/responses/AuthError"
+  /api/v1/auth/me:
+    get:
+      summary: Current authenticated user
+      operationId: getV1AuthMe
+      responses:
+        "200":
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/V1Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuthUser"
+        "401":
+          $ref: "#/components/responses/AuthError"
   /api/greenhouse/dashboard:
     get:
       summary: Legacy greenhouse dashboard
@@ -161,6 +257,17 @@ components:
                     example: 50020
                   message:
                     example: 外部集成未启用
+    AuthError:
+      description: Authentication failed or token expired
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/V1Error"
+              - type: object
+                properties:
+                  code:
+                    example: 40100
   schemas:
     V1Success:
       type: object
@@ -239,6 +346,54 @@ components:
                 service:
                   type: string
                   example: django-api
+    WeChatLoginRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          maxLength: 512
+    RefreshTokenRequest:
+      type: object
+      required: [refresh]
+      properties:
+        refresh:
+          type: string
+    AuthUser:
+      type: object
+      required: [id, username, nickname, role]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        nickname:
+          type: string
+        role:
+          type: string
+          enum: [admin, operator, viewer]
+    AuthTokenPair:
+      type: object
+      required: [access, refresh, token, user]
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+        token:
+          type: string
+          description: Compatibility alias for access.
+        user:
+          $ref: "#/components/schemas/AuthUser"
+    RefreshTokenResponse:
+      type: object
+      required: [access, token]
+      properties:
+        access:
+          type: string
+        token:
+          type: string
+          description: Compatibility alias for access.
     DashboardData:
       type: object
       required: [generatedAt, source, crops]
