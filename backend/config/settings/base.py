@@ -52,7 +52,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
+    "apps.accounts",
     "apps.core",
     "apps.greenhouse",
     "apps.weather",
@@ -186,6 +188,15 @@ WEATHER_INTEGRATION_ENABLED = env_bool("WEATHER_INTEGRATION_ENABLED", EXTERNAL_I
 WEATHER_FETCH_TIMEOUT_SECONDS = float(os.environ.get("WEATHER_FETCH_TIMEOUT_SECONDS", "8"))
 WEATHER_CACHE_MAX_ITEMS = int(os.environ.get("WEATHER_CACHE_MAX_ITEMS", "512"))
 WEATHER_CACHE_TTL_SECONDS = int(os.environ.get("WEATHER_CACHE_TTL_SECONDS", str(6 * 60 * 60)))
+
+WECHAT_MINIAPP_APPID = os.environ.get("WECHAT_MINIAPP_APPID", "")
+WECHAT_MINIAPP_SECRET = os.environ.get("WECHAT_MINIAPP_SECRET", "")
+WECHAT_CODE2SESSION_URL = os.environ.get(
+    "WECHAT_CODE2SESSION_URL",
+    "https://api.weixin.qq.com/sns/jscode2session",
+)
+WECHAT_CODE2SESSION_TIMEOUT_SECONDS = float(os.environ.get("WECHAT_CODE2SESSION_TIMEOUT_SECONDS", "5"))
+WECHAT_LOGIN_MOCK_ENABLED = env_bool("WECHAT_LOGIN_MOCK_ENABLED", False)
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",

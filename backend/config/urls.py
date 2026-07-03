@@ -2,6 +2,12 @@ from django.contrib import admin
 from django.urls import path, re_path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from apps.accounts.views import (
+    AuthMeView,
+    LogoutView,
+    RefreshTokenView,
+    WeChatLoginView,
+)
 from apps.core.views import FrontendIndexView, HealthCheckView, frontend_asset_view
 from apps.ai_advisory.views import (
     LegacyAgriChatView,
@@ -37,6 +43,10 @@ urlpatterns = [
         name="api-legacy-ai-agri-chat",
     ),
     path("api/v1/health/", HealthCheckView.as_view(), name="api-v1-health"),
+    path("api/v1/auth/wechat-login", WeChatLoginView.as_view(), name="api-v1-auth-wechat-login"),
+    path("api/v1/auth/refresh", RefreshTokenView.as_view(), name="api-v1-auth-refresh"),
+    path("api/v1/auth/logout", LogoutView.as_view(), name="api-v1-auth-logout"),
+    path("api/v1/auth/me", AuthMeView.as_view(), name="api-v1-auth-me"),
     path(
         "api/v1/greenhouse/dashboard",
         V1GreenhouseDashboardView.as_view(),

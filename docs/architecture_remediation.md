@@ -70,3 +70,65 @@
 - D-02 尚未实现微信登录发 token，本项仅完成服务端 JWT 校验与客户端 token 注入能力。
 Git Commit：fix(security): enforce API authentication defaults
 是否允许继续下一项：等待人工确认
+## D-02
+
+问题编号：D-02
+修复状态：completed, waiting for manual confirmation
+修改文件：
+- `backend/config/settings/base.py`
+- `backend/config/urls.py`
+- `backend/apps/accounts/`
+- `scripts/verify.py`
+- `.env.example`
+- `README.md`
+- `docs/deployment.md`
+关键设计决策：
+- 使用 Django 内置 User 作为认证主体，新增 `WeChatUserProfile` 保存 openid、unionid、role、session_key_hash 和登录时间。
+- 使用 DRF SimpleJWT 签发 access/refresh token，并启用 token blacklist 支持 logout。
+- `wechat-login` 和 `refresh` 保持公开入口；`logout` 和 `me` 必须携带 Bearer token。
+- 微信 `code2session` 通过服务层封装，生产缺少微信凭据时返回明确 503；mock 登录仅允许 `DEBUG=true` 且显式开启。
+- 用户角色预留 `admin`、`operator`、`viewer`，默认微信用户为 `viewer`。
+自动化检查结果：
+- `.venv\Scripts\python.exe backend\manage.py check` passed.
+- `.venv\Scripts\python.exe backend\manage.py makemigrations --check --dry-run` passed, no changes detected.
+- `.venv\Scripts\python.exe backend\manage.py migrate --noinput` passed, applied `accounts.0001_initial` and SimpleJWT token blacklist migrations locally.
+- `.venv\Scripts\python.exe backend\manage.py test apps.core apps.accounts apps.greenhouse apps.weather apps.ai_advisory` passed, 45 tests.
+- `.venv\Scripts\python.exe backend\manage.py spectacular --validate --file .runtime\schema-d02.yaml` passed.
+- `npm run verify -- --backend-only` passed.
+- `npm run lint` passed.
+- `npm run build` passed.
+- `.venv\Scripts\python.exe -m pytest` was not executable because pytest is not installed in this project.
+后端启动结果：
+- Django runserver restarted on `127.0.0.1:8000` with `DJANGO_API_AUTH_REQUIRED=true` and `WECHAT_LOGIN_MOCK_ENABLED=true` for D-02 verification.
+前端构建结果：
+- Vite production build passed and emitted `dist/`.
+网站运行验证结果：
+- `GET /` returned 200.
+- Browser verification used `POST /api/v1/auth/wechat-login` to obtain a mock JWT, injected it into `localStorage.smart_agri_access_token`, and loaded title `智慧农业管理中枢`; screenshot `output/playwright/d02-home-authenticated.png`.
+- Browser console still showed one 503 from an external integration disabled path; this is a known disabled-integration state, not a WeChat login regression.
+小程序运行验证结果：
+- No standalone miniapp `package.json` build script is present.
+- `node --check smart-agri-miniapp\config\api.js` passed.
+- `node --check smart-agri-miniapp\utils\request.js` passed.
+- `node --check smart-agri-miniapp\services\auth.js` passed.
+- WeChat Developer Tools compile/runtime verification remains manual.
+接口验证结果：
+- `POST /api/v1/auth/wechat-login` with mock code returned access token, refresh token, compatibility `token`, and user role `viewer`.
+- `GET /api/v1/auth/me` without token returned 401.
+- `GET /api/v1/auth/me` with Bearer token returned 200 and role `viewer`.
+- `POST /api/v1/auth/refresh` with refresh token returned a new access token.
+- `POST /api/v1/auth/logout` with Bearer token and refresh token returned 200.
+- Refreshing the same token after logout returned 401.
+- `GET /api/v1/greenhouse/dashboard` with the issued Bearer token returned 200.
+回归测试结果：
+- Existing health/schema, dashboard, weather, and AI-disabled tests still pass.
+- Existing admin iframe behavior from D-01 remains covered through `SAMEORIGIN` setting test.
+- Protected auth endpoints reject anonymous access.
+兼容性影响：
+- 小程序现有 `WECHAT_LOGIN_ENDPOINT=/api/v1/auth/wechat-login` 可对接新接口。
+- 登录响应同时返回 `access` 和兼容字段 `token`，便于现有小程序请求层继续读取 token。
+外部依赖与已知限制：
+- 真实微信登录需要外部配置 `WECHAT_MINIAPP_APPID` 和 `WECHAT_MINIAPP_SECRET`。
+- 当前环境无法运行微信开发者工具，只能完成代码级和 HTTP API 验证。
+Git Commit：feat(accounts): add WeChat JWT authentication
+是否允许继续下一项：等待人工确认

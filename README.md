@@ -502,3 +502,14 @@ D-01 收窄了 Django API 的默认公开面。生产环境 `DJANGO_API_AUTH_REQ
 - 设备或服务调用方：使用 `DJANGO_API_KEY_HEADER` 指定的请求头，默认 `X-API-Key`。允许的 key 通过 `DJANGO_API_KEY_ALLOWLIST` 以逗号分隔配置。`DJANGO_API_AUTH_TOKEN` 仅作为旧环境的单 token 兼容项保留。
 
 本地开发可在 `.env.local` 或 shell 中设置 `DJANGO_API_AUTH_REQUIRED=false` 继续无 token 调试；生产环境不得把业务接口加入 `DJANGO_API_PUBLIC_PATHS`。
+
+## WeChat miniapp login
+
+D-02 新增了微信小程序登录接口：
+
+- `POST /api/v1/auth/wechat-login`
+- `POST /api/v1/auth/refresh`
+- `POST /api/v1/auth/logout`
+- `GET /api/v1/auth/me`
+
+生产环境需要配置 `WECHAT_MINIAPP_APPID` 和 `WECHAT_MINIAPP_SECRET`，服务端会调用微信 `code2session` 后建立本地用户和 openid 关联，并返回 SimpleJWT `access` 和 `refresh`。本地开发可显式设置 `WECHAT_LOGIN_MOCK_ENABLED=true` 使用 mock code 登录；该 mock 仅在 `DEBUG=true` 时允许启用。

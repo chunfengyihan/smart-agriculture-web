@@ -15,3 +15,21 @@ Django API authentication is controlled by environment variables:
 Web and miniapp clients should send `Authorization: Bearer <JWT>` for protected business APIs. API keys should be reserved for backend services, ingest jobs, or trusted device gateways.
 
 If external authentication or service keys are not configured, protected business APIs must return 401 or 403 instead of silently allowing anonymous access.
+
+## WeChat miniapp login
+
+Configure these variables before enabling real miniapp login:
+
+- `WECHAT_MINIAPP_APPID`: miniapp AppID.
+- `WECHAT_MINIAPP_SECRET`: miniapp AppSecret. Keep the real value outside the repository.
+- `WECHAT_CODE2SESSION_URL`: defaults to the official WeChat `jscode2session` endpoint.
+- `WECHAT_CODE2SESSION_TIMEOUT_SECONDS`: external request timeout.
+- `WECHAT_LOGIN_MOCK_ENABLED`: development-only mock login switch. The backend rejects mock login when `DEBUG=false`.
+
+The login flow is:
+
+1. The miniapp calls `wx.login()` and sends the returned `code` to `POST /api/v1/auth/wechat-login`.
+2. Django exchanges the code through `code2session`, creates or reuses a local user profile linked to `openid`, and returns `access` and `refresh` tokens.
+3. Miniapp and web clients send `Authorization: Bearer <access>` for protected APIs.
+4. Clients call `POST /api/v1/auth/refresh` with the refresh token when the access token expires.
+5. Clients call `POST /api/v1/auth/logout` with a valid access token and refresh token to blacklist the refresh token.

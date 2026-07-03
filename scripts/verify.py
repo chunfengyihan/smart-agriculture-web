@@ -54,7 +54,7 @@ def build_env(database: str) -> dict[str, str]:
         env["DB_ENGINE"] = "sqlite"
         env["DJANGO_DB_PATH"] = str(VERIFY_DB_PATH)
     env["EXTERNAL_INTEGRATIONS_ENABLED"] = "false"
-    env.setdefault("DJANGO_SECRET_KEY", "django-insecure-verify-only")
+    env.setdefault("DJANGO_SECRET_KEY", "django-insecure-verify-only-with-sufficient-length-for-jwt")
     env.setdefault("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
     env.setdefault("DJANGO_CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
     return env
@@ -99,7 +99,7 @@ def main() -> int:
         [py, manage, "migrate", "--noinput"],
         [py, manage, "seed_dev"],
         [py, manage, "seed_dev"],
-        [py, manage, "test", "apps.core", "apps.greenhouse", "apps.weather", "apps.ai_advisory"],
+        [py, manage, "test", "apps.core", "apps.accounts", "apps.greenhouse", "apps.weather", "apps.ai_advisory"],
         [py, manage, "spectacular", "--validate", "--file", str(SCHEMA_PATH)],
     ]
     if not args.backend_only:
