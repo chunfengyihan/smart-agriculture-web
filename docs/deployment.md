@@ -16,6 +16,25 @@ Web and miniapp clients should send `Authorization: Bearer <JWT>` for protected 
 
 If external authentication or service keys are not configured, protected business APIs must return 401 or 403 instead of silently allowing anonymous access.
 
+## Cache backend
+
+Django cache is controlled by environment variables:
+
+- `DJANGO_CACHE_BACKEND`: `locmem` for local development, `redis` for shared production cache.
+- `DJANGO_CACHE_KEY_PREFIX`: cache key prefix, default `smart-agri`.
+- `DJANGO_LOCMEM_CACHE_LOCATION`: LocMemCache location for development.
+- `DJANGO_LOCMEM_CACHE_MAX_ENTRIES`: development LocMemCache size guard.
+- `REDIS_CACHE_URL`: Redis URL when `DJANGO_CACHE_BACKEND=redis`.
+
+Weather integration cache settings:
+
+- `WEATHER_CACHE_TTL_SECONDS`: successful weather response TTL, default 21600.
+- `WEATHER_FAILURE_CACHE_TTL_SECONDS`: short TTL for upstream failure markers, default 60.
+- `WEATHER_CACHE_LOCK_SECONDS`: duplicate external request lock TTL, default 30.
+- `WEATHER_SOURCE_NAME`: included in weather cache keys, default `Open-Meteo`.
+
+Production multi-process deployments should use Redis so weather cache entries survive Django process restarts and are shared by all workers.
+
 ## WeChat miniapp login
 
 Configure these variables before enabling real miniapp login:

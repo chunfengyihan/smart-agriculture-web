@@ -1,23 +1,23 @@
 import hashlib
 import json
-from collections import OrderedDict
 from datetime import datetime
-from time import monotonic
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
 from django.conf import settings
+from django.core.cache import cache
 from django.utils import timezone
 
 
 SHANGHAI_TIME_ZONE = "Asia/Shanghai"
-WEATHER_CACHE = OrderedDict()
+CACHE_VERSION = "v2"
 
 
 class WeatherIntegrationError(Exception):
-    def __init__(self, message, status_code=502):
+    def __init__(self, message, status_code=502, degraded=None):
         super().__init__(message)
         self.status_code = status_code
+        self.degraded = degraded or {}
 
 
 WEATHER_DESCRIPTIONS = {
@@ -66,50 +66,76 @@ def cache_date_key():
     return timezone.localtime(timezone.now()).date().isoformat()
 
 
+def safe_key_part(value):
+    return str(value).replace(":", "_").replace("|", "_").replace(" ", "_")
+
+
 def make_cache_key(validated):
     context_hash = hashlib.sha256(
         json.dumps(
             {
                 "includeAdvice": bool(validated.get("includeAdvice", True)),
                 "metrics": validated.get("metrics") or [],
+                "source": settings.WEATHER_SOURCE_NAME,
             },
             ensure_ascii=False,
             sort_keys=True,
         ).encode("utf-8")
     ).hexdigest()[:12]
-    return "|".join(
-        [
-            cache_date_key(),
-            validated.get("cropId") or "unknown-crop",
-            validated.get("greenhouseId") or "unknown-greenhouse",
-            f"{validated['latitude']:.4f}",
-            f"{validated['longitude']:.4f}",
-            context_hash,
-        ]
-    )
+    location_key = validated.get("greenhouseId") or validated.get("address") or "unknown-location"
+    key_parts = [
+        CACHE_VERSION,
+        "weather",
+        settings.WEATHER_SOURCE_NAME,
+        cache_date_key(),
+        validated.get("cropId") or "unknown-crop",
+        location_key,
+        f"{validated['latitude']:.4f}",
+        f"{validated['longitude']:.4f}",
+        context_hash,
+    ]
+    return ":".join(safe_key_part(part) for part in key_parts)
+
+
+def cache_lock_key(cache_key):
+    return f"{cache_key}:lock"
+
+
+def cache_failure_key(cache_key):
+    return f"{cache_key}:failure"
 
 
 def get_cached_weather(cache_key):
-    cached = WEATHER_CACHE.get(cache_key)
-    if not cached:
-        return None
-
-    expires_at, value = cached
-    if expires_at <= monotonic():
-        WEATHER_CACHE.pop(cache_key, None)
-        return None
-
-    WEATHER_CACHE.move_to_end(cache_key)
-    return value
+    return cache.get(cache_key)
 
 
 def set_cached_weather(cache_key, value):
-    WEATHER_CACHE[cache_key] = (monotonic() + settings.WEATHER_CACHE_TTL_SECONDS, value)
-    WEATHER_CACHE.move_to_end(cache_key)
+    cache.set(cache_key, value, timeout=settings.WEATHER_CACHE_TTL_SECONDS)
 
-    max_items = max(1, settings.WEATHER_CACHE_MAX_ITEMS)
-    while len(WEATHER_CACHE) > max_items:
-        WEATHER_CACHE.popitem(last=False)
+
+def get_cached_failure(cache_key):
+    return cache.get(cache_failure_key(cache_key))
+
+
+def set_cached_failure(cache_key, message):
+    cache.set(
+        cache_failure_key(cache_key),
+        {
+            "degraded": True,
+            "source": settings.WEATHER_SOURCE_NAME,
+            "message": message,
+            "cachedAt": timezone.now().isoformat(),
+        },
+        timeout=settings.WEATHER_FAILURE_CACHE_TTL_SECONDS,
+    )
+
+
+def acquire_weather_lock(cache_key):
+    return cache.add(cache_lock_key(cache_key), True, timeout=settings.WEATHER_CACHE_LOCK_SECONDS)
+
+
+def release_weather_lock(cache_key):
+    cache.delete(cache_lock_key(cache_key))
 
 
 def fetch_open_meteo_payload(latitude, longitude):
@@ -162,7 +188,7 @@ def normalize_weather(payload, validated):
         )
 
     return {
-        "source": "Open-Meteo",
+        "source": settings.WEATHER_SOURCE_NAME,
         "sourceUrl": "https://open-meteo.com/",
         "generatedAt": datetime.utcnow().isoformat() + "Z",
         "location": {
@@ -184,17 +210,11 @@ def normalize_weather(payload, validated):
     }
 
 
-def get_greenhouse_weather_advice(validated):
-    cache_key = make_cache_key(validated)
-    cached = get_cached_weather(cache_key)
-    if cached:
-        return cached
-
-    payload = fetch_open_meteo_payload(validated["latitude"], validated["longitude"])
-    weather = normalize_weather(payload, validated)
-    result = {
+def build_weather_result(cache_key, weather, validated):
+    return {
         "cacheKey": cache_key,
         "cachedAt": timezone.now().isoformat(),
+        "cacheBackend": settings.CACHE_BACKEND,
         "weather": weather,
         "advice": None,
         "adviceError": (
@@ -203,5 +223,57 @@ def get_greenhouse_weather_advice(validated):
             else None
         ),
     }
-    set_cached_weather(cache_key, result)
-    return result
+
+
+def cached_failure_error(cached_failure):
+    return WeatherIntegrationError(
+        cached_failure["message"],
+        status_code=503,
+        degraded=cached_failure,
+    )
+
+
+def get_greenhouse_weather_advice(validated):
+    cache_key = make_cache_key(validated)
+    cached = get_cached_weather(cache_key)
+    if cached:
+        return cached
+
+    cached_failure = get_cached_failure(cache_key)
+    if cached_failure:
+        raise cached_failure_error(cached_failure)
+
+    lock_acquired = acquire_weather_lock(cache_key)
+    if not lock_acquired:
+        cached = get_cached_weather(cache_key)
+        if cached:
+            return cached
+        cached_failure = get_cached_failure(cache_key)
+        if cached_failure:
+            raise cached_failure_error(cached_failure)
+        raise WeatherIntegrationError(
+            "Weather request is already in progress",
+            status_code=503,
+            degraded={
+                "degraded": True,
+                "source": settings.WEATHER_SOURCE_NAME,
+                "message": "Weather request is already in progress",
+            },
+        )
+
+    try:
+        payload = fetch_open_meteo_payload(validated["latitude"], validated["longitude"])
+        weather = normalize_weather(payload, validated)
+        result = build_weather_result(cache_key, weather, validated)
+        set_cached_weather(cache_key, result)
+        return result
+    except WeatherIntegrationError as exc:
+        set_cached_failure(cache_key, str(exc))
+        exc.degraded = {
+            "degraded": True,
+            "source": settings.WEATHER_SOURCE_NAME,
+            "message": str(exc),
+        }
+        raise
+    finally:
+        release_weather_lock(cache_key)

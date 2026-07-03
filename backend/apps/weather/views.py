@@ -42,7 +42,7 @@ class LegacyWeatherAdviceView(APIView):
         try:
             return Response(get_greenhouse_weather_advice(serializer.validated_data))
         except WeatherIntegrationError as exc:
-            return Response({"message": str(exc)}, status=exc.status_code)
+            return Response({"message": str(exc), "degraded": exc.degraded or {}}, status=exc.status_code)
 
 
 class V1WeatherAdviceView(APIView):
@@ -73,5 +73,6 @@ class V1WeatherAdviceView(APIView):
                 request,
                 code=50021,
                 message=str(exc),
+                data=exc.degraded or {},
                 status_code=exc.status_code,
             )

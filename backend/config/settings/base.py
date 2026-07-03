@@ -184,11 +184,39 @@ elif db_engine == "mysql":
 else:
     raise ImproperlyConfigured("DB_ENGINE must be either 'sqlite' or 'mysql'")
 
+CACHE_BACKEND = os.environ.get("DJANGO_CACHE_BACKEND", "locmem").strip().lower()
+CACHE_KEY_PREFIX = os.environ.get("DJANGO_CACHE_KEY_PREFIX", "smart-agri")
+if CACHE_BACKEND == "redis":
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": os.environ.get("REDIS_CACHE_URL", "redis://127.0.0.1:6379/1"),
+            "KEY_PREFIX": CACHE_KEY_PREFIX,
+            "TIMEOUT": None,
+        }
+    }
+elif CACHE_BACKEND == "locmem":
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": os.environ.get("DJANGO_LOCMEM_CACHE_LOCATION", "smart-agri-local"),
+            "KEY_PREFIX": CACHE_KEY_PREFIX,
+            "TIMEOUT": None,
+            "OPTIONS": {
+                "MAX_ENTRIES": int(os.environ.get("DJANGO_LOCMEM_CACHE_MAX_ENTRIES", "512")),
+            },
+        }
+    }
+else:
+    raise ImproperlyConfigured("DJANGO_CACHE_BACKEND must be either 'locmem' or 'redis'")
+
 EXTERNAL_INTEGRATIONS_ENABLED = env_bool("EXTERNAL_INTEGRATIONS_ENABLED", False)
 WEATHER_INTEGRATION_ENABLED = env_bool("WEATHER_INTEGRATION_ENABLED", EXTERNAL_INTEGRATIONS_ENABLED)
 WEATHER_FETCH_TIMEOUT_SECONDS = float(os.environ.get("WEATHER_FETCH_TIMEOUT_SECONDS", "8"))
-WEATHER_CACHE_MAX_ITEMS = int(os.environ.get("WEATHER_CACHE_MAX_ITEMS", "512"))
 WEATHER_CACHE_TTL_SECONDS = int(os.environ.get("WEATHER_CACHE_TTL_SECONDS", str(6 * 60 * 60)))
+WEATHER_FAILURE_CACHE_TTL_SECONDS = int(os.environ.get("WEATHER_FAILURE_CACHE_TTL_SECONDS", "60"))
+WEATHER_CACHE_LOCK_SECONDS = int(os.environ.get("WEATHER_CACHE_LOCK_SECONDS", "30"))
+WEATHER_SOURCE_NAME = os.environ.get("WEATHER_SOURCE_NAME", "Open-Meteo")
 
 YOUREN_INTEGRATION_ENABLED = env_bool("YOUREN_INTEGRATION_ENABLED", EXTERNAL_INTEGRATIONS_ENABLED)
 YOUREN_APP_KEY = os.environ.get("YOUREN_APP_KEY", "")

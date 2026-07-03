@@ -40,13 +40,13 @@
 - 调用页面：天气与棚内建议面板
 - 调用文件：`src/data/weatherAdvice.ts`、`src/components/WeatherAdvicePanel.tsx`、`smart-agri-miniapp/services/weather.js`
 - 请求字段：`cropId`、`cropName`、`greenhouseId`、`greenhouseName`、`latitude`、`longitude`、`address?`、`metrics`、`includeAdvice?`
-- 响应字段：`cacheKey`、`cachedAt`、`weather`、`advice`、`adviceError`
-- 当前数据来源：Open-Meteo 天气接口；AI 建议依赖外部 AI 服务
+- 响应字段：`cacheKey`、`cachedAt`、`cacheBackend`、`weather`、`advice`、`adviceError`
+- 当前数据来源：Open-Meteo 天气接口；天气结果通过 Django cache framework 缓存；AI 建议依赖外部 AI 服务
 - Django 迁移状态：已迁移为 safe-disabled endpoint。默认不调用外部服务，返回 HTTP 503。
 - 是否依赖第三方服务：是
 - 迁移优先级：P1
 - 兼容性要求：外部集成关闭时不得生成伪造农业建议；应返回清晰 503 错误
-- 风险：天气接口和 AI 接口均为外部依赖；缓存与超时策略需迁移复核
+- 风险：天气接口和 AI 接口均为外部依赖；生产多进程缓存必须使用 Redis
 - 确认状态：CONFIRMED
 
 ## P1 - Crop Diagnosis

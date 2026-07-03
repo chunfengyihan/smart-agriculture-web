@@ -327,3 +327,52 @@ Git Commit：refactor(integrations): move youren dashboard to Django
 - 告警列表分页和作物/大棚 CRUD 仍留给后续 D-12 等项处理。
 Git Commit：feat(greenhouse): build dashboard from normalized models
 是否允许继续下一项：等待人工确认
+
+## D-06
+
+问题编号：D-06
+修复状态：completed, waiting for manual confirmation
+修改文件：
+- `backend/config/settings/base.py`
+- `backend/apps/weather/services.py`
+- `backend/apps/weather/views.py`
+- `backend/apps/weather/tests/test_weather_advice.py`
+- `requirements/base.txt`
+- `.env.example`
+- `README.md`
+- `docs/deployment.md`
+- `docs/api_inventory.md`
+- `docs/api_contract_v1.yaml`
+- `docs/architecture_remediation.md`
+关键设计决策：
+- 移除天气服务进程内 `OrderedDict` 缓存，统一使用 Django cache framework。
+- 开发默认 `LocMemCache`，生产可通过 `DJANGO_CACHE_BACKEND=redis` 和 `REDIS_CACHE_URL` 启用 Redis。
+- 天气缓存 key 版本化，并包含数据源名称、日期、作物、温室/位置标识、经纬度和 advice/metrics 参数 hash。
+- 成功响应使用 `WEATHER_CACHE_TTL_SECONDS`；上游失败使用 `WEATHER_FAILURE_CACHE_TTL_SECONDS` 做短缓存，避免缓存穿透。
+- 使用 `cache.add()` 建立短锁，减少并发或多进程下对外部天气接口的重复请求。
+- 外部天气失败时 v1 错误响应在 `data` 中返回 `degraded=true`、`source` 和降级消息。
+自动化检查结果：
+- `.venv\Scripts\python.exe -m pip install -r requirements\base.txt` passed, installed `redis`.
+- `.venv\Scripts\python.exe backend\manage.py check` passed with default LocMem cache.
+- `DJANGO_CACHE_BACKEND=redis REDIS_CACHE_URL=redis://127.0.0.1:6379/1 .venv\Scripts\python.exe backend\manage.py check` passed as Redis configuration-level verification.
+- `.venv\Scripts\python.exe backend\manage.py test apps.weather` passed, 11 tests.
+- `.venv\Scripts\python.exe backend\manage.py test apps.core apps.accounts apps.greenhouse apps.integrations apps.weather apps.ai_advisory` passed, 53 tests.
+- `.venv\Scripts\python.exe backend\manage.py spectacular --validate --file .runtime\schema-d06.yaml` passed.
+- `.venv\Scripts\python.exe backend\manage.py makemigrations --check --dry-run` passed, no changes detected.
+- `.venv\Scripts\python.exe backend\manage.py migrate --noinput` passed, no migrations.
+- `npm run lint` passed.
+- `npm run build` passed.
+接口验证结果：
+- Unit tests cover cache key construction with source, location, coordinates and advice context.
+- Unit tests cover cache hit behavior and verify repeated same request skips external weather fetch.
+- Unit tests cover external failure degraded response and short failure-cache behavior.
+- Static OpenAPI draft includes `cacheBackend` in `WeatherAdviceResponse`.
+兼容性影响：
+- Weather success payload keeps `cacheKey`, `cachedAt`, `weather`, `advice`, and `adviceError`; adds `cacheBackend`.
+- Default local development behavior remains LocMemCache.
+- Production Redis requires installing `redis` dependency and setting `DJANGO_CACHE_BACKEND=redis`.
+外部依赖与已知限制：
+- Redis server connectivity was not exercised because no Redis service is configured in the local environment; Django Redis backend configuration and dependency import were verified.
+- Weather integration remains guarded by `WEATHER_INTEGRATION_ENABLED`.
+Git Commit：refactor(weather): use Django cache backend
+是否允许继续下一项：等待人工确认

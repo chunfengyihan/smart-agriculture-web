@@ -242,6 +242,18 @@ Open-Meteo 天气预报不需要 API key：
 $env:WEATHER_INTEGRATION_ENABLED = "true"
 ```
 
+开发环境默认使用 Django `LocMemCache`；生产多进程部署建议启用 Redis：
+
+```env
+DJANGO_CACHE_BACKEND=redis
+REDIS_CACHE_URL=redis://127.0.0.1:6379/1
+WEATHER_CACHE_TTL_SECONDS=21600
+WEATHER_FAILURE_CACHE_TTL_SECONDS=60
+WEATHER_CACHE_LOCK_SECONDS=30
+```
+
+天气缓存 key 包含数据源、日期、作物/温室、经纬度和 advice 参数。外部天气接口失败时，v1 错误响应会在 `data` 中返回 `degraded=true`、`source` 和降级消息。
+
 AI 相关接口目前只保留安全关闭入口。即使配置 `EXTERNAL_INTEGRATIONS_ENABLED=true`，Django 版 AI 适配器仍需后续实现后才能真实调用模型。
 
 健康检查：
@@ -470,7 +482,7 @@ npm run dev -- --host 127.0.0.1 --port 5173
 http://127.0.0.1:5173/
 ```
 
-默认 `EXTERNAL_INTEGRATIONS_ENABLED=false`。设置 `WEATHER_INTEGRATION_ENABLED=true` 后启用 Open-Meteo 天气预报。AI 操作建议、作物图片诊断和农业问答在 Django 版中仍保持关闭，直到后续完成 AI 适配器和凭据配置。
+默认 `EXTERNAL_INTEGRATIONS_ENABLED=false`。设置 `WEATHER_INTEGRATION_ENABLED=true` 后启用 Open-Meteo 天气预报。天气结果通过 Django cache framework 缓存；本地默认 LocMemCache，生产可通过 `DJANGO_CACHE_BACKEND=redis` 与 `REDIS_CACHE_URL` 切换到 Redis。AI 操作建议、作物图片诊断和农业问答在 Django 版中仍保持关闭，直到后续完成 AI 适配器和凭据配置。
 
 运行完整本地验证：
 

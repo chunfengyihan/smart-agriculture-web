@@ -717,6 +717,9 @@ components:
         cachedAt:
           type: string
           format: date-time
+        cacheBackend:
+          type: string
+          enum: [locmem, redis]
         weather:
           type: object
         advice:
