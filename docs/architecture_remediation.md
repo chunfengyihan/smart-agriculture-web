@@ -513,3 +513,47 @@ Miniapp Git Commit: fix(miniapp): gate demo fallback by runtime (`3864881`)
 Parent Git Commit: docs(remediation): record d09 miniapp fallback policy
 Continue next item: waiting for manual confirmation
 是否允许继续下一项：等待人工确认
+
+## D-10
+
+Issue: D-10
+Status: completed, waiting for manual confirmation
+Changed files:
+- `smart-agri-miniapp/config/api.js`
+- `smart-agri-miniapp/config/api.env.js`
+- `smart-agri-miniapp/config/api.env.example.js`
+- `smart-agri-miniapp/scripts/validate-api-config.cjs`
+- `smart-agri-miniapp/utils/request.js`
+- `smart-agri-miniapp/utils/demoFallback.js`
+- `smart-agri-miniapp/README.md`
+- `docs/architecture_remediation.md`
+
+Key decisions:
+- Replaced the hard-coded miniapp API environment with WeChat runtime-aware `develop`, `trial`, and `release` mapping.
+- Moved API bases, timeout, retry count, and demo fallback switch into `config/api.env.js`, with a committed example file.
+- Kept local `develop` on `http://127.0.0.1:8000`, required HTTPS for `trial` and `release`, and blocked release-like test hosts.
+- Added `scripts/validate-api-config.cjs` so packaging can fail before release when the production domain is missing or unsafe.
+- Made the request wrapper use configured timeout and retry count, retrying only network and 5xx failures.
+- Updated demo fallback runtime detection to support the new `develop` environment name.
+- Documented legal-domain, HTTPS, timeout, retry, and release-domain validation steps in the miniapp README.
+
+Automated checks:
+- `Get-ChildItem -Recurse -Filter *.js | ForEach-Object { node --check $_.FullName }` passed in `smart-agri-miniapp`.
+- `Get-ChildItem -Recurse -Filter *.json | ForEach-Object { node -e "JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'))" $_.FullName }` passed in `smart-agri-miniapp`.
+- `node scripts\validate-api-config.cjs develop` passed and resolved `http://127.0.0.1:8000`.
+- `node scripts\validate-api-config.cjs trial` passed and resolved `https://trial-api.smart-agri.cn`.
+- `node scripts\validate-api-config.cjs release` failed as expected because the production domain is intentionally missing.
+- `$env:MINIAPP_API_BASE_URL='https://api.smart-agri.cn'; node scripts\validate-api-config.cjs release` passed.
+- Release validation rejected `https://127.0.0.1` and `https://api.example.com` as unsafe hosts.
+
+Compatibility impact:
+- Development runtime remains local-debug friendly.
+- Trial and release runtimes no longer inherit local or placeholder API domains.
+- A real production API domain must be supplied in `config/api.env.js` or via `MINIAPP_API_BASE_URL` before release packaging.
+
+Known limits:
+- WeChat DevTools compile was not run from this environment; syntax, JSON, and environment validation checks passed.
+
+Miniapp Git Commit: fix(miniapp): validate API environment config (`ea80df7`)
+Parent Git Commit: docs(remediation): record d10 miniapp api config
+Continue next item: waiting for manual confirmation
