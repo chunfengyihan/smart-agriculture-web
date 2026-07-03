@@ -315,12 +315,15 @@ YOUREN_INTEGRATION_ENABLED=true
 - Swagger UI：`GET /api/v1/docs/`
 - 健康检查：`GET /api/v1/health/`
 - P0 看板：`GET /api/v1/greenhouse/dashboard`，legacy `GET /api/greenhouse/dashboard`
+- P0 环境读数查询：`GET /api/v1/greenhouse/readings?greenhouse=...&start=...&end=...`
 - P1 天气：`POST /api/weather/greenhouse-advice`
 
 Django Admin 使用 `django-simpleui`，默认中文；已注册：
 
 - `Greenhouse`
+- `Device`
 - `EnvironmentReading`
+- `Alert`
 - `DashboardSnapshot`
 
 本地超级管理员需要在本地数据库中创建，账号密码不会提交到 Git。
@@ -373,7 +376,7 @@ copy config\greenhouse.mapping.example.json config\greenhouse.mapping.json
 - 每个大棚对应哪个有人云 `deviceNo`。
 - 每个环境指标对应哪个有人云 `dataPointId`。
 
-当前 Django 单端口版本尚未启用有人云真实读取；P0 看板使用 `seed_dev` 导入的本地 dashboard snapshot。后续迁移有人云适配器时，应优先使用数据库表或该映射文件维护设备关系，不要在前端保存有人云密钥。
+当前 Django 单端口版本默认不启用有人云真实读取；P0 看板优先使用 `seed_dev` 导入的 `Greenhouse`、`Device`、`EnvironmentReading` 和 `Alert` 规范化数据聚合，`DashboardSnapshot` 仅作为缓存和降级数据。启用有人云后，应优先使用数据库表或该映射文件维护设备关系，不要在前端保存有人云密钥。
 
 旧 Node 探测脚本仍可作为临时工具获取 `deviceNo` 和 `dataPointId`：
 
@@ -389,7 +392,7 @@ npm run youren:test
 - 样式使用 CSS 变量实现主题，浅色和深色主题都在 `src/index.css` 中。
 - 作物主视觉当前使用 Wikimedia Commons 上对应作物图片：枣树果实、蓝莓灌木、樱桃树果实。后续建议替换为你自己的基地实拍照片。
 - 模拟数据在 `src/data/mockDashboard.ts`，可直接修改大棚数量、指标值、告警内容。
-- 模拟模式图片在 `src/data/mockDashboard.ts` 修改；Django dashboard 默认从 `DashboardSnapshot.payload` 返回 `DashboardData.crops[].heroImage`，启用 `YOUREN_INTEGRATION_ENABLED=true` 后由 Django 有人云 service 实时映射。
+- 模拟模式图片在 `src/data/mockDashboard.ts` 修改；Django dashboard 默认从规范化模型聚合 `DashboardData`，没有规范化数据时才降级读取 `DashboardSnapshot.payload`，启用 `YOUREN_INTEGRATION_ENABLED=true` 后由 Django 有人云 service 实时映射。
 - 前端刷新间隔在 `src/App.tsx` 的 `refreshIntervalMs` 中，默认 30 秒。
 - 前端刷新有请求序号保护，轮询和手动刷新并发时，旧响应不会覆盖新数据。
 - 新增工具函数或类型时优先保持模块内私有；只有被其他文件实际导入时再 `export`。

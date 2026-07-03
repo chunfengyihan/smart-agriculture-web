@@ -5,7 +5,7 @@ from django.test import Client, TestCase, override_settings
 from unittest.mock import patch
 from rest_framework_simplejwt.tokens import AccessToken
 
-from apps.greenhouse.models import DashboardSnapshot, EnvironmentReading, Greenhouse
+from apps.greenhouse.models import Alert, DashboardSnapshot, Device, EnvironmentReading, Greenhouse
 from apps.integrations.youren.client import YourenUpstreamError
 
 
@@ -35,7 +35,9 @@ class GreenhouseDashboardApiTests(TestCase):
         call_command("seed_dev", verbosity=0)
 
         self.assertEqual(Greenhouse.objects.count(), 4)
+        self.assertEqual(Device.objects.count(), 4)
         self.assertEqual(EnvironmentReading.objects.count(), 4)
+        self.assertGreater(Alert.objects.count(), 0)
         self.assertEqual(DashboardSnapshot.objects.count(), 1)
 
     def test_legacy_dashboard_after_seed_preserves_payload_shape(self):
@@ -65,6 +67,46 @@ class GreenhouseDashboardApiTests(TestCase):
         self.assertEqual(payload["data"]["source"], "local")
         self.assertEqual(len(payload["data"]["crops"]), 3)
         self.assertTrue(payload["request_id"])
+
+    def test_dashboard_uses_normalized_models_before_snapshot(self):
+        call_command("seed_dev", verbosity=0)
+        snapshot = DashboardSnapshot.objects.get()
+        snapshot.payload = {
+            "generatedAt": "2026-07-03T00:00:00Z",
+            "source": "local",
+            "crops": [],
+        }
+        snapshot.save(update_fields=["payload", "updated_at"])
+
+        response = Client().get("/api/v1/greenhouse/dashboard")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["data"]["source"], "local")
+        self.assertEqual(len(payload["data"]["crops"]), 3)
+        self.assertGreater(len(payload["data"]["crops"][0]["greenhouses"]), 0)
+
+    def test_v1_environment_readings_filter_by_greenhouse_and_time_range(self):
+        call_command("seed_dev", verbosity=0)
+        reading = EnvironmentReading.objects.select_related("greenhouse").first()
+
+        response = Client().get(
+            "/api/v1/greenhouse/readings",
+            {
+                "greenhouse": reading.greenhouse.code,
+                "start": reading.recorded_at.isoformat(),
+                "end": reading.recorded_at.isoformat(),
+                "metric_type": "environment",
+                "page_size": 5,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["code"], 0)
+        self.assertEqual(payload["data"]["count"], 1)
+        self.assertEqual(payload["data"]["results"][0]["greenhouse"], reading.greenhouse.id)
+        self.assertEqual(payload["data"]["results"][0]["metric_type"], "environment")
 
     @override_settings(API_AUTH_REQUIRED=True, API_AUTH_TOKEN="test-token")
     def test_dashboard_default_public_paths_do_not_include_business_api(self):

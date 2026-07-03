@@ -98,10 +98,11 @@
 已完成：
 
 - 创建 `apps.greenhouse`。
-- 创建 `Greenhouse`、`EnvironmentReading`、`DashboardSnapshot`。
+- 创建 `Greenhouse`、`Device`、`EnvironmentReading`、`Alert`、`DashboardSnapshot`。
 - 创建 `0001_initial` migration。
 - 创建 `seed_dev` 命令。
 - 创建 legacy `/api/greenhouse/dashboard` 和 v1 `/api/v1/greenhouse/dashboard`。
+- 创建 v1 `/api/v1/greenhouse/readings`，支持按温室、时间范围和 `metric_type` 查询。
 - 创建 P0 单元测试和兼容性证据文档。
 
 P0 数据模型建议：

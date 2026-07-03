@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import DashboardSnapshot, EnvironmentReading, Greenhouse
+from .models import Alert, DashboardSnapshot, Device, EnvironmentReading, Greenhouse
 
 
 class GreenhouseSerializer(serializers.ModelSerializer):
@@ -25,6 +25,7 @@ class EnvironmentReadingSerializer(serializers.ModelSerializer):
             "id",
             "greenhouse",
             "recorded_at",
+            "metric_type",
             "air_temp",
             "air_humidity",
             "light",
@@ -34,6 +35,43 @@ class EnvironmentReadingSerializer(serializers.ModelSerializer):
             "ec",
             "ph",
             "source",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class DeviceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Device
+        fields = [
+            "id",
+            "greenhouse",
+            "code",
+            "name",
+            "provider",
+            "external_id",
+            "status",
+            "last_seen_at",
+            "metadata",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class AlertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Alert
+        fields = [
+            "id",
+            "greenhouse",
+            "device",
+            "level",
+            "metric_type",
+            "message",
+            "triggered_at",
+            "resolved_at",
+            "source",
+            "metadata",
             "created_at",
             "updated_at",
         ]

@@ -15,7 +15,11 @@ from apps.ai_advisory.views import (
     V1AgriChatView,
     V1CropDiagnosisView,
 )
-from apps.greenhouse.views import LegacyGreenhouseDashboardView, V1GreenhouseDashboardView
+from apps.greenhouse.views import (
+    LegacyGreenhouseDashboardView,
+    V1EnvironmentReadingsView,
+    V1GreenhouseDashboardView,
+)
 from apps.integrations.youren.views import LegacyYourenHealthView, V1YourenHealthView
 from apps.weather.views import LegacyWeatherAdviceView, V1WeatherAdviceView
 
@@ -58,6 +62,11 @@ urlpatterns = [
         "api/v1/greenhouse/dashboard",
         V1GreenhouseDashboardView.as_view(),
         name="api-v1-greenhouse-dashboard",
+    ),
+    path(
+        "api/v1/greenhouse/readings",
+        V1EnvironmentReadingsView.as_view(),
+        name="api-v1-greenhouse-readings",
     ),
     path(
         "api/v1/weather/greenhouse-advice",

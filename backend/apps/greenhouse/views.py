@@ -1,17 +1,21 @@
 from django.conf import settings
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
+from rest_framework import serializers
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.pagination import StandardPageNumberPagination
 from apps.core.permissions import ApiKeyRequired
 from apps.core.responses import error_response, success_response
 from apps.integrations.youren.client import YourenIntegrationError
 from apps.integrations.youren.service import get_youren_dashboard
 
 from .models import DashboardSnapshot
-from .serializers import DashboardPayloadSerializer, V1DashboardResponseSerializer
+from .repositories import GreenhouseRepository
+from .serializers import DashboardPayloadSerializer, EnvironmentReadingSerializer, V1DashboardResponseSerializer
+from .services import build_dashboard_from_models
 
 
 def empty_dashboard_payload():
@@ -32,7 +36,21 @@ def latest_dashboard_payload():
 def dashboard_payload():
     if settings.YOUREN_INTEGRATION_ENABLED:
         return get_youren_dashboard()
-    return latest_dashboard_payload()
+    return build_dashboard_from_models() or latest_dashboard_payload()
+
+
+class EnvironmentReadingQuerySerializer(serializers.Serializer):
+    greenhouse = serializers.CharField(required=False, max_length=64)
+    start = serializers.DateTimeField(required=False)
+    end = serializers.DateTimeField(required=False)
+    metric_type = serializers.CharField(required=False, max_length=32)
+
+    def validate(self, attrs):
+        start = attrs.get("start")
+        end = attrs.get("end")
+        if start and end and start > end:
+            raise serializers.ValidationError({"end": "end must be greater than or equal to start"})
+        return attrs
 
 
 class LegacyGreenhouseDashboardView(APIView):
@@ -63,3 +81,27 @@ class V1GreenhouseDashboardView(APIView):
                 message=exc.safe_message,
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
+
+
+class V1EnvironmentReadingsView(APIView):
+    permission_classes = [ApiKeyRequired]
+    pagination_class = StandardPageNumberPagination
+
+    @extend_schema(parameters=[EnvironmentReadingQuerySerializer], responses={200: EnvironmentReadingSerializer(many=True)})
+    def get(self, request):
+        serializer = EnvironmentReadingQuerySerializer(data=request.query_params)
+        if not serializer.is_valid():
+            return error_response(
+                request,
+                code=40000,
+                message="请求参数无效",
+                data=serializer.errors,
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
+        queryset = GreenhouseRepository().query_readings(**serializer.validated_data)
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request, view=self)
+        data = EnvironmentReadingSerializer(page, many=True).data
+        paginated = paginator.get_paginated_response(data).data
+        return success_response(request, paginated)

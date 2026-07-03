@@ -21,6 +21,43 @@ class Greenhouse(models.Model):
         return f"{self.code} {self.name}"
 
 
+class Device(models.Model):
+    STATUS_ONLINE = "online"
+    STATUS_WARNING = "warning"
+    STATUS_OFFLINE = "offline"
+    STATUS_CHOICES = [
+        (STATUS_ONLINE, "Online"),
+        (STATUS_WARNING, "Warning"),
+        (STATUS_OFFLINE, "Offline"),
+    ]
+
+    greenhouse = models.ForeignKey(
+        Greenhouse,
+        on_delete=models.CASCADE,
+        related_name="devices",
+    )
+    code = models.CharField(max_length=128, unique=True)
+    name = models.CharField(max_length=128)
+    provider = models.CharField(max_length=32, default="local", db_index=True)
+    external_id = models.CharField(max_length=128, blank=True, db_index=True)
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=STATUS_ONLINE, db_index=True)
+    last_seen_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["greenhouse", "status"]),
+            models.Index(fields=["provider", "external_id"]),
+            models.Index(fields=["provider", "last_seen_at"]),
+        ]
+        ordering = ["greenhouse__code", "code"]
+
+    def __str__(self):
+        return f"{self.code} {self.name}"
+
+
 class EnvironmentReading(models.Model):
     greenhouse = models.ForeignKey(
         Greenhouse,
@@ -28,6 +65,7 @@ class EnvironmentReading(models.Model):
         related_name="readings",
     )
     recorded_at = models.DateTimeField(db_index=True)
+    metric_type = models.CharField(max_length=32, default="environment", db_index=True)
     air_temp = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     air_humidity = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     light = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
@@ -49,9 +87,56 @@ class EnvironmentReading(models.Model):
         ]
         indexes = [
             models.Index(fields=["greenhouse", "recorded_at"]),
+            models.Index(fields=["greenhouse", "metric_type", "recorded_at"]),
             models.Index(fields=["source", "recorded_at"]),
+            models.Index(fields=["source", "metric_type", "recorded_at"]),
         ]
         ordering = ["-recorded_at", "greenhouse_id"]
+
+
+class Alert(models.Model):
+    LEVEL_NOTICE = "notice"
+    LEVEL_WARNING = "warning"
+    LEVEL_CRITICAL = "critical"
+    LEVEL_CHOICES = [
+        (LEVEL_NOTICE, "Notice"),
+        (LEVEL_WARNING, "Warning"),
+        (LEVEL_CRITICAL, "Critical"),
+    ]
+
+    greenhouse = models.ForeignKey(
+        Greenhouse,
+        on_delete=models.CASCADE,
+        related_name="alerts",
+    )
+    device = models.ForeignKey(
+        Device,
+        on_delete=models.SET_NULL,
+        related_name="alerts",
+        null=True,
+        blank=True,
+    )
+    level = models.CharField(max_length=16, choices=LEVEL_CHOICES, default=LEVEL_WARNING, db_index=True)
+    metric_type = models.CharField(max_length=32, blank=True, db_index=True)
+    message = models.CharField(max_length=512)
+    triggered_at = models.DateTimeField(db_index=True)
+    resolved_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    source = models.CharField(max_length=32, default="local", db_index=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["greenhouse", "resolved_at", "-triggered_at"]),
+            models.Index(fields=["greenhouse", "metric_type", "-triggered_at"]),
+            models.Index(fields=["level", "resolved_at"]),
+            models.Index(fields=["source", "-triggered_at"]),
+        ]
+        ordering = ["-triggered_at", "-id"]
+
+    def __str__(self):
+        return f"{self.greenhouse_id} {self.level} {self.message[:64]}"
 
 
 class DashboardSnapshot(models.Model):

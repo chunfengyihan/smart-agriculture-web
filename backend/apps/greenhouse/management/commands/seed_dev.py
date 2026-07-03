@@ -7,7 +7,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
-from apps.greenhouse.models import DashboardSnapshot, EnvironmentReading, Greenhouse
+from apps.greenhouse.models import Alert, DashboardSnapshot, Device, EnvironmentReading, Greenhouse
 from config.settings.base import REPO_DIR
 
 
@@ -61,7 +61,10 @@ class Command(BaseCommand):
         snapshot_at = aware_datetime(payload.get("generatedAt"))
         source = payload.get("source") or "local"
         greenhouse_count = 0
+        device_count = 0
         reading_count = 0
+        alert_count = 0
+        Alert.objects.filter(source=source).delete()
 
         for crop in payload.get("crops", []):
             crop_code = crop.get("id", "")
@@ -76,8 +79,24 @@ class Command(BaseCommand):
                     },
                 )
                 greenhouse_count += 1
+                device, _ = Device.objects.update_or_create(
+                    code=f"{source}:{greenhouse_data['id']}:primary",
+                    defaults={
+                        "greenhouse": greenhouse,
+                        "name": f"{greenhouse.name} 采集设备",
+                        "provider": source,
+                        "external_id": greenhouse_data["id"],
+                        "status": greenhouse_data.get("status") or Device.STATUS_ONLINE,
+                        "last_seen_at": snapshot_at,
+                        "metadata": {
+                            "onlineDevices": greenhouse_data.get("onlineDevices", 0),
+                            "totalDevices": greenhouse_data.get("totalDevices", 0),
+                        },
+                    },
+                )
+                device_count += 1
 
-                reading_defaults = {"source": source}
+                reading_defaults = {"source": source, "metric_type": "environment"}
                 for metric in greenhouse_data.get("metrics", []):
                     field_name = METRIC_FIELD_BY_KEY.get(metric.get("key"))
                     if field_name:
@@ -91,6 +110,19 @@ class Command(BaseCommand):
                 )
                 reading_count += 1
 
+                for alert_data in greenhouse_data.get("alerts", []):
+                    Alert.objects.create(
+                        greenhouse=greenhouse,
+                        device=device,
+                        level=alert_data.get("level") or Alert.LEVEL_WARNING,
+                        metric_type=alert_data.get("metricType", ""),
+                        message=alert_data.get("message", ""),
+                        triggered_at=snapshot_at,
+                        source=source,
+                        metadata={"legacy_id": alert_data.get("id"), "legacy_time": alert_data.get("time")},
+                    )
+                    alert_count += 1
+
         DashboardSnapshot.objects.update_or_create(
             source=source,
             schema_version="dashboard-v1",
@@ -103,6 +135,9 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Seeded {greenhouse_count} greenhouses, {reading_count} readings, 1 dashboard snapshot."
+                (
+                    f"Seeded {greenhouse_count} greenhouses, {device_count} devices, "
+                    f"{reading_count} readings, {alert_count} alerts, 1 dashboard snapshot."
+                )
             )
         )

@@ -264,3 +264,66 @@ Git Commit：refactor(api): unify v1 API contract
 - Node weather and AI legacy handlers仍保留，后续应在对应 Django 外部集成达到 parity 后删除或转发。
 Git Commit：refactor(integrations): move youren dashboard to Django
 是否允许继续下一项：等待人工确认
+
+## D-05
+
+问题编号：D-05
+修复状态：completed, waiting for manual confirmation
+修改文件：
+- `backend/apps/greenhouse/models.py`
+- `backend/apps/greenhouse/admin.py`
+- `backend/apps/greenhouse/serializers.py`
+- `backend/apps/greenhouse/repositories.py`
+- `backend/apps/greenhouse/services.py`
+- `backend/apps/greenhouse/views.py`
+- `backend/apps/greenhouse/management/commands/seed_dev.py`
+- `backend/apps/greenhouse/tests/test_dashboard_api.py`
+- `backend/apps/greenhouse/migrations/0002_alert_device_environmentreading_metric_type_and_more.py`
+- `backend/config/urls.py`
+- `README.md`
+- `docs/api_inventory.md`
+- `docs/api_contract_v1.yaml`
+- `docs/p0_dashboard_compatibility.md`
+- `docs/migration_plan.md`
+- `docs/architecture_remediation.md`
+关键设计决策：
+- 补齐 `Device`、`Alert` 规范化模型，并为 `EnvironmentReading` 增加 `metric_type`。
+- 保留现有宽表读数字段，避免破坏既有本地 seed 和 dashboard 页面。
+- 新增 greenhouse repository/service 分层，dashboard 默认从 `Greenhouse`、`Device`、`EnvironmentReading`、`Alert` 聚合。
+- `DashboardSnapshot` 降级为缓存、降级数据或历史快照；只有规范化模型没有可用数据时才读取 snapshot。
+- 新增 `/api/v1/greenhouse/readings`，支持按 `greenhouse`、`start`、`end`、`metric_type` 查询并分页。
+- 新增组合索引覆盖 greenhouse、recorded_at、metric_type、source、device provider/status 和 alert active 查询。
+自动化检查结果：
+- `.venv\Scripts\python.exe backend\manage.py check` passed.
+- `.venv\Scripts\python.exe backend\manage.py makemigrations greenhouse` generated `0002_alert_device_environmentreading_metric_type_and_more.py`.
+- `.venv\Scripts\python.exe backend\manage.py makemigrations --check --dry-run` passed, no changes detected.
+- `.venv\Scripts\python.exe backend\manage.py migrate --noinput` passed, applied greenhouse `0002`.
+- `.venv\Scripts\python.exe backend\manage.py seed_dev` passed, seeded 4 greenhouses, 4 devices, 4 readings, 5 alerts, 1 dashboard snapshot.
+- `.venv\Scripts\python.exe backend\manage.py test apps.greenhouse` passed, 14 tests.
+- `.venv\Scripts\python.exe backend\manage.py test apps.core apps.accounts apps.greenhouse apps.integrations apps.weather apps.ai_advisory` passed, 50 tests.
+- `.venv\Scripts\python.exe backend\manage.py spectacular --validate --file .runtime\schema-d05.yaml` passed.
+- `npm run lint` passed.
+- `npm run build` passed.
+网站运行验证结果：
+- Django runserver restarted on `127.0.0.1:8000` with `YOUREN_INTEGRATION_ENABLED=false`.
+- `GET /` returned 200.
+- `GET /api/v1/greenhouse/dashboard` returned 200 with `source=local`, 3 crops, first crop 2 greenhouses, and 24 trend points.
+- `GET /api/greenhouse/dashboard` returned 200 with `source=local` and 3 crops.
+- Browser verification loaded title `智慧农业管理中枢`; runtime requested `GET /api/v1/greenhouse/dashboard` with 200.
+- Browser screenshot: `output/playwright/d05-dashboard-normalized.png`.
+接口验证结果：
+- `GET /api/v1/greenhouse/readings?greenhouse=<id>&metric_type=environment&page_size=5` returned 200 with paginated `count/results`.
+- Static OpenAPI draft includes `/api/v1/greenhouse/readings` and `EnvironmentReadingPage`.
+回归测试结果：
+- Existing dashboard shape remains compatible: 3 crop categories, 8 metrics, 24 trend points.
+- Test coverage confirms dashboard uses normalized models even if `DashboardSnapshot.payload` is changed to an empty crop list.
+- Existing auth, integrations, weather safe-disabled, and AI safe-disabled tests still pass.
+兼容性影响：
+- Dashboard no longer depends on snapshot as the only source of business data.
+- Existing snapshot payload remains usable as cache/fallback.
+- Existing `EnvironmentReading` rows receive default `metric_type=environment` during migration.
+外部依赖与已知限制：
+- 当前仍未连接真实 MySQL 实例；索引已按 MySQL 查询模式设计并通过 SQLite 迁移验证。
+- 告警列表分页和作物/大棚 CRUD 仍留给后续 D-12 等项处理。
+Git Commit：feat(greenhouse): build dashboard from normalized models
+是否允许继续下一项：等待人工确认
