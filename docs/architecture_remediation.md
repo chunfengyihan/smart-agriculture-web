@@ -420,4 +420,55 @@ Known limits:
 
 Git Commit: refactor(frontend): cache dashboard polling
 Continue next item: waiting for manual confirmation
+
+## D-08
+
+Issue: D-08
+Status: completed, waiting for manual confirmation
+Changed files:
+- `package.json`
+- `package-lock.json`
+- `src/App.tsx`
+- `src/pages/DashboardPage.tsx`
+- `src/hooks/useDashboard.ts`
+- `src/store/dashboardStore.ts`
+- `src/components/dashboard/DashboardTopbar.tsx`
+- `src/components/dashboard/HeroPanel.tsx`
+- `src/components/dashboard/CropTabs.tsx`
+- `src/components/dashboard/MapPanel.tsx`
+- `src/components/dashboard/EnvironmentPanel.tsx`
+- `src/components/dashboard/AlertPanel.tsx`
+- `src/components/dashboard/PanelFallback.tsx`
+- `docs/architecture_remediation.md`
+
+Key decisions:
+- Added `react-router-dom` and made `src/App.tsx` the application entry, route table, and global stylesheet boundary.
+- Moved dashboard orchestration into `src/pages/DashboardPage.tsx`.
+- Added `zustand` store for selected crop, selected greenhouse, theme, and mobile navigation UI state.
+- Added `useDashboard()` as the testable view-model hook that combines query data, selection state, totals, and theme synchronization.
+- Split dashboard presentation into typed components for topbar, hero, crop tabs, map, environment detail, alerts, and lazy fallback.
+- Moved Dalian map loading and projection out of the page component into `MapPanel`.
+- Kept the existing `/` route and hash anchors (`#overview`, `#map`, `#detail`, `#diagnosis`) compatible.
+
+Automated checks:
+- `npm run lint` passed.
+- `npm run build` passed.
+- `.venv\Scripts\python.exe backend\manage.py check` passed.
+
+Browser verification:
+- `GET /` returned 200 from `127.0.0.1:8000`.
+- Playwright CLI loaded page title `智慧农业管理中枢`.
+- Snapshot confirmed topbar, hero, crop tabs, Dalian map, greenhouse list, weather panel, diagnosis panel, trend chart, and alert panel render after the split.
+- Browser request list showed `GET /api/v1/greenhouse/dashboard` 200 and `GET /data/dalian.geojson` 200.
+- Clicking the `监测` navigation updated the URL to `http://127.0.0.1:8000/#detail`.
+
+Compatibility impact:
+- Current dashboard UI and hash navigation remain compatible.
+- Bundle size increased because `react-router-dom` and `zustand` are now production dependencies.
+
+Known limits:
+- Component unit tests were not added yet; the split makes `useDashboard`, `MapPanel`, and `EnvironmentPanel` independently testable for a later test pass.
+
+Git Commit: refactor(frontend): split dashboard app shell
+Continue next item: waiting for manual confirmation
 是否允许继续下一项：等待人工确认
