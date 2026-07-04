@@ -512,6 +512,62 @@ http://127.0.0.1:5173/
 npm run verify
 ```
 
+## Final acceptance checklist
+
+Use this checklist after D-01 through D-16 remediation or before handing the project to deployment/operations.
+
+1. Run the full automated suite:
+
+```powershell
+npm run verify
+```
+
+This runs Django system checks, migration dry-run, isolated SQLite migration, dev seeding idempotency, backend tests, OpenAPI validation, DTU parser tests, ESLint, and the production frontend build.
+
+2. Start the integrated local site:
+
+```powershell
+npm run build
+.venv\Scripts\python.exe backend\manage.py migrate --noinput
+.venv\Scripts\python.exe backend\manage.py seed_dev
+.venv\Scripts\python.exe backend\manage.py runserver 127.0.0.1:8000
+```
+
+Then verify:
+
+- `http://127.0.0.1:8000/` opens the dashboard without a blank screen.
+- `http://127.0.0.1:8000/admin/` opens the Django Admin login/admin UI.
+- `http://127.0.0.1:8000/api/v1/health/` returns `code=0` and `data.ok=true`.
+- `http://127.0.0.1:8000/api/v1/schema/`, `/api/v1/docs/`, and `/api/v1/redoc/` are reachable.
+
+3. Verify protected API behavior when auth is enabled:
+
+```powershell
+$env:DJANGO_API_AUTH_REQUIRED = "true"
+$env:DJANGO_API_KEY_ALLOWLIST = "local-service-key"
+```
+
+Business APIs should reject anonymous requests and accept the configured service key or JWT Bearer token.
+
+4. Verify DTU ingest locally only with placeholder credentials:
+
+```powershell
+copy config\dtu.devices.example.json config\dtu.devices.json
+npm run dev:dtu
+npm run dtu:simulate -- --device dtu-001 --token replace-with-device-token
+```
+
+Before using a real DTU, create the matching Django `Device` row with `provider=dtu`, `ingest_enabled=true`, a SHA-256 `ingest_token_hash` or strict `ingest_allowed_ips`, and a target `Greenhouse`. Do not commit `config/dtu.devices.json` or real device tokens.
+
+5. Production readiness gates:
+
+- Set `DJANGO_SETTINGS_MODULE=config.settings.production`.
+- Set a strong `DJANGO_SECRET_KEY`.
+- Set explicit `DJANGO_ALLOWED_HOSTS`, `DJANGO_CORS_ALLOWED_ORIGINS`, and `DJANGO_CSRF_TRUSTED_ORIGINS`.
+- Enable HTTPS-related settings behind the reverse proxy.
+- Configure MySQL, Redis, Nginx/TLS, static/media paths, and miniapp request domains.
+- Treat Sentry, MinIO, ClamAV, Prometheus/Grafana, and queue-backed DTU ingest as external configuration items until real services are provisioned.
+
 阶段 5 参考文档：
 
 - `docs/stage5_acceptance_report.md`
