@@ -756,3 +756,55 @@ Known limits:
 
 Parent Git Commit: docs(api): refresh OpenAPI contract baseline
 Continue next item: waiting for manual confirmation
+
+## D-15
+
+Issue: D-15
+Status: completed, waiting for manual confirmation
+Changed files:
+- `backend/config/settings/base.py`
+- `backend/config/settings/production.py`
+- `vite.config.ts`
+- `requirements/base.txt`
+- `Dockerfile`
+- `.dockerignore`
+- `docker-compose.yml`
+- `deploy/nginx/smart-agri.conf`
+- `docs/deployment.md`
+- `docs/architecture_remediation.md`
+
+Key decisions:
+- Kept Django settings split as `development`, `test`, and `production`.
+- Added environment-driven `STATIC_ROOT`, `MEDIA_ROOT`, `MEDIA_URL`, `CSRF_TRUSTED_ORIGINS`, HTTPS redirect, secure cookies, forwarded host, and secure proxy header settings.
+- Made production settings require explicit `DJANGO_ALLOWED_HOSTS`, and continue rejecting wildcard hosts.
+- Made production CORS and CSRF origins explicit environment lists instead of inheriting development defaults.
+- Kept local Vite proxy behavior compatible while allowing `VITE_API_PROXY_TARGET` override.
+- Added an Nginx reverse proxy example with HTTP-to-HTTPS redirect, proxy headers, static/media serving, and TLS placeholders.
+- Added Dockerfile and Docker Compose examples covering Django, MySQL, Redis, and Nginx.
+- Added `gunicorn` to backend requirements for containerized production serving.
+- Documented Web domain, API/admin domain, and WeChat miniapp request-domain expectations.
+
+Automated checks:
+- `.venv\Scripts\python.exe backend\manage.py check` passed.
+- Production settings check passed with strong secret, explicit allowed hosts, CORS origins, CSRF trusted origins, and SQLite.
+- Production settings check failed as expected when `DJANGO_ALLOWED_HOSTS` was missing.
+- `npm run build` passed.
+- `npm run lint` passed.
+- `.venv\Scripts\python.exe backend\manage.py test apps.core` passed with 17 tests.
+- `.venv\Scripts\python.exe backend\manage.py test apps` passed with 66 tests.
+- Production `collectstatic --dry-run` passed.
+- `docker-compose.yml` parsed with PyYAML and includes `django`, `mysql`, and `redis` services plus production security env.
+
+Acceptance coverage:
+- Local development settings still pass Django check and frontend build/lint.
+- Production no longer uses development host defaults when `DJANGO_ALLOWED_HOSTS` is unset.
+- HTTPS and secure cookie behavior can be controlled through environment variables.
+- Docker Compose defines the required core services.
+- Deployment documentation covers domains, Nginx, static/media, Docker, and miniapp request domain setup.
+
+Known limits:
+- Docker CLI is not installed in this environment, so `docker compose config` and actual container startup were not executed.
+- Example TLS certificate paths under `deploy/certs/` must be replaced by real certificate mounts before production use.
+
+Parent Git Commit: feat(deploy): harden production deployment config
+Continue next item: waiting for manual confirmation

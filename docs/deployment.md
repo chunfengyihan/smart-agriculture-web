@@ -16,6 +16,100 @@ Web and miniapp clients should send `Authorization: Bearer <JWT>` for protected 
 
 If external authentication or service keys are not configured, protected business APIs must return 401 or 403 instead of silently allowing anonymous access.
 
+## Domain model
+
+Use separate production domains and configure each one explicitly:
+
+- Web domain: `https://www.example.com`
+- API/admin domain: `https://api.example.com`
+- WeChat miniapp request domain: `https://api.example.com`
+
+The WeChat miniapp release configuration must use an HTTPS API base that is registered in the WeChat public platform request-domain allowlist. Do not use `localhost`, IP-only test hosts, `example.com`, or trial/test hostnames in release builds.
+
+## Django environment split
+
+Django settings are split into:
+
+- `config.settings.development`: local development defaults, debug enabled by default, API auth disabled by default.
+- `config.settings.test`: in-memory SQLite test settings.
+- `config.settings.production`: strict production settings, debug disabled, API auth enabled, strong secret required.
+
+Production must set:
+
+```env
+DJANGO_SETTINGS_MODULE=config.settings.production
+DJANGO_SECRET_KEY=<strong-random-secret>
+DJANGO_ALLOWED_HOSTS=api.example.com,www.example.com
+DJANGO_CORS_ALLOWED_ORIGINS=https://www.example.com
+DJANGO_CSRF_TRUSTED_ORIGINS=https://www.example.com,https://api.example.com
+DJANGO_SECURE_SSL_REDIRECT=true
+DJANGO_SESSION_COOKIE_SECURE=true
+DJANGO_CSRF_COOKIE_SECURE=true
+DJANGO_USE_X_FORWARDED_HOST=true
+DJANGO_SECURE_PROXY_SSL_HEADER=true
+```
+
+Production settings reject missing `DJANGO_ALLOWED_HOSTS` and reject wildcard `*`.
+
+## HTTPS and reverse proxy
+
+Use Nginx or an equivalent edge proxy to terminate TLS and forward these headers:
+
+```text
+Host
+X-Forwarded-Host
+X-Forwarded-Proto
+X-Forwarded-For
+X-Request-ID
+```
+
+The example config is at `deploy/nginx/smart-agri.conf`. Replace `api.example.com`, `www.example.com`, and certificate paths before production use.
+
+## Static and media files
+
+Django uses:
+
+```env
+DJANGO_STATIC_ROOT=/app/staticfiles
+DJANGO_MEDIA_ROOT=/app/media
+DJANGO_MEDIA_URL=media/
+```
+
+Run:
+
+```powershell
+.venv\Scripts\python.exe backend\manage.py collectstatic --noinput --settings config.settings.production
+```
+
+Production static files may be served by Nginx from `STATIC_ROOT` or uploaded to object storage/CDN. Public media files may be served by Nginx or object storage. Private uploads such as AI diagnosis files remain under `DJANGO_PRIVATE_UPLOAD_ROOT` and must not be exposed through `/media/`.
+
+## Docker Compose
+
+The repository includes:
+
+- `Dockerfile`: builds the frontend and Django API image.
+- `docker-compose.yml`: starts Django, MySQL, Redis, and Nginx.
+- `deploy/nginx/smart-agri.conf`: reverse proxy, HTTPS redirect, static/media examples.
+
+Local syntax/config checks:
+
+```powershell
+docker compose config
+docker compose up mysql redis
+```
+
+Full stack example:
+
+```powershell
+$env:DJANGO_SECRET_KEY='replace-with-a-strong-random-secret-at-least-50-chars'
+$env:DJANGO_ALLOWED_HOSTS='api.example.com,www.example.com'
+$env:DJANGO_CORS_ALLOWED_ORIGINS='https://www.example.com'
+$env:DJANGO_CSRF_TRUSTED_ORIGINS='https://www.example.com,https://api.example.com'
+docker compose up --build
+```
+
+Before production, replace all example database passwords and mount real TLS certificates under `deploy/certs/`.
+
 ## Cache backend
 
 Django cache is controlled by environment variables:
