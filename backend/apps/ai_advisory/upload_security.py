@@ -5,6 +5,8 @@ from pathlib import Path
 from django.conf import settings
 from rest_framework import serializers
 
+from apps.core.metrics import record_upload_failure
+
 from .models import UploadAsset, UploadScanTask
 
 
@@ -46,6 +48,7 @@ def detect_content_type(uploaded_file):
 
 def validate_upload_image(uploaded_file):
     if uploaded_file.size > max_upload_bytes():
+        record_upload_failure("too_large")
         raise serializers.ValidationError("Image must not exceed 8MB")
 
     extension = Path(uploaded_file.name).suffix.lower()
@@ -53,12 +56,16 @@ def validate_upload_image(uploaded_file):
     detected_content_type = detect_content_type(uploaded_file)
 
     if declared_content_type not in allowed_content_types():
+        record_upload_failure("declared_type_not_allowed")
         raise serializers.ValidationError("Only JPG, PNG, and WebP images are supported")
     if detected_content_type not in allowed_content_types():
+        record_upload_failure("content_type_not_allowed")
         raise serializers.ValidationError("Uploaded file content is not a supported image")
     if declared_content_type != detected_content_type:
+        record_upload_failure("mime_mismatch")
         raise serializers.ValidationError("Uploaded file MIME type does not match its content")
     if extension not in DETECTED_IMAGE_TYPES[detected_content_type]["extensions"]:
+        record_upload_failure("extension_mismatch")
         raise serializers.ValidationError("Uploaded file extension does not match its content")
 
     uploaded_file.detected_content_type = detected_content_type

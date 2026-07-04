@@ -656,3 +656,57 @@ Known limits:
 
 Parent Git Commit: feat(greenhouse): add paginated resource APIs
 Continue next item: waiting for manual confirmation
+
+## D-13
+
+Issue: D-13
+Status: completed, waiting for manual confirmation
+Changed files:
+- `backend/apps/core/logging.py`
+- `backend/apps/core/metrics.py`
+- `backend/apps/core/middleware.py`
+- `backend/apps/core/views.py`
+- `backend/apps/core/tests/test_health.py`
+- `backend/apps/weather/services.py`
+- `backend/apps/integrations/youren/client.py`
+- `backend/apps/ai_advisory/upload_security.py`
+- `backend/config/settings/base.py`
+- `backend/config/urls.py`
+- `docs/observability.md`
+- `docs/architecture_remediation.md`
+
+Key decisions:
+- Added JSON structured logging with redaction for token, password, secret, cookie, session, credential, and related field names.
+- Extended request middleware to log request_id, user_id, path, method, status_code, duration_ms, and exception state for every request.
+- Preserved and returned `X-Request-ID`; invalid incoming ids are still replaced with generated UUIDs.
+- Added a lightweight in-process Prometheus text renderer and `/api/v1/metrics/` endpoint controlled by `PROMETHEUS_METRICS_ENABLED`.
+- Kept the metrics endpoint behind the existing API authentication policy when enabled.
+- Added metric hooks for HTTP requests, request duration, slow queries, third-party call duration, cache hit/miss events, and upload failures.
+- Reserved Sentry settings (`SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_TRACES_SAMPLE_RATE`) without requiring the SDK when DSN is empty.
+- Added `docs/observability.md` with Prometheus scrape examples, Grafana starter panels, and sensitive logging guidance.
+
+Automated checks:
+- `.venv\Scripts\python.exe backend\manage.py check` passed.
+- `.venv\Scripts\python.exe backend\manage.py test apps.core` passed with 16 tests.
+- `.venv\Scripts\python.exe backend\manage.py test apps` passed with 65 tests.
+- `.venv\Scripts\python.exe backend\manage.py makemigrations --check --dry-run` passed.
+- `.venv\Scripts\python.exe backend\manage.py spectacular --file .runtime\openapi-d13.yaml --validate` passed.
+
+Acceptance coverage:
+- Local test runs output structured JSON logs.
+- `request_id` is preserved across request header, response header, response body, and request log fields.
+- Empty Sentry DSN requires no SDK and does not affect startup.
+- Metrics endpoint returns HTTP 404 while disabled and Prometheus text when enabled.
+- Formatter redacts sensitive fields and serializes Django request objects without query strings.
+- Prometheus and Grafana setup instructions are documented.
+
+Compatibility impact:
+- Default log format is now JSON. Set `DJANGO_LOG_FORMAT=plain` for local plain-text logs.
+- Metrics are disabled unless explicitly enabled with `PROMETHEUS_METRICS_ENABLED=true`.
+
+Known limits:
+- Metrics are in-process counters suitable for a single Django process. Multi-process production deployments should use a Prometheus-compatible multiprocess backend or sidecar in a later hardening pass.
+- Sentry is configuration-only in this pass; enabling real Sentry capture requires adding and initializing `sentry-sdk`.
+
+Parent Git Commit: feat(observability): add structured logs and metrics
+Continue next item: waiting for manual confirmation

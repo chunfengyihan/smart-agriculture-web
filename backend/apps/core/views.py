@@ -1,12 +1,16 @@
 from pathlib import Path
 
 from django.conf import settings
+from django.http import Http404
 from django.http import FileResponse, HttpResponse
 from django.views import View
 from django.views.static import serve as serve_static
 from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework.views import APIView
 
+from apps.core.permissions import ApiKeyRequired
+
+from .metrics import render_prometheus_metrics
 from .responses import success_response
 
 
@@ -62,3 +66,13 @@ class HealthCheckView(APIView):
     )
     def get(self, request):
         return success_response(request, {"ok": True, "service": "django-api"})
+
+
+class MetricsView(APIView):
+    permission_classes = [ApiKeyRequired]
+
+    @extend_schema(exclude=True)
+    def get(self, request):
+        if not settings.PROMETHEUS_METRICS_ENABLED:
+            raise Http404("Metrics endpoint is disabled")
+        return HttpResponse(render_prometheus_metrics(), content_type="text/plain; version=0.0.4; charset=utf-8")

@@ -8,7 +8,7 @@ from apps.accounts.views import (
     RefreshTokenView,
     WeChatLoginView,
 )
-from apps.core.views import FrontendIndexView, HealthCheckView, frontend_asset_view
+from apps.core.views import FrontendIndexView, HealthCheckView, MetricsView, frontend_asset_view
 from apps.ai_advisory.views import (
     LegacyAgriChatView,
     LegacyCropDiagnosisView,
@@ -53,6 +53,7 @@ urlpatterns = [
         name="api-legacy-ai-agri-chat",
     ),
     path("api/v1/health/", HealthCheckView.as_view(), name="api-v1-health"),
+    path("api/v1/metrics/", MetricsView.as_view(), name="api-v1-metrics"),
     path(
         "api/v1/integrations/youren/health",
         V1YourenHealthView.as_view(),

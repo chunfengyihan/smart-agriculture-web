@@ -37,6 +37,12 @@ def env_int(name, default):
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-local-development-only")
 DEBUG = env_bool("DJANGO_DEBUG", False)
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
+LOG_FORMAT = os.environ.get("DJANGO_LOG_FORMAT", "json").strip().lower()
+DB_SLOW_QUERY_MS = env_int("DB_SLOW_QUERY_MS", 500)
+SENTRY_DSN = os.environ.get("SENTRY_DSN", "")
+SENTRY_ENVIRONMENT = os.environ.get("SENTRY_ENVIRONMENT", "local")
+SENTRY_TRACES_SAMPLE_RATE = float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", "0"))
+PROMETHEUS_METRICS_ENABLED = env_bool("PROMETHEUS_METRICS_ENABLED", False)
 API_AUTH_REQUIRED = env_bool("DJANGO_API_AUTH_REQUIRED", True)
 API_AUTH_TOKEN = os.environ.get("DJANGO_API_AUTH_TOKEN", "")
 API_KEY_HEADER = os.environ.get("DJANGO_API_KEY_HEADER", "X-API-Key")
@@ -307,14 +313,17 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "structured": {
+        "json": {
+            "()": "apps.core.logging.JsonLogFormatter",
+        },
+        "plain": {
             "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
         },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "structured",
+            "formatter": "json" if LOG_FORMAT == "json" else "plain",
         },
     },
     "root": {

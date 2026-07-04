@@ -1,12 +1,15 @@
 import hashlib
 import json
 from datetime import datetime
+from time import monotonic
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
+
+from apps.core.metrics import record_cache_event, record_external_call
 
 
 SHANGHAI_TIME_ZONE = "Asia/Shanghai"
@@ -106,7 +109,9 @@ def cache_failure_key(cache_key):
 
 
 def get_cached_weather(cache_key):
-    return cache.get(cache_key)
+    value = cache.get(cache_key)
+    record_cache_event("weather", value is not None)
+    return value
 
 
 def set_cached_weather(cache_key, value):
@@ -114,7 +119,9 @@ def set_cached_weather(cache_key, value):
 
 
 def get_cached_failure(cache_key):
-    return cache.get(cache_failure_key(cache_key))
+    value = cache.get(cache_failure_key(cache_key))
+    record_cache_event("weather_failure", value is not None)
+    return value
 
 
 def set_cached_failure(cache_key, message):
@@ -156,11 +163,14 @@ def fetch_open_meteo_payload(latitude, longitude):
         }
     )
     url = f"https://api.open-meteo.com/v1/forecast?{query}"
+    started_at = monotonic()
     try:
         with urlopen(url, timeout=settings.WEATHER_FETCH_TIMEOUT_SECONDS) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
+        record_external_call("open_meteo", (monotonic() - started_at) * 1000, False)
         raise WeatherIntegrationError("Open-Meteo 天气预报获取失败") from exc
+    record_external_call("open_meteo", (monotonic() - started_at) * 1000, True)
     if not isinstance(payload, dict):
         raise WeatherIntegrationError("Open-Meteo response format is invalid")
     return payload

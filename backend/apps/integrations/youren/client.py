@@ -6,6 +6,8 @@ from urllib.request import Request, urlopen
 
 from django.conf import settings
 
+from apps.core.metrics import record_external_call
+
 
 logger = logging.getLogger(__name__)
 
@@ -66,15 +68,18 @@ class YourenClient:
             },
             method="POST",
         )
+        started_at = monotonic()
         try:
             with self.urlopen(request, timeout=self.timeout) as response:
                 raw = response.read().decode("utf-8")
         except (HTTPError, URLError, OSError) as exc:
+            record_external_call("youren", (monotonic() - started_at) * 1000, False)
             logger.warning(
                 "youren_http_request_failed",
                 extra={"path": path, "error": exc.__class__.__name__},
             )
             raise YourenUpstreamError() from exc
+        record_external_call("youren", (monotonic() - started_at) * 1000, True)
 
         try:
             payload = json.loads(raw) if raw else {}
