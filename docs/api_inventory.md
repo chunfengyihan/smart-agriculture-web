@@ -2,6 +2,21 @@
 
 确认状态只使用 `CONFIRMED`、`PARTIALLY_CONFIRMED`、`UNKNOWN`。
 
+## OpenAPI Contract Baseline
+
+- 契约基准文件：`docs/api_contract_v1.yaml`
+- 在线 schema：`GET /api/v1/schema/`
+- Swagger UI：`GET /api/v1/docs/`
+- ReDoc UI：`GET /api/v1/redoc/`
+- 生成命令：`.venv\Scripts\python.exe backend\manage.py spectacular --file docs\api_contract_v1.yaml --validate`
+- CI 校验命令：`.venv\Scripts\python.exe backend\manage.py spectacular --file .runtime\openapi-ci.yaml --validate`
+- 前端类型生成建议：
+  - 使用 `openapi-typescript docs/api_contract_v1.yaml -o src/api/generated/schema.d.ts` 生成 TypeScript schema 类型。
+  - 使用 `openapi-fetch` 或 `orval` 基于同一 schema 生成 typed client。
+  - 小程序侧不直接引入生成器时，应以 `docs/api_contract_v1.yaml` 为字段契约，手写 wrapper 必须保持 `code/message/data/request_id` v1 包装结构。
+
+所有 `/api/v1/*` 接口状态以 OpenAPI schema 为准；本文档只保留迁移盘点、调用方和兼容性说明。
+
 ## P0 - Greenhouse Dashboard
 
 - 接口路径：`/api/v1/greenhouse/dashboard`
@@ -40,6 +55,66 @@
 - 是否依赖第三方服务：否
 - 迁移优先级：P0
 - 兼容性要求：分页响应必须保留 `count/next/previous/results`，时间字段使用 ISO 8601。
+- 确认状态：CONFIRMED
+
+## P0 - Greenhouse Resource APIs
+
+- 接口路径：`/api/v1/greenhouses/`
+- 请求方法：`GET`
+- 调用页面：温室列表、地图筛选、后续设备/告警/历史详情入口
+- 调用文件：`backend/apps/greenhouse/views.py`
+- 请求字段：`crop_code?`、`source?`、`q?`、`ordering?`、`page?`、`page_size?`
+- 响应字段：v1 wrapper；`data.count`、`data.next`、`data.previous`、`data.results[]`；温室字段含 `id`、`code`、`name`、`location`、`crop_code`、`source`、`created_at`、`updated_at`
+- 当前数据来源：`Greenhouse`
+- Django 迁移状态：已实现，支持分页、作物/来源过滤、搜索和白名单排序。
+- 是否依赖第三方服务：否
+- 迁移优先级：P0
+- 兼容性要求：新增资源型接口，不替代旧 dashboard 聚合接口。
+- 确认状态：CONFIRMED
+
+## P0 - Greenhouse Detail Readings
+
+- 接口路径：`/api/v1/greenhouses/{id}/readings/`
+- 请求方法：`GET`
+- 调用页面：温室历史曲线、趋势图按需加载
+- 调用文件：`backend/apps/greenhouse/views.py`
+- 请求字段：`start_time?`、`end_time?`、`metrics?`、`metric_type?`、`ordering?`、`page?`、`page_size?`
+- 响应字段：v1 wrapper；分页结构同上；读数字段按 `metrics` 可裁剪。
+- 当前数据来源：`EnvironmentReading`
+- Django 迁移状态：已实现，支持时间范围、指标列表、读数类型、排序和分页；超大时间范围会被拒绝。
+- 是否依赖第三方服务：否
+- 迁移优先级：P0
+- 兼容性要求：曲线数据通过此接口按范围请求，dashboard 摘要不再承载完整历史曲线。
+- 确认状态：CONFIRMED
+
+## P0 - Greenhouse Detail Alerts
+
+- 接口路径：`/api/v1/greenhouses/{id}/alerts/`
+- 请求方法：`GET`
+- 调用页面：告警列表、温室详情告警面板
+- 调用文件：`backend/apps/greenhouse/views.py`
+- 请求字段：`status?`、`level?`、`start_time?`、`end_time?`、`ordering?`、`page?`、`page_size?`
+- 响应字段：v1 wrapper；分页结构同上；告警字段含 `id`、`greenhouse`、`device`、`level`、`metric_type`、`message`、`triggered_at`、`resolved_at`、`source`、`metadata`
+- 当前数据来源：`Alert`
+- Django 迁移状态：已实现，支持 active/resolved/all、等级、时间范围、排序和分页。
+- 是否依赖第三方服务：否
+- 迁移优先级：P0
+- 兼容性要求：新增资源型接口；旧 dashboard 内嵌 alerts 仍保留首屏兼容。
+- 确认状态：CONFIRMED
+
+## P0 - Greenhouse Detail Dashboard Summary
+
+- 接口路径：`/api/v1/greenhouses/{id}/dashboard/`
+- 请求方法：`GET`
+- 调用页面：温室详情首屏摘要
+- 调用文件：`backend/apps/greenhouse/views.py`
+- 请求字段：路径参数 `id` 可为温室 numeric id 或 code
+- 响应字段：v1 wrapper；`id`、`name`、`crop_code`、`location`、`source`、`status`、`online_devices`、`total_devices`、`latest_reading`、`active_alert_count`、`latest_alerts`
+- 当前数据来源：`Greenhouse`、`Device`、`EnvironmentReading`、`Alert`
+- Django 迁移状态：已实现，只返回首屏摘要；趋势曲线使用 readings 接口单独请求。
+- 是否依赖第三方服务：否
+- 迁移优先级：P0
+- 兼容性要求：不存在或无访问权限的温室统一返回 404。
 - 确认状态：CONFIRMED
 
 ## P1 - Weather Greenhouse Advice
@@ -135,11 +210,20 @@
 - 风险：不是传感器业务数据
 - 确认状态：CONFIRMED
 
-## UNKNOWN 接口
+## Implemented Platform Endpoints
 
-- 生产鉴权接口：已实现 `/api/v1/auth/*`
-- 用户/管理员身份接口：已实现 `/api/v1/auth/me`
-- 历史曲线分页接口：已实现 `/api/v1/greenhouse/readings`
-- 告警列表分页接口：UNKNOWN
-- 作物/大棚 CRUD 接口：UNKNOWN
-- `/api/v1/health/`、`/api/v1/auth/*`、`/api/v1/greenhouse/dashboard`、`/api/v1/greenhouse/readings`、`/api/v1/weather/greenhouse-advice`、`/api/v1/ai/crop-diagnosis`、`/api/v1/ai/agri-chat` 已实现；告警分页和 CRUD 类 v1 接口仍待 D-12 等后续项处理。
+- `/api/v1/health/`：已实现，公开健康检查。
+- `/api/v1/schema/`：已实现，OpenAPI schema。
+- `/api/v1/docs/`：已实现，Swagger UI。
+- `/api/v1/redoc/`：已实现，ReDoc UI。
+- `/api/v1/metrics/`：已实现，受 `PROMETHEUS_METRICS_ENABLED` 控制，默认关闭。
+- `/api/v1/auth/wechat-login`：已实现。
+- `/api/v1/auth/refresh`：已实现。
+- `/api/v1/auth/logout`：已实现。
+- `/api/v1/auth/me`：已实现。
+- `/api/v1/integrations/youren/health`：已实现。
+
+## Deferred API Surface
+
+- 作物 CRUD：UNKNOWN，当前没有独立作物模型和管理接口。
+- 温室写入型 CRUD：UNKNOWN，当前只实现读取型资源接口；写入仍通过后台、种子数据或集成同步流程处理。

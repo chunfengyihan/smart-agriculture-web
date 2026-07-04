@@ -710,3 +710,49 @@ Known limits:
 
 Parent Git Commit: feat(observability): add structured logs and metrics
 Continue next item: waiting for manual confirmation
+
+## D-14
+
+Issue: D-14
+Status: completed, waiting for manual confirmation
+Changed files:
+- `backend/config/urls.py`
+- `backend/config/settings/base.py`
+- `backend/apps/core/tests/test_health.py`
+- `docs/api_contract_v1.yaml`
+- `docs/api_inventory.md`
+- `docs/architecture_remediation.md`
+
+Key decisions:
+- Kept `drf-spectacular` as the OpenAPI source of truth and regenerated `docs/api_contract_v1.yaml` from the live Django URL/schema configuration.
+- Added ReDoc at `GET /api/v1/redoc/` alongside existing schema and Swagger routes.
+- Added `/api/v1/redoc/` to default public API paths so schema, Swagger, and ReDoc share the same access behavior.
+- Updated `docs/api_inventory.md` to state that OpenAPI is the contract baseline and to document generation, CI validation, and frontend/client type generation commands.
+- Removed stale D-12-era descriptions that said alert pagination and other current v1 endpoints were still unknown or pending.
+- Documented the implemented greenhouse resource APIs, auth/platform endpoints, and remaining deferred API surfaces.
+- Reused the existing `scripts/verify.py` CI path, which already runs `spectacular --validate`.
+
+Automated checks:
+- `.venv\Scripts\python.exe backend\manage.py spectacular --file docs\api_contract_v1.yaml --validate` passed.
+- `.venv\Scripts\python.exe backend\manage.py test apps.core` passed with 17 tests.
+- `.venv\Scripts\python.exe backend\manage.py check` passed.
+- `.venv\Scripts\python.exe backend\manage.py test apps` passed with 66 tests.
+- `.venv\Scripts\python.exe backend\manage.py spectacular --file .runtime\openapi-d14.yaml --validate` passed.
+- `rg` found no stale `告警列表分页接口：UNKNOWN` or `仍待 D-12` text in `docs/api_inventory.md`.
+
+Acceptance coverage:
+- OpenAPI schema reflects current v1 greenhouse resource routes.
+- Schema can be generated and validated from the command line.
+- Swagger and ReDoc routes return HTTP 200 in tests.
+- CI can validate schema generation through `scripts/verify.py`.
+- Frontend TypeScript/client generation workflow is documented.
+
+Compatibility impact:
+- Existing `/api/v1/schema/` and `/api/v1/docs/` routes remain unchanged.
+- New `/api/v1/redoc/` route is additive.
+
+Known limits:
+- Generated frontend client code was not introduced in this pass; the documented command establishes the workflow while avoiding generated-code churn.
+
+Parent Git Commit: docs(api): refresh OpenAPI contract baseline
+Continue next item: waiting for manual confirmation

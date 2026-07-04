@@ -56,11 +56,27 @@ class HealthCheckTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    @override_settings(API_AUTH_REQUIRED=True, API_PUBLIC_PATHS=["/api/v1/health/", "/api/v1/schema/"])
+    @override_settings(
+        API_AUTH_REQUIRED=True,
+        API_PUBLIC_PATHS=["/api/v1/health/", "/api/v1/schema/", "/api/v1/docs/", "/api/v1/redoc/"],
+    )
     def test_schema_remains_public_when_api_auth_is_required(self):
         response = Client().get("/api/v1/schema/")
 
         self.assertEqual(response.status_code, 200)
+
+    @override_settings(
+        API_AUTH_REQUIRED=True,
+        API_PUBLIC_PATHS=["/api/v1/health/", "/api/v1/schema/", "/api/v1/docs/", "/api/v1/redoc/"],
+    )
+    def test_api_docs_pages_remain_public_when_api_auth_is_required(self):
+        client = Client()
+
+        swagger = client.get("/api/v1/docs/")
+        redoc = client.get("/api/v1/redoc/")
+
+        self.assertEqual(swagger.status_code, 200)
+        self.assertEqual(redoc.status_code, 200)
 
     def test_json_log_formatter_outputs_structured_and_redacted_payload(self):
         record = logging.LogRecord(

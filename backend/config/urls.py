@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, re_path
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 from apps.accounts.views import (
     AuthMeView,
@@ -113,6 +113,11 @@ urlpatterns = [
         "api/v1/docs/",
         SpectacularSwaggerView.as_view(url_name="api-v1-schema"),
         name="api-v1-docs",
+    ),
+    path(
+        "api/v1/redoc/",
+        SpectacularRedocView.as_view(url_name="api-v1-schema"),
+        name="api-v1-redoc",
     ),
     re_path(
         r"^(?P<path>(assets|data|images)/.*|favicon\.(ico|png|svg)|icons\.svg|logo-(lockup|mark)\.(png|svg)|smart-agriculture-logo\.ico)$",

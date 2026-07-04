@@ -1,434 +1,1109 @@
 openapi: 3.0.3
 info:
-  title: Smart Agriculture Django API Contract Draft
+  title: Smart Agriculture API
   version: 0.1.0
-  description: >
-    Stage 1 draft contract for the Django migration. Legacy paths keep their
-    current response shape. /api/v1/ paths use code/message/data/request_id.
-servers:
-  - url: http://127.0.0.1:8000
-    description: Local Django development server
+  description: Django API for the smart agriculture migration.
 paths:
-  /api/v1/health/:
-    get:
-      summary: Health check
-      operationId: getV1Health
-      responses:
-        "200":
-          description: Service health
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/V1HealthResponse"
-  /api/v1/integrations/youren/health:
-    get:
-      summary: Youren integration health
-      operationId: getV1IntegrationsYourenHealth
-      responses:
-        "200":
-          description: Youren integration configuration and sample device check
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/V1Success"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/YourenHealth"
-        "503":
-          $ref: "#/components/responses/ExternalIntegrationDisabled"
-  /api/v1/auth/wechat-login:
+  /api/ai/agri-chat:
     post:
-      summary: WeChat miniapp login
-      operationId: postV1AuthWechatLogin
+      operationId: api_ai_agri_chat_create
+      tags:
+      - api
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WeChatLoginRequest"
-      responses:
-        "200":
-          description: JWT token pair and user profile
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/V1Success"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/AuthTokenPair"
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "503":
-          $ref: "#/components/responses/ExternalIntegrationDisabled"
-  /api/v1/auth/refresh:
-    post:
-      summary: Refresh access token
-      operationId: postV1AuthRefresh
-      requestBody:
-        required: true
-        content:
-          application/json:
+              $ref: '#/components/schemas/AgriChatRequest'
+          application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/RefreshTokenRequest"
-      responses:
-        "200":
-          description: New access token
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/V1Success"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/RefreshTokenResponse"
-        "401":
-          $ref: "#/components/responses/AuthError"
-  /api/v1/auth/logout:
-    post:
-      summary: Logout and blacklist refresh token
-      operationId: postV1AuthLogout
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RefreshTokenRequest"
-      responses:
-        "200":
-          description: Logout result
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/V1Success"
-                  - type: object
-                    properties:
-                      data:
-                        type: object
-                        required: [logged_out]
-                        properties:
-                          logged_out:
-                            type: boolean
-        "401":
-          $ref: "#/components/responses/AuthError"
-  /api/v1/auth/me:
-    get:
-      summary: Current authenticated user
-      operationId: getV1AuthMe
-      responses:
-        "200":
-          description: Current user profile
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/V1Success"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/AuthUser"
-        "401":
-          $ref: "#/components/responses/AuthError"
-  /api/greenhouse/dashboard:
-    get:
-      summary: Legacy greenhouse dashboard
-      description: Legacy compatibility path. Response body is the raw DashboardData object.
-      operationId: getLegacyGreenhouseDashboard
-      responses:
-        "200":
-          description: Legacy dashboard payload
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DashboardData"
-        "503":
-          description: External integration disabled or data source unavailable
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacyError"
-  /api/youren/health:
-    get:
-      summary: Legacy Youren health check
-      description: Legacy compatibility path now served by Django; Node proxy only forwards or probes.
-      operationId: getLegacyYourenHealth
-      responses:
-        "200":
-          description: Youren integration configuration and sample device check
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/YourenHealth"
-  /api/v1/greenhouse/dashboard:
-    get:
-      summary: V1 greenhouse dashboard
-      operationId: getV1GreenhouseDashboard
-      responses:
-        "200":
-          description: V1 dashboard payload
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/V1Success"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/DashboardData"
-        "503":
-          $ref: "#/components/responses/ExternalIntegrationDisabled"
-  /api/v1/greenhouse/readings:
-    get:
-      summary: Query environment readings
-      operationId: getV1GreenhouseReadings
-      parameters:
-        - in: query
-          name: greenhouse
-          schema:
-            type: string
-          description: Greenhouse code.
-        - in: query
-          name: start
-          schema:
-            type: string
-            format: date-time
-        - in: query
-          name: end
-          schema:
-            type: string
-            format: date-time
-        - in: query
-          name: metric_type
-          schema:
-            type: string
-            default: environment
-        - in: query
-          name: page
-          schema:
-            type: integer
-            minimum: 1
-        - in: query
-          name: page_size
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-      responses:
-        "200":
-          description: Paginated environment readings
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/V1Success"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/EnvironmentReadingPage"
-        "400":
-          $ref: "#/components/responses/ValidationError"
-  /api/v1/weather/greenhouse-advice:
-    post:
-      summary: V1 greenhouse weather and operation advice
-      operationId: postV1WeatherGreenhouseAdvice
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/WeatherAdviceRequest"
-      responses:
-        "200":
-          description: Weather payload and optional advice
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/V1Success"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/WeatherAdviceResponse"
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "503":
-          $ref: "#/components/responses/ExternalIntegrationDisabled"
-  /api/v1/ai/crop-diagnosis:
-    post:
-      summary: V1 crop image diagnosis
-      operationId: postV1CropDiagnosis
-      requestBody:
-        required: true
-        content:
+              $ref: '#/components/schemas/AgriChatRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CropDiagnosisRequest"
-      responses:
-        "200":
-          description: Diagnosis result
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/V1Success"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/CropDiagnosisResult"
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "413":
-          description: Payload too large
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/V1Error"
-        "503":
-          $ref: "#/components/responses/ExternalIntegrationDisabled"
-  /api/v1/ai/agri-chat:
-    post:
-      summary: V1 agricultural chat
-      operationId: postV1AgriChat
-      requestBody:
+              $ref: '#/components/schemas/AgriChatRequest'
         required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacyExternalDisabled'
+          description: ''
+  /api/ai/crop-diagnosis:
+    post:
+      operationId: api_ai_crop_diagnosis_create
+      tags:
+      - api
+      requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AgriChatRequest"
+              $ref: '#/components/schemas/CropDiagnosisRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CropDiagnosisRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CropDiagnosisRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
       responses:
-        "200":
-          description: Agricultural chat answer
+        '503':
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/V1Success"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/AgriChatResponse"
-        "400":
-          $ref: "#/components/responses/ValidationError"
-        "503":
-          $ref: "#/components/responses/ExternalIntegrationDisabled"
-components:
-  responses:
-    ValidationError:
-      description: Request validation failed
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/V1ValidationError"
-    ExternalIntegrationDisabled:
-      description: External integration disabled
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: "#/components/schemas/V1Error"
-              - type: object
+                $ref: '#/components/schemas/LegacyExternalDisabled'
+          description: ''
+  /api/greenhouse/dashboard:
+    get:
+      operationId: api_greenhouse_dashboard_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardPayload'
+          description: ''
+  /api/v1/ai/agri-chat:
+    post:
+      operationId: api_v1_ai_agri_chat_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgriChatRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AgriChatRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AgriChatRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1ExternalDisabled'
+          description: ''
+  /api/v1/ai/crop-diagnosis:
+    post:
+      operationId: api_v1_ai_crop_diagnosis_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CropDiagnosisRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CropDiagnosisRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CropDiagnosisRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1ExternalDisabled'
+          description: ''
+  /api/v1/auth/logout:
+    post:
+      operationId: api_v1_auth_logout_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+          description: ''
+  /api/v1/auth/me:
+    get:
+      operationId: api_v1_auth_me_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/auth/refresh:
+    post:
+      operationId: api_v1_auth_refresh_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+          description: ''
+  /api/v1/auth/wechat-login:
+    post:
+      operationId: api_v1_auth_wechat_login_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeChatLoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WeChatLoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WeChatLoginRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: ''
+        '400':
+          description: Invalid code or WeChat rejected the login code
+        '503':
+          description: WeChat credentials are not configured
+  /api/v1/greenhouse/dashboard:
+    get:
+      operationId: api_v1_greenhouse_dashboard_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1DashboardResponse'
+          description: ''
+  /api/v1/greenhouse/readings:
+    get:
+      operationId: api_v1_greenhouse_readings_list
+      parameters:
+      - in: query
+        name: end
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: greenhouse
+        schema:
+          type: string
+          maxLength: 64
+          minLength: 1
+      - in: query
+        name: metric_type
+        schema:
+          type: string
+          maxLength: 32
+          minLength: 1
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: start
+        schema:
+          type: string
+          format: date-time
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEnvironmentReadingList'
+          description: ''
+  /api/v1/greenhouses/:
+    get:
+      operationId: api_v1_greenhouses_list
+      parameters:
+      - in: query
+        name: crop_code
+        schema:
+          type: string
+        description: Filter by crop code.
+      - in: query
+        name: ordering
+        schema:
+          type: string
+        description: One of code, -code, name, -name, created_at, -created_at.
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Page number.
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: Page size, capped by the global max page size.
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Search greenhouse code, name, or location.
+      - in: query
+        name: source
+        schema:
+          type: string
+        description: Filter by data source.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGreenhouseList'
+          description: ''
+  /api/v1/greenhouses/{greenhouse_id}/alerts/:
+    get:
+      operationId: api_v1_greenhouses_alerts_list
+      parameters:
+      - in: query
+        name: end_time
+        schema:
+          type: string
+        description: Inclusive ISO-8601 triggered_at upper bound.
+      - in: path
+        name: greenhouse_id
+        schema:
+          type: string
+        description: Greenhouse numeric id or code.
+        required: true
+      - in: query
+        name: level
+        schema:
+          type: string
+        description: 'Comma-separated levels: notice, warning, critical.'
+      - in: query
+        name: ordering
+        schema:
+          type: string
+        description: One of triggered_at, -triggered_at, created_at, -created_at,
+          level, -level.
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Page number.
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: Page size, capped by the global max page size.
+      - in: query
+        name: start_time
+        schema:
+          type: string
+        description: Inclusive ISO-8601 triggered_at lower bound.
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: 'Alert status: active, resolved, or all. Default active.'
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAlertList'
+          description: ''
+  /api/v1/greenhouses/{greenhouse_id}/dashboard/:
+    get:
+      operationId: api_v1_greenhouses_dashboard_retrieve
+      parameters:
+      - in: path
+        name: greenhouse_id
+        schema:
+          type: string
+        description: Greenhouse numeric id or code.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GreenhouseDashboardSummary'
+          description: ''
+  /api/v1/greenhouses/{greenhouse_id}/readings/:
+    get:
+      operationId: api_v1_greenhouses_readings_list
+      parameters:
+      - in: query
+        name: end_time
+        schema:
+          type: string
+        description: Inclusive ISO-8601 recorded_at upper bound.
+      - in: path
+        name: greenhouse_id
+        schema:
+          type: string
+        description: Greenhouse numeric id or code.
+        required: true
+      - in: query
+        name: metric_type
+        schema:
+          type: string
+        description: Filter by reading metric_type.
+      - in: query
+        name: metrics
+        schema:
+          type: string
+        description: Comma-separated metric fields, e.g. airTemp,airHumidity,soilHumidity.
+      - in: query
+        name: ordering
+        schema:
+          type: string
+        description: One of recorded_at, -recorded_at, created_at, -created_at, id,
+          -id.
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Page number.
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: Page size, capped by the global max page size.
+      - in: query
+        name: start_time
+        schema:
+          type: string
+        description: Inclusive ISO-8601 recorded_at lower bound.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEnvironmentReadingList'
+          description: ''
+  /api/v1/health/:
+    get:
+      operationId: api_v1_health_retrieve
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
                 properties:
                   code:
-                    example: 50020
+                    type: integer
+                    example: 0
                   message:
-                    example: 外部集成未启用
-    AuthError:
-      description: Authentication failed or token expired
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: "#/components/schemas/V1Error"
-              - type: object
-                properties:
-                  code:
-                    example: 40100
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      ok:
+                        type: boolean
+                        example: true
+                      service:
+                        type: string
+                        example: django-api
+                  request_id:
+                    type: string
+                    format: uuid
+              examples:
+                HealthCheck:
+                  value:
+                    code: 0
+                    message: success
+                    data:
+                      ok: true
+                      service: django-api
+                    request_id: 00000000-0000-0000-0000-000000000000
+                  summary: Health check
+          description: ''
+  /api/v1/integrations/youren/health:
+    get:
+      operationId: api_v1_integrations_youren_health_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YourenHealth'
+          description: ''
+  /api/v1/weather/greenhouse-advice:
+    post:
+      operationId: api_v1_weather_greenhouse_advice_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeatherAdviceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WeatherAdviceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WeatherAdviceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1ExternalDisabled'
+          description: ''
+  /api/weather/greenhouse-advice:
+    post:
+      operationId: api_weather_greenhouse_advice_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeatherAdviceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WeatherAdviceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WeatherAdviceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacyExternalDisabled'
+          description: ''
+  /api/youren/health:
+    get:
+      operationId: api_youren_health_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YourenHealth'
+          description: ''
+components:
   schemas:
-    V1Success:
+    AgriChatRequest:
       type: object
-      required: [code, message, data, request_id]
       properties:
-        code:
-          type: integer
-          example: 0
-        message:
+        cropId:
           type: string
-          example: success
-        data:
-          type: object
-        request_id:
+          maxLength: 64
+        cropName:
           type: string
-          format: uuid
-    V1Error:
-      type: object
-      required: [code, message, data, request_id]
-      properties:
-        code:
-          type: integer
-          example: 50000
-        message:
+          maxLength: 128
+        greenhouseId:
           type: string
-        data:
-          type: object
-          nullable: true
-        request_id:
+          maxLength: 64
+        greenhouseName:
           type: string
-          format: uuid
-    V1ValidationError:
-      type: object
-      required: [code, message, data, request_id]
-      properties:
-        code:
-          type: integer
-          example: 40001
-        message:
-          type: string
-          example: 参数校验失败
-        data:
-          type: object
-          required: [field_errors]
-          properties:
-            field_errors:
-              type: object
-              additionalProperties:
-                type: array
-                items:
-                  type: string
-        request_id:
-          type: string
-          format: uuid
-    LegacyError:
-      type: object
-      required: [message]
-      properties:
-        message:
-          type: string
-        requiredEnv:
+          maxLength: 128
+        metrics:
           type: array
           items:
-            type: string
-    V1HealthResponse:
-      allOf:
-        - $ref: "#/components/schemas/V1Success"
-        - type: object
-          properties:
-            data:
-              type: object
-              required: [ok]
-              properties:
-                ok:
-                  type: boolean
-                service:
-                  type: string
-                  example: django-api
+            type: object
+            additionalProperties: {}
+          maxItems: 64
+        question:
+          type: string
+          maxLength: 2000
+      required:
+      - cropId
+      - cropName
+      - greenhouseId
+      - greenhouseName
+      - question
+    Alert:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        greenhouse:
+          type: integer
+        device:
+          type: integer
+          nullable: true
+        level:
+          $ref: '#/components/schemas/LevelEnum'
+        metric_type:
+          type: string
+          maxLength: 32
+        message:
+          type: string
+          maxLength: 512
+        triggered_at:
+          type: string
+          format: date-time
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+        source:
+          type: string
+          maxLength: 32
+        metadata: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - greenhouse
+      - id
+      - message
+      - triggered_at
+      - updated_at
+    CropDiagnosisRequest:
+      type: object
+      properties:
+        image:
+          type: string
+          format: uri
+        cropId:
+          type: string
+          maxLength: 64
+        cropName:
+          type: string
+          maxLength: 128
+        greenhouseId:
+          type: string
+          maxLength: 64
+        greenhouseName:
+          type: string
+          maxLength: 128
+        useEnvironmentContext:
+          type: boolean
+          default: false
+        metrics:
+          type: string
+          maxLength: 32768
+      required:
+      - cropId
+      - cropName
+      - greenhouseId
+      - image
+    DashboardPayload:
+      type: object
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        source:
+          type: string
+        crops:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - crops
+      - generatedAt
+      - source
+    EnvironmentReading:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        greenhouse:
+          type: integer
+        recorded_at:
+          type: string
+          format: date-time
+        metric_type:
+          type: string
+          maxLength: 32
+        air_temp:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+        air_humidity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+        light:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        co2:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        soil_humidity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+        soil_temp:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+        ec:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,3})?$
+          nullable: true
+        ph:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,3})?$
+          nullable: true
+        source:
+          type: string
+          default: local
+          maxLength: 32
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - greenhouse
+      - id
+      - recorded_at
+      - updated_at
+    Greenhouse:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 64
+        name:
+          type: string
+          maxLength: 128
+        location:
+          type: string
+          maxLength: 255
+        crop_code:
+          type: string
+          maxLength: 64
+        source:
+          type: string
+          maxLength: 32
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - id
+      - name
+      - updated_at
+    GreenhouseDashboardSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        crop_code:
+          type: string
+        location:
+          type: string
+        source:
+          type: string
+        status:
+          type: string
+        online_devices:
+          type: integer
+        total_devices:
+          type: integer
+        latest_reading:
+          allOf:
+          - $ref: '#/components/schemas/EnvironmentReading'
+          nullable: true
+        active_alert_count:
+          type: integer
+        latest_alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alert'
+      required:
+      - active_alert_count
+      - crop_code
+      - id
+      - latest_alerts
+      - latest_reading
+      - location
+      - name
+      - online_devices
+      - source
+      - status
+      - total_devices
+    LegacyExternalDisabled:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+      - message
+    LevelEnum:
+      enum:
+      - notice
+      - warning
+      - critical
+      type: string
+      description: |-
+        * `notice` - Notice
+        * `warning` - Warning
+        * `critical` - Critical
+    LogoutRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          maxLength: 2048
+      required:
+      - refresh
+    LogoutResponse:
+      type: object
+      properties:
+        logged_out:
+          type: boolean
+      required:
+      - logged_out
+    PaginatedAlertList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alert'
+    PaginatedEnvironmentReadingList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentReading'
+    PaginatedGreenhouseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Greenhouse'
+    RefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          maxLength: 2048
+      required:
+      - refresh
+    RefreshResponse:
+      type: object
+      properties:
+        access:
+          type: string
+        token:
+          type: string
+      required:
+      - access
+      - token
+    TokenPair:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+      - access
+      - refresh
+      - token
+      - user
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        nickname:
+          type: string
+        role:
+          type: string
+      required:
+      - id
+      - nickname
+      - role
+      - username
+    V1DashboardResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/DashboardPayload'
+        request_id:
+          type: string
+      required:
+      - code
+      - data
+      - message
+      - request_id
+    V1ExternalDisabled:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties: {}
+        request_id:
+          type: string
+      required:
+      - code
+      - data
+      - message
+      - request_id
+    WeChatLoginRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 512
+      required:
+      - code
+    WeatherAdviceRequest:
+      type: object
+      properties:
+        cropId:
+          type: string
+          maxLength: 64
+        cropName:
+          type: string
+          maxLength: 128
+        greenhouseId:
+          type: string
+          maxLength: 64
+        greenhouseName:
+          type: string
+          maxLength: 128
+        latitude:
+          type: number
+          format: double
+          maximum: 90
+          minimum: -90
+        longitude:
+          type: number
+          format: double
+          maximum: 180
+          minimum: -180
+        address:
+          type: string
+          maxLength: 255
+        metrics:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          maxItems: 64
+        includeAdvice:
+          type: boolean
+          default: true
+      required:
+      - cropId
+      - cropName
+      - greenhouseId
+      - greenhouseName
+      - latitude
+      - longitude
     YourenHealth:
       type: object
-      required: [ok, configured]
       properties:
         ok:
           type: boolean
@@ -444,387 +1119,16 @@ components:
           type: array
           items:
             type: object
-            properties:
-              deviceNo:
-                type: string
-              deviceName:
-                type: string
-              projectName:
-                type: string
-              onlineOffline:
-                type: integer
-    WeChatLoginRequest:
-      type: object
-      required: [code]
-      properties:
-        code:
-          type: string
-          maxLength: 512
-    RefreshTokenRequest:
-      type: object
-      required: [refresh]
-      properties:
-        refresh:
-          type: string
-    AuthUser:
-      type: object
-      required: [id, username, nickname, role]
-      properties:
-        id:
-          type: integer
-        username:
-          type: string
-        nickname:
-          type: string
-        role:
-          type: string
-          enum: [admin, operator, viewer]
-    AuthTokenPair:
-      type: object
-      required: [access, refresh, token, user]
-      properties:
-        access:
-          type: string
-        refresh:
-          type: string
-        token:
-          type: string
-          description: Compatibility alias for access.
-        user:
-          $ref: "#/components/schemas/AuthUser"
-    RefreshTokenResponse:
-      type: object
-      required: [access, token]
-      properties:
-        access:
-          type: string
-        token:
-          type: string
-          description: Compatibility alias for access.
-    DashboardData:
-      type: object
-      required: [generatedAt, source, crops]
-      properties:
-        generatedAt:
-          type: string
-          format: date-time
-        source:
-          type: string
-          enum: [mock, local, youren]
-        crops:
-          type: array
-          items:
-            $ref: "#/components/schemas/Crop"
-    Crop:
-      type: object
-      required: [id, name, greenhouses]
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        latinName:
-          type: string
-        description:
-          type: string
-        heroImage:
-          type: string
-        accent:
-          type: string
-        greenhouses:
-          type: array
-          items:
-            $ref: "#/components/schemas/Greenhouse"
-    Greenhouse:
-      type: object
-      required: [id, name, status, metrics, trend, alerts]
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        area:
-          type: string
-        status:
-          type: string
-          enum: [online, warning, offline]
-        onlineDevices:
-          type: integer
-        totalDevices:
-          type: integer
-        metrics:
-          type: array
-          items:
-            $ref: "#/components/schemas/MetricReading"
-        trend:
-          type: array
-          items:
-            $ref: "#/components/schemas/TrendPoint"
-        alerts:
-          type: array
-          items:
-            $ref: "#/components/schemas/AlertItem"
-    MetricReading:
-      type: object
-      required: [key, label, value, unit, status, target]
-      properties:
-        key:
-          type: string
-        label:
-          type: string
-        value:
-          type: number
-          nullable: true
-        unit:
-          type: string
-        status:
-          type: string
-          enum: [normal, warning, critical]
-        target:
-          type: string
-    TrendPoint:
-      type: object
-      required: [time]
-      properties:
-        time:
-          type: string
-        airTemp:
-          type: number
-          nullable: true
-        airHumidity:
-          type: number
-          nullable: true
-        soilHumidity:
-          type: number
-          nullable: true
-        light:
-          type: number
-          nullable: true
-    AlertItem:
-      type: object
-      required: [id, level, message, time]
-      properties:
-        id:
-          type: string
-        level:
-          type: string
-          enum: [warning, critical]
-        message:
-          type: string
-        time:
-          type: string
-    EnvironmentReadingPage:
-      type: object
-      required: [count, results]
-      properties:
-        count:
-          type: integer
-        next:
-          type: string
-          nullable: true
-        previous:
-          type: string
-          nullable: true
-        results:
-          type: array
-          items:
-            $ref: "#/components/schemas/EnvironmentReading"
-    EnvironmentReading:
-      type: object
-      required: [id, greenhouse, recorded_at, metric_type, source]
-      properties:
-        id:
-          type: integer
-        greenhouse:
-          type: integer
-        recorded_at:
-          type: string
-          format: date-time
-        metric_type:
-          type: string
-        air_temp:
-          type: string
-          nullable: true
-        air_humidity:
-          type: string
-          nullable: true
-        light:
-          type: string
-          nullable: true
-        co2:
-          type: string
-          nullable: true
-        soil_humidity:
-          type: string
-          nullable: true
-        soil_temp:
-          type: string
-          nullable: true
-        ec:
-          type: string
-          nullable: true
-        ph:
-          type: string
-          nullable: true
-        source:
-          type: string
-    MetricInput:
-      type: object
-      properties:
-        key:
-          type: string
-        label:
-          type: string
-        value:
-          type: number
-          nullable: true
-        unit:
-          type: string
-        status:
-          type: string
-        target:
-          type: string
-    WeatherAdviceRequest:
-      type: object
-      required: [cropId, cropName, greenhouseId, greenhouseName, latitude, longitude]
-      properties:
-        cropId:
-          type: string
-        cropName:
-          type: string
-        greenhouseId:
-          type: string
-        greenhouseName:
-          type: string
-        latitude:
-          type: number
-        longitude:
-          type: number
-        address:
-          type: string
-        metrics:
-          type: array
-          items:
-            $ref: "#/components/schemas/MetricInput"
-        includeAdvice:
-          type: boolean
-          default: true
-    WeatherAdviceResponse:
-      type: object
-      properties:
-        cacheKey:
-          type: string
-        cachedAt:
-          type: string
-          format: date-time
-        cacheBackend:
-          type: string
-          enum: [locmem, redis]
-        weather:
-          type: object
-        advice:
-          type: object
-          nullable: true
-        adviceError:
-          type: string
-          nullable: true
-    CropDiagnosisRequest:
-      type: object
-      required: [image, cropId, cropName, greenhouseId]
-      properties:
-        image:
-          type: string
-          format: binary
-        cropId:
-          type: string
-        cropName:
-          type: string
-        greenhouseId:
-          type: string
-        greenhouseName:
-          type: string
-        useEnvironmentContext:
-          type: boolean
-        metrics:
-          type: string
-          description: JSON encoded MetricInput array for legacy compatibility.
-    CropDiagnosisResult:
-      type: object
-      required: [riskLevel, hasPestOrDisease, suspectedIssues, environmentAssessment, recommendations, disclaimer]
-      properties:
-        riskLevel:
-          type: string
-          enum: [low, medium, high, unknown]
-        hasPestOrDisease:
-          type: boolean
-        suspectedIssues:
-          type: array
-          items:
-            type: object
-        environmentAssessment:
-          type: string
-        recommendations:
-          type: array
-          items:
-            type: string
-        disclaimer:
-          type: string
-        evidence:
-          type: array
-          items:
-            type: string
-        matchedRules:
-          type: array
-          items:
-            type: string
-        confidenceReason:
-          type: string
-        followUpQuestions:
-          type: array
-          items:
-            type: string
-    AgriChatRequest:
-      type: object
-      required: [cropId, cropName, greenhouseId, greenhouseName, question]
-      properties:
-        cropId:
-          type: string
-        cropName:
-          type: string
-        greenhouseId:
-          type: string
-        greenhouseName:
-          type: string
-        question:
-          type: string
-        metrics:
-          type: array
-          items:
-            $ref: "#/components/schemas/MetricInput"
-    AgriChatResponse:
-      type: object
-      required: [riskLevel, summary, likelyCauses, actions, watchItems, matchedRules, disclaimer]
-      properties:
-        riskLevel:
-          type: string
-          enum: [low, medium, high, unknown]
-        summary:
-          type: string
-        likelyCauses:
-          type: array
-          items:
-            type: string
-        actions:
-          type: array
-          items:
-            type: string
-        watchItems:
-          type: array
-          items:
-            type: string
-        matchedRules:
-          type: array
-          items:
-            type: string
-        disclaimer:
-          type: string
+            additionalProperties: {}
+      required:
+      - configured
+      - ok
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
