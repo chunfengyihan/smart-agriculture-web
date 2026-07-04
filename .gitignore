@@ -20,6 +20,7 @@ output
 .env
 .env.*
 !.env.example
+config/dtu.devices.json
 
 # Python / Django
 .venv/

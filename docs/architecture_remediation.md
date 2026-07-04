@@ -808,3 +808,92 @@ Known limits:
 
 Parent Git Commit: feat(deploy): harden production deployment config
 Continue next item: waiting for manual confirmation
+
+## D-16
+
+Issue: D-16
+Status: completed, waiting for manual confirmation
+Changed files:
+- `backend/apps/greenhouse/models.py`
+- `backend/apps/greenhouse/serializers.py`
+- `backend/apps/greenhouse/admin.py`
+- `backend/apps/greenhouse/migrations/0003_remove_environmentreading_uniq_greenhouse_reading_recorded_source_and_more.py`
+- `backend/apps/ingest/`
+- `backend/config/settings/base.py`
+- `backend/config/urls.py`
+- `server/dtu-tcp-server.mjs`
+- `server/ingest/dtu-protocol.mjs`
+- `server/ingest/dtu-protocol.test.mjs`
+- `scripts/simulate-dtu-frame.mjs`
+- `scripts/verify.py`
+- `.env.example`
+- `.gitignore`
+- `package.json`
+- `config/dtu.devices.example.json`
+- `docs/dtu_tcp_receiver.md`
+- `docs/api_contract_v1.yaml`
+- `docs/api_inventory.md`
+- `docs/deployment.md`
+- `README.md`
+- `docs/architecture_remediation.md`
+
+Key decisions:
+- Kept the existing `greenhouse.Device` model as the canonical device registry instead of introducing a duplicate device table.
+- Added DTU-specific `Device` ingest fields for enablement, token hash, IP allowlist, protocol, and last ingest time.
+- Linked `EnvironmentReading` to `Device` so DTU data is traceable to device, greenhouse, and recorded time.
+- Added `apps.ingest` with `POST /api/v1/ingest/dtu-readings` as the only backend write boundary for DTU readings.
+- Added `DtuIngestAuditEvent` to persist accepted and rejected backend ingest attempts without storing raw frames.
+- Replaced full raw frame JSONL logging in the TCP receiver with sanitized audit logs containing frame length, SHA-256 hash, error code, and redacted/truncated snippets.
+- Added a local DTU registry file format and ignored real `config/dtu.devices.json`; only `config/dtu.devices.example.json` is committed.
+- Supported `DTU1|key=value` frames and signed JSON frames, with token, HMAC signature, IP allowlist, protocol, frame size, and metric validation.
+- Added a DTU simulation script and Node protocol tests.
+- Reserved queue-based production scaling in documentation; the current implementation forwards directly to Django.
+
+Automated checks:
+- `.venv\Scripts\python.exe backend\manage.py check` passed.
+- `.venv\Scripts\python.exe backend\manage.py makemigrations --check --dry-run` passed.
+- `.venv\Scripts\python.exe backend\manage.py migrate --noinput` applied D-16 migrations locally.
+- `.venv\Scripts\python.exe backend\manage.py test apps.ingest` passed with 4 tests.
+- `.venv\Scripts\python.exe backend\manage.py test apps` passed with 70 tests.
+- `.venv\Scripts\python.exe backend\manage.py spectacular --file docs\api_contract_v1.yaml --validate` passed.
+- `npm run dtu:test` passed with 5 tests.
+- `npm run lint` passed.
+- `npm run build` passed.
+
+Backend startup result:
+- Started Django on `http://127.0.0.1:8016/` during runtime verification.
+- `GET /api/v1/health/` returned ok.
+
+Frontend build result:
+- `npm run build` passed.
+
+Website runtime verification result:
+- Existing web routes were not changed; production build completed successfully.
+- Runtime verification used Django single-port API mode and confirmed protected greenhouse readings API access with service API key.
+
+Miniapp runtime verification result:
+- Not involved in D-16; no miniapp files or request wrappers were changed.
+
+API verification result:
+- `POST /api/v1/ingest/dtu-readings` accepts only registered/enabled devices with valid token/IP/protocol.
+- Legal DTU simulation frame wrote one `EnvironmentReading(source=dtu)` linked to device `dtu-runtime-001` and greenhouse `gh-dtu-runtime`.
+- Invalid token frame was rejected by the TCP gateway and written only to sanitized DTU audit JSONL.
+- Backend tests verify unregistered devices cannot write, invalid tokens are rejected and audited, IP allowlists are enforced, and legal frames produce traceable readings.
+
+Regression test result:
+- Existing Django app tests passed with 70 tests.
+- Node DTU parser tests passed.
+- Frontend lint/build passed.
+
+Compatibility impact:
+- Existing dashboard read APIs and frontend behavior are unchanged.
+- `EnvironmentReadingSerializer` now includes nullable `device`.
+- Real DTU deployments must add `Device` ingest fields and a private receiver registry before data is accepted.
+
+External dependencies and known limits:
+- No external queue is required locally.
+- High-concurrency production deployments should add Redis Queue, Celery, RabbitMQ, or Kafka between the TCP receiver and Django workers.
+- Real DTU registry files and device tokens must remain outside Git.
+
+Parent Git Commit: feat(ingest): secure dtu tcp ingestion
+Continue next item: waiting for manual confirmation

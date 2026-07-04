@@ -13,11 +13,21 @@ class GreenhouseAdmin(admin.ModelAdmin):
 
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
-    list_display = ("code", "name", "greenhouse", "provider", "status", "last_seen_at", "updated_at")
-    list_filter = ("provider", "status", "last_seen_at")
+    list_display = (
+        "code",
+        "name",
+        "greenhouse",
+        "provider",
+        "status",
+        "ingest_enabled",
+        "last_seen_at",
+        "last_ingest_at",
+        "updated_at",
+    )
+    list_filter = ("provider", "status", "ingest_enabled", "last_seen_at", "last_ingest_at")
     search_fields = ("code", "name", "external_id", "greenhouse__code", "greenhouse__name")
     autocomplete_fields = ("greenhouse",)
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at", "last_ingest_at")
     date_hierarchy = "last_seen_at"
 
 
@@ -25,6 +35,7 @@ class DeviceAdmin(admin.ModelAdmin):
 class EnvironmentReadingAdmin(admin.ModelAdmin):
     list_display = (
         "greenhouse",
+        "device",
         "recorded_at",
         "metric_type",
         "air_temp",
@@ -34,8 +45,8 @@ class EnvironmentReadingAdmin(admin.ModelAdmin):
         "source",
     )
     list_filter = ("source", "metric_type", "recorded_at")
-    search_fields = ("greenhouse__code", "greenhouse__name")
-    autocomplete_fields = ("greenhouse",)
+    search_fields = ("greenhouse__code", "greenhouse__name", "device__code", "device__name")
+    autocomplete_fields = ("greenhouse", "device")
     readonly_fields = ("created_at", "updated_at")
     date_hierarchy = "recorded_at"
 

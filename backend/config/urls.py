@@ -24,6 +24,7 @@ from apps.greenhouse.views import (
     V1GreenhouseListView,
     V1GreenhouseReadingsView,
 )
+from apps.ingest.views import V1DtuReadingIngestView
 from apps.integrations.youren.views import LegacyYourenHealthView, V1YourenHealthView
 from apps.weather.views import LegacyWeatherAdviceView, V1WeatherAdviceView
 
@@ -58,6 +59,11 @@ urlpatterns = [
         "api/v1/integrations/youren/health",
         V1YourenHealthView.as_view(),
         name="api-v1-youren-health",
+    ),
+    path(
+        "api/v1/ingest/dtu-readings",
+        V1DtuReadingIngestView.as_view(),
+        name="api-v1-ingest-dtu-readings",
     ),
     path("api/v1/auth/wechat-login", WeChatLoginView.as_view(), name="api-v1-auth-wechat-login"),
     path("api/v1/auth/refresh", RefreshTokenView.as_view(), name="api-v1-auth-refresh"),

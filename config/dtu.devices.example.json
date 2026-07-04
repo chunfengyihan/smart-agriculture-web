@@ -1,0 +1,10 @@
+{
+  "devices": [
+    {
+      "deviceId": "dtu-001",
+      "token": "replace-with-device-token",
+      "allowedIps": ["127.0.0.1"],
+      "protocol": "smart_agri_v1"
+    }
+  ]
+}

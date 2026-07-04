@@ -42,6 +42,11 @@ class Device(models.Model):
     external_id = models.CharField(max_length=128, blank=True, db_index=True)
     status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=STATUS_ONLINE, db_index=True)
     last_seen_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    ingest_enabled = models.BooleanField(default=False, db_index=True)
+    ingest_token_hash = models.CharField(max_length=64, blank=True)
+    ingest_allowed_ips = models.JSONField(default=list, blank=True)
+    ingest_protocol = models.CharField(max_length=32, default="smart_agri_v1")
+    last_ingest_at = models.DateTimeField(null=True, blank=True, db_index=True)
     metadata = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -51,6 +56,7 @@ class Device(models.Model):
             models.Index(fields=["greenhouse", "status"]),
             models.Index(fields=["provider", "external_id"]),
             models.Index(fields=["provider", "last_seen_at"]),
+            models.Index(fields=["provider", "ingest_enabled"]),
         ]
         ordering = ["greenhouse__code", "code"]
 
@@ -63,6 +69,13 @@ class EnvironmentReading(models.Model):
         Greenhouse,
         on_delete=models.CASCADE,
         related_name="readings",
+    )
+    device = models.ForeignKey(
+        Device,
+        on_delete=models.SET_NULL,
+        related_name="readings",
+        null=True,
+        blank=True,
     )
     recorded_at = models.DateTimeField(db_index=True)
     metric_type = models.CharField(max_length=32, default="environment", db_index=True)
@@ -81,12 +94,13 @@ class EnvironmentReading(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["greenhouse", "recorded_at", "source"],
-                name="uniq_greenhouse_reading_recorded_source",
+                fields=["greenhouse", "device", "recorded_at", "source"],
+                name="uniq_greenhouse_device_reading_source",
             )
         ]
         indexes = [
             models.Index(fields=["greenhouse", "recorded_at"]),
+            models.Index(fields=["device", "recorded_at"]),
             models.Index(fields=["greenhouse", "metric_type", "recorded_at"]),
             models.Index(fields=["source", "recorded_at"]),
             models.Index(fields=["source", "metric_type", "recorded_at"]),

@@ -262,6 +262,28 @@ AI 相关接口目前只保留安全关闭入口。即使配置 `EXTERNAL_INTEGR
 GET /api/v1/health/
 ```
 
+## DTU TCP ingest
+
+D-16 adds a guarded DTU ingest path for TCP transparent-transmission devices:
+
+- TCP gateway: `server/dtu-tcp-server.mjs`
+- Protocol/parser tests: `server/ingest/dtu-protocol.test.mjs`
+- Simulation script: `scripts/simulate-dtu-frame.mjs`
+- Backend API: `POST /api/v1/ingest/dtu-readings`
+- Detailed runbook: `docs/dtu_tcp_receiver.md`
+
+Local commands:
+
+```powershell
+npm run dev:dtu
+npm run dtu:simulate -- --device dtu-001 --token replace-with-device-token
+npm run dtu:test
+```
+
+The gateway requires a private registry at `config/dtu.devices.json`; copy from `config/dtu.devices.example.json` and replace placeholder values locally. Do not commit real device tokens or real source IPs.
+
+In Django Admin, register a `Device` with `provider=dtu`, `ingest_enabled=true`, a SHA-256 `ingest_token_hash` or strict `ingest_allowed_ips`, and the target `Greenhouse`. Accepted DTU readings are stored as `EnvironmentReading(source=dtu)` and linked back to the device and greenhouse. Rejected frames are recorded in `DtuIngestAuditEvent` with only hash and redacted snippets.
+
 ## AI 作物诊断
 
 页面中的 AI 诊断面板会上传一张 JPG、PNG 或 WebP 图片，并附带当前大棚的环境指标：

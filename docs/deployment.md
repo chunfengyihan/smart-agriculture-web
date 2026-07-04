@@ -129,6 +129,41 @@ Weather integration cache settings:
 
 Production multi-process deployments should use Redis so weather cache entries survive Django process restarts and are shared by all workers.
 
+## DTU ingest
+
+DTU TCP access is handled by the Node gateway at `server/dtu-tcp-server.mjs`, then forwarded to Django:
+
+```text
+DTU -> TCP gateway -> POST /api/v1/ingest/dtu-readings -> EnvironmentReading
+```
+
+Production environment variables:
+
+```env
+DTU_TCP_HOST=0.0.0.0
+DTU_TCP_PORT=9000
+DTU_TCP_LOG_DIR=.runtime/dtu
+DTU_TCP_MAX_FRAME_BYTES=4096
+DTU_TCP_REDACTED_PREVIEW_BYTES=160
+DTU_DEVICE_REGISTRY_PATH=/run/secrets/dtu.devices.json
+DTU_INGEST_API_URL=https://api.example.com/api/v1/ingest/dtu-readings
+DTU_INGEST_API_KEY=<service-api-key-from-DJANGO_API_KEY_ALLOWLIST>
+```
+
+Keep real `config/dtu.devices.json` content outside Git. The committed `config/dtu.devices.example.json` is only a template.
+
+Django must have matching `Device` rows with:
+
+- `code` equal to the DTU frame device id.
+- `provider=dtu`.
+- `ingest_enabled=true`.
+- `ingest_token_hash` set to the SHA-256 device token hash, or `ingest_allowed_ips` set to a strict source IP list.
+- `greenhouse` set to the target greenhouse.
+
+The gateway writes sanitized audit logs under `DTU_TCP_LOG_DIR`; full raw frames, cleartext tokens, and full hex dumps must not be stored in normal logs. Django stores accepted/rejected ingest attempts in `DtuIngestAuditEvent`.
+
+For high-concurrency deployments, keep the same parser and backend API contract, but put Redis Queue, Celery, RabbitMQ, or Kafka between the TCP gateway and Django workers. Queue messages should contain normalized metrics plus `raw_frame_hash` and `redacted_snippet`, not full raw frames.
+
 ## WeChat miniapp login
 
 Configure these variables before enabling real miniapp login:

@@ -511,6 +511,46 @@ paths:
                     request_id: 00000000-0000-0000-0000-000000000000
                   summary: Health check
           description: ''
+  /api/v1/ingest/dtu-readings:
+    post:
+      operationId: api_v1_ingest_dtu_readings_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DtuReadingIngest'
+            examples:
+              DTUNormalizedReading:
+                value:
+                  device_id: dtu-greenhouse-1
+                  device_token: device-token-from-secure-env
+                  protocol: smart_agri_v1
+                  recorded_at: '2026-07-04T10:00:00+08:00'
+                  metrics:
+                    air_temp: 25.6
+                    air_humidity: 68
+                    soil_humidity: 52
+                  raw_frame_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+                  frame_length: 128
+                  redacted_snippet: DTU1|device=dtu-greenhouse-1|token=[redacted]|...
+                summary: DTU normalized reading
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DtuReadingIngest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DtuReadingIngest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+        '201':
+          description: No response body
   /api/v1/integrations/youren/health:
     get:
       operationId: api_v1_integrations_youren_health_retrieve
@@ -718,6 +758,48 @@ components:
       - crops
       - generatedAt
       - source
+    DtuReadingIngest:
+      type: object
+      properties:
+        device_id:
+          type: string
+          maxLength: 128
+        device_token:
+          type: string
+          writeOnly: true
+          maxLength: 512
+        protocol:
+          type: string
+          default: smart_agri_v1
+          maxLength: 32
+        recorded_at:
+          type: string
+          format: date-time
+        metrics:
+          type: object
+          additionalProperties: {}
+        remote_ip:
+          type: string
+          nullable: true
+        raw_frame_hash:
+          type: string
+          maxLength: 64
+          pattern: ^[0-9a-f]{64}$
+        frame_length:
+          type: integer
+          minimum: 0
+        parser_version:
+          type: string
+          maxLength: 32
+        connection_id:
+          type: string
+          maxLength: 64
+        redacted_snippet:
+          type: string
+          maxLength: 256
+      required:
+      - device_id
+      - metrics
     EnvironmentReading:
       type: object
       properties:
@@ -726,6 +808,9 @@ components:
           readOnly: true
         greenhouse:
           type: integer
+        device:
+          type: integer
+          nullable: true
         recorded_at:
           type: string
           format: date-time
@@ -786,6 +871,7 @@ components:
           readOnly: true
       required:
       - created_at
+      - device
       - greenhouse
       - id
       - recorded_at

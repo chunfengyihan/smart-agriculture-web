@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.integrations",
     "apps.greenhouse",
+    "apps.ingest",
     "apps.weather",
     "apps.ai_advisory",
 ]

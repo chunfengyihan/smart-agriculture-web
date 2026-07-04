@@ -99,13 +99,23 @@ def main() -> int:
         [py, manage, "migrate", "--noinput"],
         [py, manage, "seed_dev"],
         [py, manage, "seed_dev"],
-        [py, manage, "test", "apps.core", "apps.accounts", "apps.greenhouse", "apps.weather", "apps.ai_advisory"],
+        [
+            py,
+            manage,
+            "test",
+            "apps.core",
+            "apps.accounts",
+            "apps.greenhouse",
+            "apps.ingest",
+            "apps.weather",
+            "apps.ai_advisory",
+        ],
         [py, manage, "spectacular", "--validate", "--file", str(SCHEMA_PATH)],
     ]
     if not args.backend_only:
         if shutil.which(npm) is None:
             raise RuntimeError("npm is required unless --backend-only is used")
-        commands.extend([[npm, "run", "lint"], [npm, "run", "build"]])
+        commands.extend([[npm, "run", "dtu:test"], [npm, "run", "lint"], [npm, "run", "build"]])
 
     for command in commands:
         run(command, env)

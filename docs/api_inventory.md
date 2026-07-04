@@ -223,6 +223,19 @@
 - `/api/v1/auth/me`：已实现。
 - `/api/v1/integrations/youren/health`：已实现。
 
+## P1 - DTU Ingest
+
+- Endpoint: `POST /api/v1/ingest/dtu-readings`
+- Caller: `server/dtu-tcp-server.mjs` or a trusted device gateway.
+- Request fields: `device_id`, `device_token?`, `protocol`, `recorded_at?`, `metrics`, `remote_ip?`, `raw_frame_hash?`, `frame_length?`, `redacted_snippet?`.
+- Response fields: v1 wrapper with `data.reading_id`, `data.device_id`, `data.greenhouse_id`, `data.recorded_at`, and `data.created`.
+- Data source: normalized DTU TCP frames.
+- Django migration status: implemented; writes `EnvironmentReading(source=dtu)` and records `DtuIngestAuditEvent`.
+- External dependency: none by default; high-concurrency deployments can replace direct forwarding with Redis Queue, Celery, RabbitMQ, or Kafka.
+- Compatibility: additive service endpoint; existing web and miniapp dashboard read APIs are unchanged.
+- Security: unregistered, disabled, token-mismatched, IP-denied, protocol-mismatched, and invalid-metric frames are rejected before write. Normal logs store only hashes and redacted snippets.
+- Confirmation status: CONFIRMED
+
 ## Deferred API Surface
 
 - 作物 CRUD：UNKNOWN，当前没有独立作物模型和管理接口。

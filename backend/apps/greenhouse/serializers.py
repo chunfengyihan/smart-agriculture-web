@@ -36,6 +36,7 @@ class EnvironmentReadingSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "greenhouse",
+            "device",
             "recorded_at",
             "metric_type",
             "air_temp",
@@ -64,6 +65,10 @@ class DeviceSerializer(serializers.ModelSerializer):
             "external_id",
             "status",
             "last_seen_at",
+            "ingest_enabled",
+            "ingest_allowed_ips",
+            "ingest_protocol",
+            "last_ingest_at",
             "metadata",
             "created_at",
             "updated_at",
