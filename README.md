@@ -171,10 +171,12 @@ DashboardData
 VITE_DATA_SOURCE=remote
 VITE_DASHBOARD_ENDPOINT=/api/v1/greenhouse/dashboard
 VITE_LOCAL_DASHBOARD_PATH=/data/local-dashboard.json
+VITE_HISTORICAL_ANALYTICS_PATH=/data/historical-analytics.json
 ```
 
 - `mock`：使用 `src/data/mockDashboard.ts`，适合前端开发和演示。
 - `local`：请求 `VITE_LOCAL_DASHBOARD_PATH`，读取 `npm run local:data` 生成的 JSON。
+- 历史分析区始终请求 `VITE_HISTORICAL_ANALYTICS_PATH`；`npm run local:data` 会同时生成实时本地快照和 2026 日级历史分析文件。
 - `remote`：请求 `VITE_DASHBOARD_ENDPOINT`，当前由 Django 提供。
 
 如果没有设置 `VITE_DATA_SOURCE`，前端默认按 `remote` 处理。`VITE_USE_REMOTE_DATA` 仅为旧配置兼容项。
@@ -204,6 +206,7 @@ public/data/local-dashboard.json
 ```env
 VITE_DATA_SOURCE=local
 VITE_LOCAL_DASHBOARD_PATH=/data/local-dashboard.json
+VITE_HISTORICAL_ANALYTICS_PATH=/data/historical-analytics.json
 ```
 
 然后启动 Vite 开发网页：

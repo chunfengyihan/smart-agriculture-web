@@ -14,6 +14,61 @@ export type MetricKey =
   | 'ec'
   | 'ph'
 
+export type HistoricalMetricKey = MetricKey | 'pressure' | 'salinity'
+
+export interface HistoricalDailyPoint {
+  date: string
+  average: number | null
+  minimum: number | null
+  maximum: number | null
+  validCount: number
+  filteredZeroCount: number
+  invalidCount: number
+}
+
+export interface HistoricalMetricSeries {
+  key: HistoricalMetricKey
+  label: string
+  unit: string
+  unitNote: string
+  latestValue: number | null
+  latestAt: string | null
+  validCount: number
+  filteredZeroCount: number
+  invalidCount: number
+  undatedInvalidCount: number
+  points: HistoricalDailyPoint[]
+}
+
+export interface HistoricalGreenhouseAnalytics {
+  id: string
+  name: string
+  area: string
+  deviceNo: string
+  period: {
+    start: string | null
+    end: string | null
+  }
+  series: HistoricalMetricSeries[]
+}
+
+export interface HistoricalCropAnalytics {
+  id: CropId
+  name: string
+  greenhouses: HistoricalGreenhouseAnalytics[]
+}
+
+export interface HistoricalAnalyticsData {
+  version: number
+  generatedAt: string
+  source: string
+  period: {
+    start: string | null
+    end: string | null
+  }
+  crops: HistoricalCropAnalytics[]
+}
+
 export interface MetricReading {
   key: MetricKey
   label: string

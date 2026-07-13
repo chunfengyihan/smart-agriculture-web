@@ -6,6 +6,39 @@ if (-not (Test-Path $PythonExe)) {
     $PythonExe = "python"
 }
 
+function Import-DotEnv {
+    param([string]$Path)
+
+    if (-not (Test-Path $Path)) {
+        return
+    }
+
+    foreach ($line in Get-Content -LiteralPath $Path) {
+        if ($line -match '^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
+            $name = $matches[1]
+            $value = $matches[2].Trim()
+            if (
+                $value.Length -ge 2 -and
+                (($value.StartsWith('"') -and $value.EndsWith('"')) -or
+                 ($value.StartsWith("'") -and $value.EndsWith("'")))
+            ) {
+                $value = $value.Substring(1, $value.Length - 2)
+            }
+            Set-Item -Path "Env:$name" -Value $value
+        }
+    }
+}
+
+Import-DotEnv -Path (Join-Path $ProjectDir ".env.local")
+
+if ($env:DB_ENGINE -eq "mysql") {
+    $MysqlStartScript = "D:\mysql\start-mysql.ps1"
+    if (-not (Test-Path $MysqlStartScript)) {
+        throw "MySQL is configured but $MysqlStartScript was not found."
+    }
+    & $MysqlStartScript
+}
+
 function Test-HttpHealth {
     param([int]$Port)
 

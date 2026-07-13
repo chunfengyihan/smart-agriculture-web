@@ -9,6 +9,7 @@ const WeatherAdvicePanel = lazy(() => import('../WeatherAdvicePanel'))
 const CropDiagnosisPanel = lazy(() => import('../CropDiagnosisPanel'))
 const JujubeAdvisorPanel = lazy(() => import('../JujubeAdvisorPanel'))
 const TrendChart = lazy(() => import('../TrendChart'))
+const HistoricalAnalyticsPanel = lazy(() => import('../HistoricalAnalyticsPanel'))
 
 const metricIcons: Record<string, typeof ThermometerSun> = {
   airTemp: ThermometerSun,
@@ -143,6 +144,14 @@ export function EnvironmentPanel({ selectedCrop, selectedGreenhouse, onSelectGre
               <MetricCard key={metric.key} metric={metric} />
             ))}
           </div>
+
+          <Suspense fallback={<PanelFallback label="正在加载 2026 历史采集分析" />}>
+            <HistoricalAnalyticsPanel
+              key={`history-${selectedCrop.id}-${selectedGreenhouse.id}`}
+              selectedCrop={selectedCrop}
+              selectedGreenhouse={selectedGreenhouse}
+            />
+          </Suspense>
 
           <div id="diagnosis">
             <Suspense fallback={<PanelFallback label="正在加载 AI 诊断模块" />}>

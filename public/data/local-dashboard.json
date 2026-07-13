@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-27T08:47:16.330455",
+  "generatedAt": "2026-07-13T18:27:23.817841",
   "source": "local",
   "crops": [
     {
@@ -87,170 +87,170 @@
             {
               "time": "00:00",
               "airTemp": 20.4,
-              "airHumidity": 81,
-              "soilHumidity": 13,
-              "light": 0
+              "airHumidity": 81.2,
+              "soilHumidity": 12.7,
+              "light": 0.0
             },
             {
               "time": "01:00",
               "airTemp": 20.8,
-              "airHumidity": 81,
-              "soilHumidity": 13,
-              "light": 0
+              "airHumidity": 81.1,
+              "soilHumidity": 12.6,
+              "light": 0.0
             },
             {
               "time": "02:00",
               "airTemp": 20.8,
-              "airHumidity": 81,
-              "soilHumidity": 13,
-              "light": 0
+              "airHumidity": 81.0,
+              "soilHumidity": 12.6,
+              "light": 0.0
             },
             {
               "time": "03:00",
               "airTemp": 20.6,
-              "airHumidity": 81,
-              "soilHumidity": 13,
-              "light": 0
+              "airHumidity": 81.3,
+              "soilHumidity": 12.5,
+              "light": 0.0
             },
             {
               "time": "04:00",
               "airTemp": 20.7,
-              "airHumidity": 82,
-              "soilHumidity": 13,
-              "light": 120
+              "airHumidity": 81.5,
+              "soilHumidity": 12.5,
+              "light": 119.6
             },
             {
               "time": "05:00",
               "airTemp": 20.6,
-              "airHumidity": 81,
-              "soilHumidity": 12,
-              "light": 676
+              "airHumidity": 81.4,
+              "soilHumidity": 12.5,
+              "light": 675.6
             },
             {
               "time": "06:00",
               "airTemp": 20.9,
-              "airHumidity": 82,
-              "soilHumidity": 12,
-              "light": 2339
+              "airHumidity": 81.6,
+              "soilHumidity": 12.4,
+              "light": 2339.1
             },
             {
               "time": "07:00",
               "airTemp": 22.5,
-              "airHumidity": 82,
-              "soilHumidity": 12,
-              "light": 6718
+              "airHumidity": 82.1,
+              "soilHumidity": 12.4,
+              "light": 6718.1
             },
             {
               "time": "08:00",
               "airTemp": 26.9,
-              "airHumidity": 74,
-              "soilHumidity": 12,
-              "light": 28760
+              "airHumidity": 74.2,
+              "soilHumidity": 12.5,
+              "light": 28759.6
             },
             {
               "time": "09:00",
               "airTemp": 30.7,
-              "airHumidity": 59,
-              "soilHumidity": 13,
-              "light": 45757
+              "airHumidity": 58.8,
+              "soilHumidity": 12.6,
+              "light": 45757.2
             },
             {
               "time": "10:00",
               "airTemp": 34.2,
-              "airHumidity": 50,
-              "soilHumidity": 13,
-              "light": 65382
+              "airHumidity": 49.9,
+              "soilHumidity": 12.9,
+              "light": 65382.3
             },
             {
               "time": "11:00",
               "airTemp": 34.7,
-              "airHumidity": 48,
-              "soilHumidity": 13,
-              "light": 56512
+              "airHumidity": 48.1,
+              "soilHumidity": 13.0,
+              "light": 56512.3
             },
             {
               "time": "12:00",
               "airTemp": 29.8,
-              "airHumidity": 52,
-              "soilHumidity": 13,
-              "light": 23287
+              "airHumidity": 52.2,
+              "soilHumidity": 13.0,
+              "light": 23287.4
             },
             {
               "time": "13:00",
               "airTemp": 29.9,
-              "airHumidity": 52,
-              "soilHumidity": 13,
-              "light": 24732
+              "airHumidity": 51.8,
+              "soilHumidity": 13.0,
+              "light": 24731.8
             },
             {
               "time": "14:00",
               "airTemp": 25.6,
-              "airHumidity": 69,
-              "soilHumidity": 13,
-              "light": 6265
+              "airHumidity": 68.9,
+              "soilHumidity": 13.0,
+              "light": 6265.5
             },
             {
               "time": "15:00",
               "airTemp": 26.2,
-              "airHumidity": 74,
-              "soilHumidity": 13,
-              "light": 1246
+              "airHumidity": 74.0,
+              "soilHumidity": 12.8,
+              "light": 1246.0
             },
             {
               "time": "16:00",
               "airTemp": 24.2,
-              "airHumidity": 75,
-              "soilHumidity": 13,
-              "light": 436
+              "airHumidity": 74.7,
+              "soilHumidity": 12.7,
+              "light": 435.9
             },
             {
               "time": "17:00",
               "airTemp": 23.3,
-              "airHumidity": 78,
-              "soilHumidity": 13,
-              "light": 2199
+              "airHumidity": 77.6,
+              "soilHumidity": 12.7,
+              "light": 2199.1
             },
             {
               "time": "18:00",
               "airTemp": 23.2,
-              "airHumidity": 78,
-              "soilHumidity": 13,
-              "light": 2056
+              "airHumidity": 77.7,
+              "soilHumidity": 12.6,
+              "light": 2056.0
             },
             {
               "time": "19:00",
               "airTemp": 22.7,
-              "airHumidity": 78,
-              "soilHumidity": 13,
-              "light": 179
+              "airHumidity": 77.7,
+              "soilHumidity": 12.6,
+              "light": 179.3
             },
             {
               "time": "20:00",
               "airTemp": 21.5,
-              "airHumidity": 79,
-              "soilHumidity": 13,
-              "light": 0
+              "airHumidity": 78.8,
+              "soilHumidity": 12.5,
+              "light": 0.0
             },
             {
               "time": "21:00",
               "airTemp": 20.6,
-              "airHumidity": 80,
-              "soilHumidity": 13,
-              "light": 0
+              "airHumidity": 80.0,
+              "soilHumidity": 12.5,
+              "light": 0.0
             },
             {
               "time": "22:00",
               "airTemp": 19.8,
-              "airHumidity": 80,
-              "soilHumidity": 12,
-              "light": 0
+              "airHumidity": 80.4,
+              "soilHumidity": 12.5,
+              "light": 0.0
             },
             {
               "time": "23:00",
               "airTemp": 19.2,
-              "airHumidity": 81,
-              "soilHumidity": 12,
-              "light": 0
+              "airHumidity": 80.8,
+              "soilHumidity": 12.4,
+              "light": 0.0
             }
           ],
           "alerts": [
@@ -258,13 +258,13 @@
               "id": "local-soilHumidity",
               "level": "warning",
               "message": "土壤湿度 当前值 12.5%，建议复核目标范围 45-70%。",
-              "time": "08:47"
+              "time": "18:27"
             },
             {
               "id": "local-ph",
               "level": "warning",
               "message": "土壤 PH 当前值 9.02，建议复核目标范围 5.8-7.2。",
-              "time": "08:47"
+              "time": "18:27"
             }
           ]
         },
@@ -311,7 +311,7 @@
             {
               "key": "soilHumidity",
               "label": "土壤湿度",
-              "value": 0.0,
+              "value": 0.1,
               "unit": "%",
               "status": "warning",
               "target": "45-70%"
@@ -327,7 +327,7 @@
             {
               "key": "ec",
               "label": "土壤 EC",
-              "value": 0.0,
+              "value": 0.08,
               "unit": "mS/cm",
               "status": "normal",
               "target": "0.8-1.8"
@@ -345,178 +345,178 @@
             {
               "time": "00:00",
               "airTemp": 19.7,
-              "airHumidity": 81,
-              "soilHumidity": 0,
-              "light": 0
+              "airHumidity": 81.4,
+              "soilHumidity": 0.4,
+              "light": 0.0
             },
             {
               "time": "01:00",
               "airTemp": 20.1,
-              "airHumidity": 82,
-              "soilHumidity": 0,
-              "light": 0
+              "airHumidity": 81.9,
+              "soilHumidity": null,
+              "light": 0.0
             },
             {
               "time": "02:00",
               "airTemp": 20.1,
-              "airHumidity": 82,
-              "soilHumidity": 0,
-              "light": 0
+              "airHumidity": 81.7,
+              "soilHumidity": null,
+              "light": 0.0
             },
             {
               "time": "03:00",
               "airTemp": 20.0,
-              "airHumidity": 82,
-              "soilHumidity": 0,
-              "light": 0
+              "airHumidity": 81.8,
+              "soilHumidity": null,
+              "light": 0.0
             },
             {
               "time": "04:00",
               "airTemp": 20.0,
-              "airHumidity": 82,
-              "soilHumidity": 0,
-              "light": 122
+              "airHumidity": 82.1,
+              "soilHumidity": null,
+              "light": 122.3
             },
             {
               "time": "05:00",
               "airTemp": 20.0,
-              "airHumidity": 82,
-              "soilHumidity": 0,
-              "light": 706
+              "airHumidity": 82.3,
+              "soilHumidity": null,
+              "light": 706.5
             },
             {
               "time": "06:00",
               "airTemp": 20.4,
-              "airHumidity": 83,
-              "soilHumidity": 0,
-              "light": 2342
+              "airHumidity": 82.6,
+              "soilHumidity": null,
+              "light": 2341.7
             },
             {
               "time": "07:00",
               "airTemp": 22.2,
-              "airHumidity": 83,
-              "soilHumidity": 0,
-              "light": 6711
+              "airHumidity": 83.1,
+              "soilHumidity": null,
+              "light": 6711.5
             },
             {
               "time": "08:00",
               "airTemp": 26.5,
-              "airHumidity": 71,
-              "soilHumidity": 0,
-              "light": 26736
+              "airHumidity": 71.4,
+              "soilHumidity": 0.2,
+              "light": 26735.7
             },
             {
               "time": "09:00",
               "airTemp": 29.4,
-              "airHumidity": 59,
-              "soilHumidity": 1,
-              "light": 43488
+              "airHumidity": 58.9,
+              "soilHumidity": 0.6,
+              "light": 43487.8
             },
             {
               "time": "10:00",
               "airTemp": 33.6,
-              "airHumidity": 49,
-              "soilHumidity": 1,
-              "light": 55655
+              "airHumidity": 49.5,
+              "soilHumidity": 1.5,
+              "light": 55655.5
             },
             {
               "time": "11:00",
               "airTemp": 34.8,
-              "airHumidity": 46,
-              "soilHumidity": 2,
-              "light": 45247
+              "airHumidity": 45.6,
+              "soilHumidity": 1.5,
+              "light": 45246.9
             },
             {
               "time": "12:00",
               "airTemp": 30.0,
-              "airHumidity": 52,
-              "soilHumidity": 1,
-              "light": 22250
+              "airHumidity": 52.0,
+              "soilHumidity": 0.5,
+              "light": 22250.5
             },
             {
               "time": "13:00",
               "airTemp": 30.2,
-              "airHumidity": 51,
-              "soilHumidity": 0,
-              "light": 25333
+              "airHumidity": 51.5,
+              "soilHumidity": 0.5,
+              "light": 25333.4
             },
             {
               "time": "14:00",
               "airTemp": 26.6,
-              "airHumidity": 64,
-              "soilHumidity": 0,
-              "light": 7194
+              "airHumidity": 64.0,
+              "soilHumidity": 0.2,
+              "light": 7194.1
             },
             {
               "time": "15:00",
               "airTemp": 26.1,
-              "airHumidity": 73,
-              "soilHumidity": 0,
-              "light": 1326
+              "airHumidity": 72.9,
+              "soilHumidity": null,
+              "light": 1325.8
             },
             {
               "time": "16:00",
               "airTemp": 23.7,
-              "airHumidity": 75,
-              "soilHumidity": 0,
-              "light": 436
+              "airHumidity": 75.1,
+              "soilHumidity": null,
+              "light": 436.4
             },
             {
               "time": "17:00",
               "airTemp": 22.9,
-              "airHumidity": 78,
-              "soilHumidity": 0,
-              "light": 2447
+              "airHumidity": 77.9,
+              "soilHumidity": null,
+              "light": 2446.8
             },
             {
               "time": "18:00",
               "airTemp": 23.0,
-              "airHumidity": 78,
-              "soilHumidity": 0,
-              "light": 2142
+              "airHumidity": 77.5,
+              "soilHumidity": null,
+              "light": 2142.0
             },
             {
               "time": "19:00",
               "airTemp": 22.4,
-              "airHumidity": 77,
-              "soilHumidity": 0,
-              "light": 182
+              "airHumidity": 77.4,
+              "soilHumidity": null,
+              "light": 181.6
             },
             {
               "time": "20:00",
               "airTemp": 20.9,
-              "airHumidity": 79,
-              "soilHumidity": 0,
-              "light": 0
+              "airHumidity": 78.9,
+              "soilHumidity": null,
+              "light": 0.0
             },
             {
               "time": "21:00",
               "airTemp": 19.9,
-              "airHumidity": 80,
-              "soilHumidity": 0,
-              "light": 0
+              "airHumidity": 80.0,
+              "soilHumidity": null,
+              "light": 0.0
             },
             {
               "time": "22:00",
               "airTemp": 19.1,
-              "airHumidity": 80,
-              "soilHumidity": 0,
-              "light": 0
+              "airHumidity": 80.4,
+              "soilHumidity": null,
+              "light": 0.0
             },
             {
               "time": "23:00",
               "airTemp": 18.4,
-              "airHumidity": 81,
-              "soilHumidity": 0,
-              "light": 0
+              "airHumidity": 80.9,
+              "soilHumidity": null,
+              "light": 0.0
             }
           ],
           "alerts": [
             {
               "id": "local-soilHumidity",
               "level": "warning",
-              "message": "土壤湿度 当前值 0.0%，建议复核目标范围 45-70%。",
-              "time": "08:47"
+              "message": "土壤湿度 当前值 0.1%，建议复核目标范围 45-70%。",
+              "time": "18:27"
             }
           ]
         }
@@ -599,170 +599,170 @@
             {
               "time": "00:00",
               "airTemp": 16.3,
-              "airHumidity": 84,
-              "soilHumidity": 24,
-              "light": 0
+              "airHumidity": 84.3,
+              "soilHumidity": 24.0,
+              "light": 0.0
             },
             {
               "time": "01:00",
               "airTemp": 16.4,
-              "airHumidity": 84,
-              "soilHumidity": 24,
-              "light": 0
+              "airHumidity": 84.3,
+              "soilHumidity": 24.0,
+              "light": 0.0
             },
             {
               "time": "02:00",
               "airTemp": 16.4,
-              "airHumidity": 85,
-              "soilHumidity": 24,
-              "light": 0
+              "airHumidity": 84.6,
+              "soilHumidity": 24.0,
+              "light": 0.0
             },
             {
               "time": "03:00",
               "airTemp": 16.7,
-              "airHumidity": 86,
-              "soilHumidity": 24,
-              "light": 0
+              "airHumidity": 85.9,
+              "soilHumidity": 24.0,
+              "light": 0.0
             },
             {
               "time": "04:00",
               "airTemp": 16.7,
-              "airHumidity": 86,
-              "soilHumidity": 24,
-              "light": 148
+              "airHumidity": 86.1,
+              "soilHumidity": 24.0,
+              "light": 148.4
             },
             {
               "time": "05:00",
               "airTemp": 17.0,
-              "airHumidity": 86,
-              "soilHumidity": 24,
-              "light": 1406
+              "airHumidity": 86.1,
+              "soilHumidity": 24.0,
+              "light": 1406.1
             },
             {
               "time": "06:00",
               "airTemp": 17.0,
-              "airHumidity": 85,
-              "soilHumidity": 24,
-              "light": 2762
+              "airHumidity": 85.2,
+              "soilHumidity": 24.0,
+              "light": 2762.0
             },
             {
               "time": "07:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "08:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "09:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "10:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "11:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "12:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "13:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "14:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "15:00",
               "airTemp": 25.1,
-              "airHumidity": 64,
-              "soilHumidity": 25,
-              "light": 4990
+              "airHumidity": 63.6,
+              "soilHumidity": 25.4,
+              "light": 4990.0
             },
             {
               "time": "16:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "17:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "18:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "19:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "20:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "21:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "22:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             },
             {
               "time": "23:00",
-              "airTemp": 23.1,
-              "airHumidity": 60,
-              "soilHumidity": 18,
-              "light": 8480
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": null,
+              "light": null
             }
           ],
           "alerts": [
@@ -770,7 +770,7 @@
               "id": "local-soilHumidity",
               "level": "warning",
               "message": "土壤湿度 当前值 25.0%，建议复核目标范围 45-70%。",
-              "time": "08:47"
+              "time": "18:27"
             }
           ]
         },
@@ -842,171 +842,171 @@
           "trend": [
             {
               "time": "00:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 13,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 13.0,
+              "light": null
             },
             {
               "time": "01:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 13,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 13.0,
+              "light": null
             },
             {
               "time": "02:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 13,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 13.0,
+              "light": null
             },
             {
               "time": "03:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 13,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 13.0,
+              "light": null
             },
             {
               "time": "04:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 13,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 13.0,
+              "light": null
             },
             {
               "time": "05:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 13,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 13.0,
+              "light": null
             },
             {
               "time": "06:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 13,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 13.0,
+              "light": null
             },
             {
               "time": "07:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 13,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 13.0,
+              "light": null
             },
             {
               "time": "08:00",
               "airTemp": 25.7,
-              "airHumidity": 63,
-              "soilHumidity": 13,
-              "light": 29059
+              "airHumidity": 63.0,
+              "soilHumidity": 13.0,
+              "light": 29058.8
             },
             {
               "time": "09:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 14,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 13.8,
+              "light": null
             },
             {
               "time": "10:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 14,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 13.8,
+              "light": null
             },
             {
               "time": "11:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 14,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 14.1,
+              "light": null
             },
             {
               "time": "12:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 15,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 14.6,
+              "light": null
             },
             {
               "time": "13:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 15,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 14.5,
+              "light": null
             },
             {
               "time": "14:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 14,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 13.9,
+              "light": null
             },
             {
               "time": "15:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 22,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 21.9,
+              "light": null
             },
             {
               "time": "16:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 20,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 19.8,
+              "light": null
             },
             {
               "time": "17:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 19,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 19.0,
+              "light": null
             },
             {
               "time": "18:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 19,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 19.0,
+              "light": null
             },
             {
               "time": "19:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 19,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 18.5,
+              "light": null
             },
             {
               "time": "20:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 18,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 18.0,
+              "light": null
             },
             {
               "time": "21:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 18,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 18.0,
+              "light": null
             },
             {
               "time": "22:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 18,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 18.0,
+              "light": null
             },
             {
               "time": "23:00",
-              "airTemp": 15.5,
-              "airHumidity": 88,
-              "soilHumidity": 18,
-              "light": 0
+              "airTemp": null,
+              "airHumidity": null,
+              "soilHumidity": 18.0,
+              "light": null
             }
           ],
           "alerts": [
@@ -1014,7 +1014,7 @@
               "id": "local-soilHumidity",
               "level": "warning",
               "message": "土壤湿度 当前值 18.0%，建议复核目标范围 45-70%。",
-              "time": "08:47"
+              "time": "18:27"
             }
           ]
         }

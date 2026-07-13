@@ -37,7 +37,7 @@ export function DashboardPage() {
     totals,
   } = useDashboard()
 
-  if (!dashboard || !selectedCrop) {
+  if (!dashboard) {
     return (
       <main className="app-shell loading-shell">
         <div className="loading-panel">
@@ -46,6 +46,21 @@ export function DashboardPage() {
           <p>{error || '正在准备温室数据...'}</p>
           <button type="button" onClick={() => void refetchDashboard({ force: true })}>
             重新加载
+          </button>
+        </div>
+      </main>
+    )
+  }
+
+  if (!selectedCrop) {
+    return (
+      <main className="app-shell loading-shell">
+        <div className="loading-panel">
+          <img className="loading-logo" src="/logo-mark.svg" alt="" />
+          <h1>暂无温室数据</h1>
+          <p>{error || '数据库连接正常，尚未录入温室和设备数据。'}</p>
+          <button type="button" onClick={() => void refetchDashboard({ force: true })}>
+            重新检查
           </button>
         </div>
       </main>
