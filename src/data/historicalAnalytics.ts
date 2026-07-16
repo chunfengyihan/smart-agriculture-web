@@ -9,7 +9,7 @@ export async function getHistoricalAnalytics(signal?: AbortSignal): Promise<Hist
   const response = await fetchWithTimeout(HISTORICAL_ANALYTICS_PATH, {
     auth: false,
     signal,
-    timeoutMs: 12_000,
+    timeoutMs: 30_000,
   })
 
   if (!response.ok) {

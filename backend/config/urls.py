@@ -130,4 +130,9 @@ urlpatterns = [
         frontend_asset_view,
         name="frontend-asset",
     ),
+    re_path(
+        r"^(?:monitoring|map|intelligence|analytics(?:/wall(?:/trends)?)?)/?$",
+        FrontendIndexView.as_view(),
+        name="frontend-spa",
+    ),
 ]

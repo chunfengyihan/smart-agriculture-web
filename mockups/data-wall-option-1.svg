@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#061b15"/><stop offset="1" stop-color="#092a20"/></linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0d3025"/><stop offset="1" stop-color="#0a241c"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <g font-family="Microsoft YaHei, PingFang SC, sans-serif">
+    <rect x="0" y="0" width="278" height="900" fill="#071711" stroke="#1b5c44"/>
+    <image href="../public/logo-lockup.png" x="28" y="28" width="205" height="55" preserveAspectRatio="xMinYMid meet"/>
+    <text x="30" y="132" fill="#75a993" font-size="16">选择作物</text>
+    <rect x="24" y="151" width="230" height="52" rx="10" fill="#16a56b"/><text x="50" y="184" fill="white" font-size="20" font-weight="700">冰糖枣</text><circle cx="226" cy="177" r="5" fill="white"/>
+    <rect x="24" y="214" width="230" height="52" rx="10" fill="#102b21"/><text x="50" y="247" fill="#bdd8cb" font-size="20">蓝莓</text>
+    <rect x="24" y="277" width="230" height="52" rx="10" fill="#102b21"/><text x="50" y="310" fill="#bdd8cb" font-size="20">樱桃</text>
+    <line x1="24" y1="365" x2="254" y2="365" stroke="#204c3b"/>
+    <text x="30" y="409" fill="#75a993" font-size="16">选择大棚</text>
+    <rect x="24" y="428" width="230" height="60" rx="10" fill="#123b2d" stroke="#23c77e"/><text x="43" y="455" fill="white" font-size="18" font-weight="700">瓦房店 1 号棚</text><text x="43" y="476" fill="#58d89e" font-size="13">在线 · 数据正常</text>
+    <rect x="24" y="499" width="230" height="60" rx="10" fill="#102b21"/><text x="43" y="535" fill="#bdd8cb" font-size="18">瓦房店 2 号棚</text>
+    <rect x="24" y="570" width="230" height="60" rx="10" fill="#102b21"/><text x="43" y="606" fill="#bdd8cb" font-size="18">普兰店示范棚</text>
+    <rect x="24" y="814" width="230" height="52" rx="10" fill="#0f2b21" stroke="#275b46"/><text x="74" y="847" fill="#9fcbb7" font-size="17">← 返回数据分析</text>
+
+    <text x="310" y="48" fill="#55d99e" font-size="14" letter-spacing="3">SMART AGRICULTURE</text>
+    <text x="310" y="83" fill="white" font-size="29" font-weight="700">智慧农业数据大屏</text>
+    <text x="310" y="112" fill="#81aa98" font-size="15">冰糖枣 · 瓦房店 1 号棚</text>
+    <text x="1325" y="48" fill="#81aa98" font-size="14">2026-07-14  周二</text><text x="1324" y="80" fill="white" font-size="25">14:58:36</text>
+    <rect x="1480" y="41" width="92" height="43" rx="8" fill="#11382a" stroke="#2f7b5d"/><text x="1498" y="69" fill="#d8eee4" font-size="16">退出大屏</text>
+
+    <g>
+      <rect x="310" y="139" width="144" height="105" rx="12" fill="url(#card)" stroke="#1c513e"/><text x="328" y="166" fill="#7da792" font-size="14">空气温度</text><text x="328" y="210" fill="#fff" font-size="29" font-weight="700">26.8<tspan font-size="16"> °C</tspan></text><text x="328" y="232" fill="#43d293" font-size="12">↑ 0.4  正常</text>
+      <rect x="465" y="139" width="144" height="105" rx="12" fill="url(#card)" stroke="#1c513e"/><text x="483" y="166" fill="#7da792" font-size="14">空气湿度</text><text x="483" y="210" fill="#fff" font-size="29" font-weight="700">68<tspan font-size="16"> %</tspan></text><text x="483" y="232" fill="#43d293" font-size="12">稳定  正常</text>
+      <rect x="620" y="139" width="144" height="105" rx="12" fill="url(#card)" stroke="#1c513e"/><text x="638" y="166" fill="#7da792" font-size="14">光照</text><text x="638" y="210" fill="#fff" font-size="25" font-weight="700">18,200<tspan font-size="14"> lx</tspan></text><text x="638" y="232" fill="#43d293" font-size="12">光照充足</text>
+      <rect x="775" y="139" width="144" height="105" rx="12" fill="url(#card)" stroke="#1c513e"/><text x="793" y="166" fill="#7da792" font-size="14">CO₂</text><text x="793" y="210" fill="#fff" font-size="29" font-weight="700">612<tspan font-size="14"> ppm</tspan></text><text x="793" y="232" fill="#43d293" font-size="12">浓度适宜</text>
+      <rect x="930" y="139" width="144" height="105" rx="12" fill="url(#card)" stroke="#1c513e"/><text x="948" y="166" fill="#7da792" font-size="14">土壤湿度</text><text x="948" y="210" fill="#fff" font-size="29" font-weight="700">57<tspan font-size="16"> %</tspan></text><text x="948" y="232" fill="#43d293" font-size="12">墒情正常</text>
+      <rect x="1085" y="139" width="144" height="105" rx="12" fill="url(#card)" stroke="#1c513e"/><text x="1103" y="166" fill="#7da792" font-size="14">土壤温度</text><text x="1103" y="210" fill="#fff" font-size="29" font-weight="700">24.6<tspan font-size="16"> °C</tspan></text><text x="1103" y="232" fill="#43d293" font-size="12">适宜生长</text>
+      <rect x="1240" y="139" width="144" height="105" rx="12" fill="url(#card)" stroke="#1c513e"/><text x="1258" y="166" fill="#7da792" font-size="14">EC</text><text x="1258" y="210" fill="#fff" font-size="25" font-weight="700">1.82<tspan font-size="13"> mS/cm</tspan></text><text x="1258" y="232" fill="#43d293" font-size="12">肥力适中</text>
+      <rect x="1395" y="139" width="177" height="105" rx="12" fill="url(#card)" stroke="#1c513e"/><text x="1413" y="166" fill="#7da792" font-size="14">PH</text><text x="1413" y="210" fill="#fff" font-size="29" font-weight="700">6.5</text><text x="1413" y="232" fill="#43d293" font-size="12">弱酸性 · 正常</text>
+    </g>
+
+    <rect x="310" y="260" width="815" height="365" rx="14" fill="#0a261d" stroke="#1b503c"/><text x="335" y="299" fill="white" font-size="19" font-weight="700">24 小时环境趋势</text><text x="917" y="298" fill="#67d7a5" font-size="13">● 温度</text><text x="990" y="298" fill="#51b8ff" font-size="13">● 湿度</text><text x="1060" y="298" fill="#f6c452" font-size="13">● CO₂</text>
+    <g stroke="#1a4536" stroke-width="1"><line x1="350" y1="350" x2="1095" y2="350"/><line x1="350" y1="420" x2="1095" y2="420"/><line x1="350" y1="490" x2="1095" y2="490"/><line x1="350" y1="560" x2="1095" y2="560"/></g>
+    <polyline points="350,521 410,500 470,510 530,462 590,475 650,430 710,451 770,382 830,398 890,350 950,371 1010,338 1095,360" fill="none" stroke="#48dda0" stroke-width="4" filter="url(#glow)"/>
+    <polyline points="350,392 410,405 470,385 530,410 590,401 650,420 710,398 770,430 830,412 890,449 950,430 1010,457 1095,442" fill="none" stroke="#47adff" stroke-width="3"/>
+    <g fill="#6d9986" font-size="12"><text x="344" y="590">00:00</text><text x="500" y="590">04:00</text><text x="655" y="590">08:00</text><text x="810" y="590">12:00</text><text x="960" y="590">16:00</text><text x="1055" y="590">20:00</text></g>
+
+    <rect x="1140" y="260" width="432" height="365" rx="14" fill="#0a261d" stroke="#1b503c"/><text x="1165" y="299" fill="white" font-size="19" font-weight="700">棚区指标对比</text>
+    <g fill="#85aa98" font-size="13"><text x="1167" y="350">瓦房店 1 号棚</text><text x="1167" y="414">瓦房店 2 号棚</text><text x="1167" y="478">普兰店示范棚</text></g>
+    <g><rect x="1167" y="365" width="350" height="14" rx="7" fill="#163b2e"/><rect x="1167" y="365" width="285" height="14" rx="7" fill="#27ca82"/><rect x="1167" y="429" width="350" height="14" rx="7" fill="#163b2e"/><rect x="1167" y="429" width="232" height="14" rx="7" fill="#48a6e8"/><rect x="1167" y="493" width="350" height="14" rx="7" fill="#163b2e"/><rect x="1167" y="493" width="264" height="14" rx="7" fill="#d7ad45"/></g>
+    <text x="1167" y="552" fill="#7da792" font-size="14">综合环境适宜度</text><text x="1167" y="592" fill="white" font-size="35" font-weight="700">92.4<tspan font-size="16"> 分</tspan></text><text x="1388" y="592" fill="#41d394" font-size="14">运行良好</text>
+
+    <rect x="310" y="641" width="370" height="225" rx="14" fill="#0a261d" stroke="#1b503c"/><text x="335" y="681" fill="white" font-size="18" font-weight="700">数据质量</text><circle cx="421" cy="771" r="60" fill="none" stroke="#173f31" stroke-width="16"/><path d="M421 711 A60 60 0 1 1 372 806" fill="none" stroke="#2bd28a" stroke-width="16" stroke-linecap="round"/><text x="389" y="779" fill="white" font-size="24" font-weight="700">96%</text><text x="512" y="735" fill="#84aa98" font-size="14">在线设备  18 / 18</text><text x="512" y="770" fill="#84aa98" font-size="14">数据完整  99.2%</text><text x="512" y="805" fill="#84aa98" font-size="14">最后采集  14:58</text>
+    <rect x="695" y="641" width="493" height="225" rx="14" fill="#0a261d" stroke="#1b503c"/><text x="720" y="681" fill="white" font-size="18" font-weight="700">最新采集</text><text x="720" y="715" fill="#68927f" font-size="13">时间</text><text x="835" y="715" fill="#68927f" font-size="13">设备</text><text x="1025" y="715" fill="#68927f" font-size="13">状态</text><g fill="#d3e6dc" font-size="14"><text x="720" y="753">14:58:32</text><text x="835" y="753">土壤墒情传感器</text><text x="1025" y="753" fill="#41d394">正常</text><text x="720" y="794">14:58:17</text><text x="835" y="794">棚内气象站</text><text x="1025" y="794" fill="#41d394">正常</text><text x="720" y="835">14:57:51</text><text x="835" y="835">水肥一体机</text><text x="1025" y="835" fill="#f6c452">待执行</text></g>
+    <rect x="1203" y="641" width="369" height="225" rx="14" fill="#0a261d" stroke="#1b503c"/><text x="1228" y="681" fill="white" font-size="18" font-weight="700">实时预警</text><rect x="1228" y="705" width="319" height="55" rx="9" fill="#2d2a17"/><circle cx="1250" cy="732" r="6" fill="#f3c44d"/><text x="1268" y="728" fill="#f6dd98" font-size="14">2 号棚光照略低</text><text x="1268" y="747" fill="#ad9c68" font-size="12">建议检查补光设备</text><rect x="1228" y="773" width="319" height="55" rx="9" fill="#113626"/><circle cx="1250" cy="800" r="6" fill="#37cf8b"/><text x="1268" y="796" fill="#bdebd6" font-size="14">其余指标运行正常</text><text x="1268" y="815" fill="#73a890" font-size="12">无紧急告警</text>
+  </g>
+</svg>

@@ -1,4 +1,5 @@
-import { Activity, AlertTriangle, Menu, Moon, RefreshCw, Sun, X } from 'lucide-react'
+import { Menu, Moon, RefreshCw, Sun, X } from 'lucide-react'
+import { Link, NavLink } from 'react-router-dom'
 import type { ThemeMode } from '../../types'
 
 interface DashboardTopbarProps {
@@ -7,12 +8,19 @@ interface DashboardTopbarProps {
   isPaused: boolean
   mobileNavOpen: boolean
   theme: ThemeMode
-  totalAlerts: number
   onCloseMobileNav: () => void
   onRefresh: () => void
   onToggleMobileNav: () => void
   onToggleTheme: () => void
 }
+
+const navigation = [
+  { to: '/', label: '首页', end: true },
+  { to: '/monitoring', label: '棚区监测' },
+  { to: '/map', label: '地图分布' },
+  { to: '/analytics', label: '数据分析' },
+  { to: '/intelligence', label: '智能服务' },
+]
 
 export function DashboardTopbar({
   error,
@@ -20,7 +28,6 @@ export function DashboardTopbar({
   isPaused,
   mobileNavOpen,
   theme,
-  totalAlerts,
   onCloseMobileNav,
   onRefresh,
   onToggleMobileNav,
@@ -28,44 +35,32 @@ export function DashboardTopbar({
 }: DashboardTopbarProps) {
   return (
     <header className="topbar">
-      <div className="brand">
-        <span className="brand-mark">
-          <img src="/logo-mark.svg" alt="" />
-        </span>
-        <strong>智慧农业</strong>
-      </div>
-      <nav id="mobile-nav" className={`top-links ${mobileNavOpen ? 'open' : ''}`} aria-label="页面分区">
-        <a href="#overview" onClick={onCloseMobileNav}>
-          概览
-        </a>
-        <a href="#map" onClick={onCloseMobileNav}>
-          位置
-        </a>
-        <a href="#detail" onClick={onCloseMobileNav}>
-          监测
-        </a>
-        <a href="#diagnosis" onClick={onCloseMobileNav}>
-          AI 诊断
-        </a>
+      <Link className="brand" to="/" onClick={onCloseMobileNav} aria-label="智慧农业首页">
+        <img src="/logo-lockup.png" alt="智慧农业 Smart Agriculture" />
+      </Link>
+      <nav id="mobile-nav" className={`top-links ${mobileNavOpen ? 'open' : ''}`} aria-label="主导航">
+        {navigation.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            onClick={onCloseMobileNav}
+            className={({ isActive }) => (isActive ? 'active' : undefined)}
+          >
+            {item.label}
+          </NavLink>
+        ))}
       </nav>
       <div className="topbar-actions">
-        {error ? (
-          <span className="query-status warning">
-            <AlertTriangle size={14} />
-            数据刷新失败
-          </span>
-        ) : null}
-        {isPaused ? <span className="query-status muted">暂停刷新</span> : null}
-        {isFetching ? <span className="query-status">正在刷新</span> : null}
-        <span className="health-pill">
-          <Activity size={15} />
-          {totalAlerts > 0 ? `${totalAlerts} 条提醒` : '全部正常'}
+        <span className="sr-only" aria-live="polite">
+          {error ? '数据刷新失败' : isPaused ? '数据刷新已暂停' : isFetching ? '正在刷新数据' : '数据已更新'}
         </span>
         <button className="icon-button" type="button" onClick={onToggleTheme} aria-label="切换主题" title="切换主题">
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
         </button>
-        <button className="icon-button" type="button" onClick={onRefresh} aria-label="刷新数据" title="刷新数据">
-          <RefreshCw className={isFetching ? 'spinning' : ''} size={18} />
+        <button className="icon-button refresh-button" type="button" onClick={onRefresh} aria-label="刷新数据" title="刷新数据">
+          <RefreshCw className={isFetching ? 'spinning' : ''} size={20} />
+          <span>刷新</span>
         </button>
         <button
           className="icon-button mobile-menu-button"
@@ -73,10 +68,10 @@ export function DashboardTopbar({
           onClick={onToggleMobileNav}
           aria-expanded={mobileNavOpen}
           aria-controls="mobile-nav"
-          aria-label="打开页面导航"
-          title="页面导航"
+          aria-label="打开主导航"
+          title="主导航"
         >
-          {mobileNavOpen ? <X size={18} /> : <Menu size={18} />}
+          {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
     </header>

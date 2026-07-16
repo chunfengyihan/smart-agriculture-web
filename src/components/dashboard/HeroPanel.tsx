@@ -1,49 +1,62 @@
 import type { CSSProperties } from 'react'
-import { Sprout } from 'lucide-react'
-import type { Crop, DashboardData } from '../../types'
-import { formatTime } from '../../lib/formatters'
+import { ArrowRight, Bell, MapPin, Monitor, Warehouse } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import type { Crop } from '../../types'
 
 interface HeroPanelProps {
-  cropAlerts: number
-  dashboard: DashboardData
-  dashboardSourceLabel: string
   selectedCrop: Crop
   totals: {
+    greenhouses: number
     onlineDevices: number
     totalDevices: number
+    alerts: number
   }
 }
 
-export function HeroPanel({ cropAlerts, dashboard, dashboardSourceLabel, selectedCrop, totals }: HeroPanelProps) {
+export function HeroPanel({ selectedCrop, totals }: HeroPanelProps) {
   return (
     <section
-      id="overview"
       className="hero-section"
       style={{ '--crop-accent': selectedCrop.accent, backgroundImage: `url(${selectedCrop.heroImage})` } as CSSProperties}
     >
       <div className="hero-content">
-        <span className="hero-label">智慧农业中控台</span>
-        <p className="eyebrow">
-          <Sprout size={16} />
-          {dashboardSourceLabel} · 更新于 {formatTime(dashboard.generatedAt)}
-        </p>
-        <h1>{selectedCrop.name}</h1>
-        <p className="hero-description">{selectedCrop.description}</p>
+        <p className="hero-kicker">智慧农业 · 实时生产管理</p>
+        <h1>智慧农业管理平台</h1>
+        <p className="hero-slogan">让每一座大棚更智慧</p>
+        <span className="hero-divider" aria-hidden="true" />
+        <p className="hero-description">实时掌握环境、设备与作物状态</p>
+        <div className="hero-actions">
+          <Link className="hero-primary-action" to="/monitoring">
+            进入管理中枢
+            <ArrowRight size={20} />
+          </Link>
+          <Link className="hero-secondary-action" to="/map">
+            查看棚区地图
+            <MapPin size={19} />
+          </Link>
+        </div>
       </div>
-      <div className="hero-stats">
+      <div className="hero-stats" aria-label="园区运行概览">
         <span>
-          <strong>{selectedCrop.greenhouses.length}</strong>
-          <small>当前作物大棚</small>
+          <i className="hero-stat-icon" aria-hidden="true"><Monitor size={30} /></i>
+          <span>
+            <small>在线设备</small>
+            <strong>{totals.onlineDevices}<em>/{totals.totalDevices}</em></strong>
+          </span>
         </span>
         <span>
-          <strong>
-            {totals.onlineDevices}/{totals.totalDevices}
-          </strong>
-          <small>设备在线</small>
+          <i className="hero-stat-icon" aria-hidden="true"><Warehouse size={30} /></i>
+          <span>
+            <small>管理棚区</small>
+            <strong>{totals.greenhouses}<em> 个</em></strong>
+          </span>
         </span>
         <span>
-          <strong>{cropAlerts}</strong>
-          <small>作物提醒</small>
+          <i className="hero-stat-icon warning" aria-hidden="true"><Bell size={30} /></i>
+          <span>
+            <small>今日预警</small>
+            <strong className="warning-value">{totals.alerts}<em> 条</em></strong>
+          </span>
         </span>
       </div>
     </section>

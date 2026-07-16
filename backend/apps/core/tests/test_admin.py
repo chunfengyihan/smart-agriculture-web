@@ -35,6 +35,38 @@ class AdminSiteTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(b"console.log('frontend')", content)
 
+    def test_frontend_spa_routes_serve_index(self):
+        with TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "index.html").write_text("<html>frontend routes</html>", encoding="utf-8")
+
+            with override_settings(FRONTEND_DIST_DIR=Path(temp_dir)):
+                for route in (
+                    "/monitoring",
+                    "/map",
+                    "/analytics",
+                    "/analytics/wall",
+                    "/analytics/wall/trends",
+                    "/intelligence",
+                ):
+                    with self.subTest(route=route):
+                        response = Client().get(route)
+                        content = b"".join(response.streaming_content)
+                        response.close()
+
+                        self.assertEqual(response.status_code, 200)
+                        self.assertEqual(response["Content-Type"], "text/html; charset=utf-8")
+                        self.assertEqual(content.decode("utf-8"), "<html>frontend routes</html>")
+
+    def test_frontend_spa_fallback_does_not_capture_unknown_api_route(self):
+        response = Client().get("/api/not-a-real-route")
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_frontend_spa_fallback_does_not_capture_unknown_file_path(self):
+        response = Client().get("/private/not-a-real-file.png")
+
+        self.assertEqual(response.status_code, 404)
+
     def test_admin_requires_login(self):
         response = Client().get("/admin/")
 

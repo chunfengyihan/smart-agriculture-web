@@ -10,7 +10,7 @@ export const greenhouseLocations = [
     address: '大连市金普新区华家街道新石村',
     lon: 122.0278486,
     lat: 39.2802386,
-    photo: '',
+    photo: '/images/crops/blueberry-field.jpg',
   },
   {
     cropId: 'jujube' as Crop['id'],
@@ -21,7 +21,7 @@ export const greenhouseLocations = [
     address: '大连市普兰店区四平街道四平社区',
     lon: 122.1747936,
     lat: 39.7834416,
-    photo: '',
+    photo: '/images/crops/jujube-field.jpg',
   },
   {
     cropId: 'cherry' as Crop['id'],

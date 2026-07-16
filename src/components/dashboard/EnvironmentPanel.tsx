@@ -22,7 +22,10 @@ const metricIcons: Record<string, typeof ThermometerSun> = {
   ph: Activity,
 }
 
+type EnvironmentMode = 'monitoring' | 'analytics' | 'intelligence'
+
 interface EnvironmentPanelProps {
+  mode: EnvironmentMode
   selectedCrop: Crop
   selectedGreenhouse?: Greenhouse
   onSelectGreenhouse: (greenhouseId: string) => void
@@ -94,32 +97,46 @@ function GreenhouseCard({
   )
 }
 
-export function EnvironmentPanel({ selectedCrop, selectedGreenhouse, onSelectGreenhouse }: EnvironmentPanelProps) {
+function GreenhouseList({
+  selectedCrop,
+  selectedGreenhouse,
+  onSelectGreenhouse,
+}: Omit<EnvironmentPanelProps, 'mode'>) {
   return (
-    <section id="detail" className="dashboard-grid">
-      <aside className="greenhouse-list">
-        <div className="section-heading">
-          <div>
-            <p>{selectedCrop.latinName}</p>
-            <h2>选择棚区</h2>
-          </div>
-          <span>{selectedCrop.greenhouses.length} 座</span>
+    <aside className="greenhouse-list">
+      <div className="section-heading">
+        <div>
+          <p>{selectedCrop.latinName}</p>
+          <h2>选择棚区</h2>
         </div>
-        <div className="greenhouse-stack">
-          {selectedCrop.greenhouses.length > 0 ? (
-            selectedCrop.greenhouses.map((greenhouse) => (
-              <GreenhouseCard
-                key={greenhouse.id}
-                greenhouse={greenhouse}
-                active={greenhouse.id === selectedGreenhouse?.id}
-                onSelect={() => onSelectGreenhouse(greenhouse.id)}
-              />
-            ))
-          ) : (
-            <div className="empty-state">当前作物暂无本地采集数据</div>
-          )}
-        </div>
-      </aside>
+        <span>{selectedCrop.greenhouses.length} 座</span>
+      </div>
+      <div className="greenhouse-stack">
+        {selectedCrop.greenhouses.length > 0 ? (
+          selectedCrop.greenhouses.map((greenhouse) => (
+            <GreenhouseCard
+              key={greenhouse.id}
+              greenhouse={greenhouse}
+              active={greenhouse.id === selectedGreenhouse?.id}
+              onSelect={() => onSelectGreenhouse(greenhouse.id)}
+            />
+          ))
+        ) : (
+          <div className="empty-state">当前作物暂无本地采集数据</div>
+        )}
+      </div>
+    </aside>
+  )
+}
+
+export function EnvironmentPanel({ mode, selectedCrop, selectedGreenhouse, onSelectGreenhouse }: EnvironmentPanelProps) {
+  return (
+    <section className={`dashboard-grid environment-view ${mode}`}>
+      <GreenhouseList
+        selectedCrop={selectedCrop}
+        selectedGreenhouse={selectedGreenhouse}
+        onSelectGreenhouse={onSelectGreenhouse}
+      />
 
       {selectedGreenhouse ? (
         <section className="detail-panel">
@@ -131,69 +148,76 @@ export function EnvironmentPanel({ selectedCrop, selectedGreenhouse, onSelectGre
             <span className={`status-pill ${selectedGreenhouse.status}`}>{statusText(selectedGreenhouse.status)}</span>
           </div>
 
-          <Suspense fallback={<PanelFallback label="正在加载天气模块" />}>
-            <WeatherAdvicePanel
-              key={`weather-${selectedCrop.id}-${selectedGreenhouse.id}`}
-              crop={selectedCrop}
-              greenhouse={selectedGreenhouse}
-            />
-          </Suspense>
+          {mode === 'monitoring' && (
+            <>
+              <Suspense fallback={<PanelFallback label="正在加载天气模块" />}>
+                <WeatherAdvicePanel
+                  key={`weather-${selectedCrop.id}-${selectedGreenhouse.id}`}
+                  crop={selectedCrop}
+                  greenhouse={selectedGreenhouse}
+                />
+              </Suspense>
 
-          <div className="metric-grid">
-            {selectedGreenhouse.metrics.map((metric) => (
-              <MetricCard key={metric.key} metric={metric} />
-            ))}
-          </div>
+              <div className="metric-grid">
+                {selectedGreenhouse.metrics.map((metric) => (
+                  <MetricCard key={metric.key} metric={metric} />
+                ))}
+              </div>
 
-          <Suspense fallback={<PanelFallback label="正在加载 2026 历史采集分析" />}>
-            <HistoricalAnalyticsPanel
-              key={`history-${selectedCrop.id}-${selectedGreenhouse.id}`}
-              selectedCrop={selectedCrop}
-              selectedGreenhouse={selectedGreenhouse}
-            />
-          </Suspense>
+              <div className="analytics-row">
+                <article className="chart-panel">
+                  <div className="section-heading">
+                    <div>
+                      <p>最近 24 小时</p>
+                      <h2>环境趋势</h2>
+                    </div>
+                  </div>
+                  <Suspense fallback={<PanelFallback label="正在加载趋势图" />}>
+                    <TrendChart accent={selectedCrop.accent} data={selectedGreenhouse.trend} />
+                  </Suspense>
+                </article>
+                <AlertPanel greenhouse={selectedGreenhouse} />
+              </div>
+            </>
+          )}
 
-          <div id="diagnosis">
-            <Suspense fallback={<PanelFallback label="正在加载 AI 诊断模块" />}>
-              <CropDiagnosisPanel
-                key={`${selectedCrop.id}-${selectedGreenhouse.id}`}
-                crop={selectedCrop}
-                greenhouse={selectedGreenhouse}
-              />
-            </Suspense>
-          </div>
-
-          {selectedCrop.id === 'jujube' && (
-            <Suspense fallback={<PanelFallback label="正在加载冰糖枣顾问" />}>
-              <JujubeAdvisorPanel
-                key={`jujube-advisor-${selectedGreenhouse.id}`}
-                crop={selectedCrop}
-                greenhouse={selectedGreenhouse}
+          {mode === 'analytics' && (
+            <Suspense fallback={<PanelFallback label="正在加载 2026 历史采集分析" />}>
+              <HistoricalAnalyticsPanel
+                key={`history-${selectedCrop.id}-${selectedGreenhouse.id}`}
+                selectedCrop={selectedCrop}
+                selectedGreenhouse={selectedGreenhouse}
               />
             </Suspense>
           )}
 
-          <div className="analytics-row">
-            <article className="chart-panel">
-              <div className="section-heading">
-                <div>
-                  <p>最近 24 小时</p>
-                  <h2>环境趋势</h2>
-                </div>
-              </div>
-              <Suspense fallback={<PanelFallback label="正在加载趋势图" />}>
-                <TrendChart accent={selectedCrop.accent} data={selectedGreenhouse.trend} />
+          {mode === 'intelligence' && (
+            <div className="intelligence-stack">
+              <Suspense fallback={<PanelFallback label="正在加载 AI 诊断模块" />}>
+                <CropDiagnosisPanel
+                  key={`${selectedCrop.id}-${selectedGreenhouse.id}`}
+                  crop={selectedCrop}
+                  greenhouse={selectedGreenhouse}
+                />
               </Suspense>
-            </article>
 
-            <AlertPanel greenhouse={selectedGreenhouse} />
-          </div>
+              {selectedCrop.id === 'jujube' && (
+                <Suspense fallback={<PanelFallback label="正在加载冰糖枣顾问" />}>
+                  <JujubeAdvisorPanel
+                    key={`jujube-advisor-${selectedGreenhouse.id}`}
+                    crop={selectedCrop}
+                    greenhouse={selectedGreenhouse}
+                  />
+                </Suspense>
+              )}
+            </div>
+          )}
         </section>
       ) : (
         <section className="detail-panel no-data-panel">
           <div className="empty-state">
             <h2>{selectedCrop.name} 暂无本地数据</h2>
-            <p>当前数据文件夹里没有识别到该作物的大棚采集表。放入对应 Excel 后重新运行本地数据构建脚本即可显示。</p>
+            <p>当前数据源中没有识别到该作物的棚区采集记录。</p>
           </div>
         </section>
       )}

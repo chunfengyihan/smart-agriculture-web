@@ -30,6 +30,7 @@ __pycache__/
 
 # Build outputs
 build/
+smart-agri-*.tar.gz
 
 # Runtime and local databases
 *.sqlite3
